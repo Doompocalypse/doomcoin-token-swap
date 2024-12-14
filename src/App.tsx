@@ -19,11 +19,9 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
-const chains = [arbitrum];
-
 // Create wagmi config
 const config = createConfig({
-  chains,
+  chains: [arbitrum],
   transports: {
     [arbitrum.id]: http()
   }
@@ -33,7 +31,7 @@ const config = createConfig({
 createWeb3Modal({
   wagmiConfig: config,
   projectId,
-  chains,
+  defaultChain: arbitrum,
   themeMode: 'dark',
   metadata
 });
