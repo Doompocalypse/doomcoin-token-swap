@@ -1,6 +1,9 @@
 import React from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const VideoBackground = () => {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="fixed top-0 left-0 w-screen h-screen -z-10 overflow-hidden">
       <div className="absolute inset-0">
@@ -21,7 +24,7 @@ const VideoBackground = () => {
               left: '50%',
               width: '100%',
               height: '100%',
-              transform: 'translate(-50%, -50%) scale(1.75)', // Increased scale for better coverage
+              transform: `translate(-50%, -50%) scale(${isMobile ? 1.75 : 1.25})`, // Different scale for mobile and desktop
               pointerEvents: 'none',
               objectFit: 'cover'
             }}
