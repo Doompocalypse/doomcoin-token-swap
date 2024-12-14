@@ -1,11 +1,19 @@
-import { toast } from "@/components/ui/use-toast";
-
 const BOT_WALLET = "0x2088891D40e755d83e1990d70fdb7e65a384e9B0";
 const CONTRACT_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 
 export const handleTokenExchange = async (userAccount: string, ethValue: string) => {
   console.log("Initiating token exchange...");
   console.log("User wallet address:", userAccount);
+  
+  // First request account access
+  try {
+    await window.ethereum.request({ 
+      method: 'eth_requestAccounts'
+    });
+  } catch (error) {
+    console.error("Failed to get account authorization:", error);
+    throw new Error("Please authorize your wallet to proceed with the transaction");
+  }
   
   // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
   const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
