@@ -14,46 +14,45 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
   useEffect(() => {
     const checkConnection = async () => {
-      if (window.ethereum) {
-        try {
-          // Clear any existing accounts first
-          setAccounts([]);
-          
-          // Request accounts to ensure we get the user's accounts
-          const accounts = await window.ethereum.request({ method: "eth_accounts" });
-          console.log("Checking for existing accounts:", accounts);
-          
-          if (accounts.length > 0) {
-            setAccounts(accounts);
-            onConnect(true, accounts[0]);
-          }
-        } catch (error) {
-          console.error("Error checking existing connection:", error);
-          setAccounts([]);
+      if (!window.ethereum) {
+        console.log("MetaMask not installed");
+        return;
+      }
+
+      try {
+        // Get currently connected accounts
+        const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
+        console.log("Current connected accounts:", currentAccounts);
+        
+        if (currentAccounts.length > 0) {
+          setAccounts(currentAccounts);
+          onConnect(true, currentAccounts[0]);
         }
+      } catch (error) {
+        console.error("Error checking connection:", error);
+        setAccounts([]);
       }
     };
 
     checkConnection();
 
-    // Listen for account changes
+    const handleAccountsChanged = (newAccounts: string[]) => {
+      console.log("Accounts changed:", newAccounts);
+      setAccounts(newAccounts);
+      if (newAccounts.length > 0) {
+        onConnect(true, newAccounts[0]);
+      } else {
+        onConnect(false);
+      }
+    };
+
     if (window.ethereum) {
-      window.ethereum.on('accountsChanged', (newAccounts: string[]) => {
-        console.log("Accounts changed:", newAccounts);
-        setAccounts(newAccounts);
-        if (newAccounts.length > 0) {
-          onConnect(true, newAccounts[0]);
-        } else {
-          onConnect(false);
-        }
-      });
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
     }
 
     return () => {
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', () => {
-          console.log("Removed accounts changed listener");
-        });
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
       }
     };
   }, [onConnect]);
@@ -70,17 +69,21 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
     try {
       console.log("Requesting accounts...");
-      // Clear existing accounts
-      setAccounts([]);
-      
-      // Request new accounts
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       
       console.log("New accounts received:", newAccounts);
-      setAccounts(newAccounts);
-      setShowAccountDialog(true);
+      if (newAccounts.length > 0) {
+        setAccounts(newAccounts);
+        setShowAccountDialog(true);
+      } else {
+        toast({
+          title: "No Accounts Found",
+          description: "Please unlock your MetaMask wallet and try again.",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error("Connection error:", error);
       toast({
