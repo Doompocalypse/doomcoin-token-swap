@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import {
   DropdownMenu,
