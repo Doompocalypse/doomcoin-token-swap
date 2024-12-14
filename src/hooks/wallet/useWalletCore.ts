@@ -61,20 +61,35 @@ export const useWalletCore = (
   const connectWalletConnect = async () => {
     try {
       console.log("Opening WalletConnect modal...");
+      
+      // First, open the WalletConnect modal
       await open();
       
-      // Wait for connection to be established
+      // We need to wait for the connection to be established
+      // The Web3Modal will handle the QR code display and scanning
       if (isConnected && address) {
         console.log("WalletConnect connection successful:", address);
+        
+        // Check if we need to switch networks first
+        if (chain?.id !== arbitrum.id) {
+          console.log("Switching to Arbitrum network...");
+          try {
+            await switchNetwork?.(arbitrum.id);
+          } catch (error) {
+            console.error("Failed to switch network:", error);
+            toast({
+              title: "Network Switch Failed",
+              description: "Please manually switch to Arbitrum network in your wallet.",
+              variant: "destructive",
+            });
+            return;
+          }
+        }
+        
+        // Now we can set the account
         setAccounts([address]);
         setChainId(chain?.id.toString(16));
         onConnect(true, address);
-        
-        // Check if we need to switch networks
-        if (chain?.id !== arbitrum.id) {
-          console.log("Switching to Arbitrum network...");
-          await switchNetwork?.(arbitrum.id);
-        }
         
         toast({
           title: "Wallet Connected",
