@@ -6,19 +6,32 @@ export const useInitialConnection = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
   const checkConnection = useCallback(async () => {
-    // Always start with a disconnected state on page load
-    console.log("Starting with disconnected state on page load");
+    console.log("Starting fresh connection state...");
+    
+    // Clear any existing connections
     setAccounts([]);
     onConnect(false);
     
-    // Don't proceed with connection checks
+    // Clear any cached permissions if MetaMask is present
+    if (window.ethereum?.isMetaMask) {
+      try {
+        console.log("Clearing cached MetaMask permissions...");
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }]
+        });
+      } catch (error) {
+        console.log("No permissions to revoke or error:", error);
+      }
+    }
+
     if (!window.ethereum) {
       console.log("No Web3 wallet detected");
       return;
     }
 
     try {
-      // Still get the chain ID for reference
+      // Only get chain ID for reference
       const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
       console.log("Current chain ID:", currentChainId);
       setChainId(currentChainId);

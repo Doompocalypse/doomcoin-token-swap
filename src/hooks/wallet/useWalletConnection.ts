@@ -23,6 +23,9 @@ export const useWalletConnection = (
   const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
     console.log("Connecting wallet with type:", walletType);
     
+    // Clear any existing connections first
+    await forceDisconnectWallet();
+    
     // If switching between connected accounts
     if (selectedAccount && accounts.includes(selectedAccount)) {
       console.log("Switching to selected account:", selectedAccount);

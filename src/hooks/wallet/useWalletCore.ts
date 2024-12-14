@@ -20,17 +20,27 @@ export const useWalletCore = (
     }
 
     try {
-      console.log("Requesting MetaMask account access...");
+      console.log("Requesting fresh MetaMask connection...");
       
-      // Always use eth_requestAccounts to force the account selection popup
+      // First, clear any existing permissions
+      try {
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }]
+        });
+      } catch (error) {
+        console.log("No permissions to revoke:", error);
+      }
+      
+      // Force new account selection
       const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts"
+        method: "eth_requestAccounts",
+        params: [{ force: true }] // Force new account selection
       });
       
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        // After user selects account, check if we're on Arbitrum
         const currentChainId = await window.ethereum.request({
           method: 'eth_chainId'
         });
