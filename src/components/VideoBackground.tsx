@@ -21,7 +21,7 @@ const VideoBackground = () => {
               left: '50%',
               width: '100%',
               height: '100%',
-              transform: 'translate(-50%, -50%) scale(1.5)', // Added scale to ensure full coverage
+              transform: 'translate(-50%, -50%) scale(1.75)', // Increased scale for better coverage
               pointerEvents: 'none',
               objectFit: 'cover'
             }}
