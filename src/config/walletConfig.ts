@@ -1,21 +1,30 @@
 import { configureChains, createConfig } from 'wagmi';
 import { arbitrum } from 'wagmi/chains';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
-import { Web3Modal } from '@web3modal/react';
 
 // WalletConnect Project ID
 const projectId = '0d63e4b93b8abc2ea0a58328d7e7c053';
 
-// Configure chains & providers
+// Get the current domain for allowed origins
+const currentDomain = typeof window !== 'undefined' ? window.location.origin : '';
+
+// Configure chains & providers with proper metadata
 const { chains, publicClient } = configureChains(
   [arbitrum],
-  [w3mProvider({ projectId })]
+  [w3mProvider({ 
+    projectId,
+    relayUrl: 'wss://relay.walletconnect.org'
+  })]
 );
 
 // Set up wagmi config
 export const wagmiConfig = createConfig({
   autoConnect: false,
-  connectors: w3mConnectors({ projectId, chains }),
+  connectors: w3mConnectors({ 
+    projectId, 
+    chains,
+    optionalChains: chains 
+  }),
   publicClient,
 });
 
@@ -36,7 +45,11 @@ export const web3modalProps = {
   metadata: {
     name: 'DoomCoin Token Swap',
     description: 'Swap tokens on Arbitrum',
-    url: typeof window !== 'undefined' ? window.location.origin : '',
+    url: currentDomain,
     icons: []
-  }
+  },
+  // Configure WebSocket options
+  walletConnectVersion: 2,
+  standaloneChains: chains.map(chain => chain.id),
+  defaultChainId: arbitrum.id
 };
