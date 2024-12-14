@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -18,16 +18,53 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const [showAccountDialog, setShowAccountDialog] = useState(false);
   const { toast } = useToast();
 
+  // Listen for account changes
+  useEffect(() => {
+    if (typeof window.ethereum !== "undefined") {
+      const handleAccountsChanged = (newAccounts: string[]) => {
+        console.log("MetaMask accounts changed:", newAccounts);
+        setAccounts(newAccounts);
+        if (newAccounts.length === 0) {
+          onConnect(false);
+          toast({
+            title: "Wallet Disconnected",
+            description: "Your wallet has been disconnected",
+            variant: "destructive",
+          });
+        }
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      
+      // Check if already connected
+      window.ethereum.request({ method: 'eth_accounts' })
+        .then(handleAccountsChanged)
+        .catch(console.error);
+
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      };
+    }
+  }, [onConnect, toast]);
+
   const connectWallet = async () => {
     setConnecting(true);
     try {
       if (typeof window.ethereum !== "undefined") {
+        console.log("Requesting accounts from MetaMask...");
         const accounts = await window.ethereum.request({
           method: "eth_requestAccounts",
         });
-        console.log("Available accounts:", accounts);
+        console.log("Received accounts from MetaMask:", accounts);
         setAccounts(accounts);
-        setShowAccountDialog(true);
+        
+        if (accounts.length === 1) {
+          // If only one account, connect directly
+          handleAccountSelect(accounts[0]);
+        } else if (accounts.length > 1) {
+          // If multiple accounts, show selection dialog
+          setShowAccountDialog(true);
+        }
       } else {
         toast({
           title: "MetaMask Required",
