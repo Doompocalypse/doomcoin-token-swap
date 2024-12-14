@@ -27,10 +27,7 @@ const ConnectDialog = ({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button 
-          className="bg-white text-black hover:bg-white/90"
-          onClick={() => onOpenChange(true)}
-        >
+        <Button className="bg-white text-black hover:bg-white/90">
           Connect Wallet
         </Button>
       </DialogTrigger>
