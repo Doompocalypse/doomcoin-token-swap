@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { useWeb3Modal } from '@web3modal/react';
+import { useAccount, useNetwork, useSwitchNetwork } from 'wagmi';
+import { arbitrum } from 'wagmi/chains';
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -8,6 +10,10 @@ export const useWalletCore = (
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
+  const { open } = useWeb3Modal();
+  const { address, isConnected } = useAccount();
+  const { chain } = useNetwork();
+  const { switchNetwork } = useSwitchNetwork();
 
   const connectMetaMask = async () => {
     if (!window.ethereum?.isMetaMask) {
@@ -22,56 +28,19 @@ export const useWalletCore = (
     try {
       console.log("Requesting fresh MetaMask connection...");
       
-      // First, clear any existing permissions
-      try {
-        await window.ethereum.request({
-          method: "wallet_revokePermissions",
-          params: [{ eth_accounts: {} }]
-        });
-      } catch (error) {
-        console.log("No permissions to revoke:", error);
-      }
-      
-      // Force new account selection
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
-        params: [{ force: true }] // Force new account selection
       });
       
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        const currentChainId = await window.ethereum.request({
-          method: 'eth_chainId'
-        });
-        
-        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
-          try {
-            await window.ethereum.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: ARBITRUM_CHAIN_ID }],
-            });
-          } catch (switchError: any) {
-            console.error("Network switch error:", switchError);
-            if (switchError.code === 4902) {
-              await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                  chainId: ARBITRUM_CHAIN_ID,
-                  chainName: 'Arbitrum One',
-                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                  rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-                  blockExplorerUrls: ['https://arbiscan.io/']
-                }]
-              });
-            } else {
-              throw switchError;
-            }
-          }
+        if (chain?.id !== arbitrum.id) {
+          await switchNetwork?.(arbitrum.id);
         }
         
         setAccounts(accounts);
-        setChainId(ARBITRUM_CHAIN_ID);
+        setChainId(arbitrum.id.toString(16));
         onConnect(true, accounts[0]);
         
         toast({
@@ -89,11 +58,31 @@ export const useWalletCore = (
     }
   };
 
+  const connectWalletConnect = async () => {
+    try {
+      await open();
+      
+      if (isConnected && address) {
+        setAccounts([address]);
+        setChainId(chain?.id.toString(16));
+        onConnect(true, address);
+      }
+    } catch (error: any) {
+      console.error("WalletConnect error:", error);
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect with WalletConnect",
+        variant: "destructive",
+      });
+    }
+  };
+
   return {
     accounts,
     chainId,
     setAccounts,
     setChainId,
     connectMetaMask,
+    connectWalletConnect,
   };
 };
