@@ -15,7 +15,7 @@ const Doomy = () => {
             "[Connect your wallet](https://metamask.io/download/) " +
             "[Making token swaps](https://ethereum.org/en/defi/) " +
             "[Checking exchange rates](https://coinmarketcap.com/) " +
-            "[Understanding crypto basics](https://ethereum.org/en/what-is-ethereum/) " +
+            "[Understanding crypto basics](https://ethereum.org/en/what-is-ethereum/)" +
             "\n\nHow can I assist you today?", 
       isBot: true 
     },
