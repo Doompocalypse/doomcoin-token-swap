@@ -54,7 +54,7 @@ const Doomy = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full w-12 h-12 bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] p-0 shadow-lg hover:opacity-90"
+        className="fixed bottom-4 right-4 rounded-full w-12 h-12 bg-[#33C3F0] p-0 shadow-lg hover:opacity-90"
       >
         <MessageCircle className="w-6 h-6" />
       </Button>
@@ -99,7 +99,7 @@ const Doomy = () => {
                   className={`max-w-[80%] rounded-lg px-3 py-2 ${
                     message.isBot
                       ? "bg-[#1A1F2C] text-[#F1F1F1]"
-                      : "bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] text-white"
+                      : "bg-[#33C3F0] text-white"
                   }`}
                 >
                   {message.text}
@@ -115,11 +115,11 @@ const Doomy = () => {
                 onChange={(e) => setInput(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder="Type your message..."
-                className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#9b87f5]"
+                className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#8E9196]"
               />
               <Button
                 onClick={handleSend}
-                className="bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] hover:opacity-90"
+                className="bg-[#33C3F0] hover:opacity-90"
               >
                 Send
               </Button>

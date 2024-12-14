@@ -35,7 +35,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   const { data: ethPrice = 2500 } = useQuery({
     queryKey: ["ethPrice"],
     queryFn: fetchEthPrice,
-    refetchInterval: 60000, // Refetch every minute
+    refetchInterval: 60000,
     meta: {
       onError: (error: Error) => {
         console.error("Query error:", error);
@@ -93,7 +93,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
             placeholder="0.0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#9b87f5] text-lg"
+            className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#8E9196] text-lg"
           />
           <p className="mt-2 text-sm text-[#8E9196]">≈ ${usdValue} USD</p>
         </div>
@@ -101,7 +101,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
         <Button
           onClick={handleExchange}
           disabled={!amount || !isConnected}
-          className="w-full bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] hover:opacity-90 transition-opacity text-white font-medium py-6"
+          className="w-full bg-[#33C3F0] hover:opacity-90 transition-opacity text-white font-medium py-6"
         >
           {isConnected ? "Swap" : "Connect Wallet to Swap"}
         </Button>

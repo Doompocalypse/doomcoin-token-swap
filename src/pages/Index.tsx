@@ -22,10 +22,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#1A1F2C] p-4 md:p-8">
+    <div className="min-h-screen bg-[#221F26] p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] bg-clip-text text-transparent">
+          <h1 className="text-3xl font-bold text-[#F1F1F1]">
             Swap Tokens
           </h1>
           <WalletConnect onConnect={handleConnect} />
