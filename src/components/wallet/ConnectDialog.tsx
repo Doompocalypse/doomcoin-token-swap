@@ -1,11 +1,6 @@
-import { Button } from "@/components/ui/button";
-import {
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Wallet, Wallet2, Loader2 } from "lucide-react";
+import { Wallet, Wallet2 } from "lucide-react";
+import DialogLayout from "./dialog/DialogLayout";
+import WalletButton from "./buttons/WalletButton";
 
 interface ConnectDialogProps {
   onConnectMetaMask: () => Promise<void>;
@@ -23,48 +18,24 @@ const ConnectDialog = ({
   console.log("ConnectDialog render, isConnecting:", isConnecting, "connectionType:", connectionType);
   
   return (
-    <DialogContent className="sm:max-w-md bg-black/20 backdrop-blur-sm border border-white/10">
-      <DialogHeader>
-        <DialogTitle className="text-white">Connect Your Wallet</DialogTitle>
-        <DialogDescription className="text-gray-200">
-          Choose your preferred wallet to connect to our application. Make sure you're on the Arbitrum network.
-        </DialogDescription>
-      </DialogHeader>
-      <div className="flex flex-col gap-4 py-4">
-        <Button
-          onClick={onConnectMetaMask}
-          variant="outline"
-          className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
-          disabled={isConnecting}
-        >
-          {isConnecting && connectionType === "metamask" ? (
-            <Loader2 className="mr-4 h-6 w-6 animate-spin" />
-          ) : (
-            <Wallet className="mr-4 h-6 w-6" />
-          )}
-          <div className="flex flex-col items-start">
-            <span className="font-semibold">MetaMask</span>
-            <span className="text-sm text-gray-300">Connect using browser wallet</span>
-          </div>
-        </Button>
-        <Button
-          onClick={onConnectWalletConnect}
-          variant="outline"
-          className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
-          disabled={isConnecting}
-        >
-          {isConnecting && connectionType === "walletconnect" ? (
-            <Loader2 className="mr-4 h-6 w-6 animate-spin" />
-          ) : (
-            <Wallet2 className="mr-4 h-6 w-6" />
-          )}
-          <div className="flex flex-col items-start">
-            <span className="font-semibold">WalletConnect</span>
-            <span className="text-sm text-gray-300">Connect using WalletConnect</span>
-          </div>
-        </Button>
-      </div>
-    </DialogContent>
+    <DialogLayout>
+      <WalletButton
+        onClick={onConnectMetaMask}
+        isConnecting={isConnecting}
+        isActive={connectionType === "metamask"}
+        icon={Wallet}
+        title="MetaMask"
+        description="Connect using browser wallet"
+      />
+      <WalletButton
+        onClick={onConnectWalletConnect}
+        isConnecting={isConnecting}
+        isActive={connectionType === "walletconnect"}
+        icon={Wallet2}
+        title="WalletConnect"
+        description="Connect using WalletConnect"
+      />
+    </DialogLayout>
   );
 };
 
