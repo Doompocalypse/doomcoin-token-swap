@@ -38,7 +38,7 @@ export const web3modalProps = {
   metadata: {
     name: 'DoomCoin Token Swap',
     description: 'Swap tokens on Arbitrum',
-    url: 'https://doomcoin.com', // Use a generic URL that will be overridden by WalletConnect
+    url: window.location.origin,
     icons: ['https://avatars.githubusercontent.com/u/37784886']
   },
   standaloneChains: [arbitrum.id],
