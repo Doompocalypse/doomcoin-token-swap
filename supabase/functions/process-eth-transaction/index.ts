@@ -44,8 +44,8 @@ Deno.serve(async (req) => {
       throw new Error("Alchemy API key not configured");
     }
 
-    // Initialize provider with proper API key
-    const provider = new ethers.JsonRpcProvider(`https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`);
+    // Initialize provider with Arbitrum One RPC URL
+    const provider = new ethers.JsonRpcProvider(`https://arb-mainnet.g.alchemy.com/v2/${alchemyApiKey}`);
     const botPrivateKey = Deno.env.get("BOT_WALLET_PRIVATE_KEY");
     
     if (!botPrivateKey) {
