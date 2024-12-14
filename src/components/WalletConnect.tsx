@@ -20,7 +20,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       }
 
       try {
-        // Get currently connected accounts
         const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
         console.log("Current connected accounts:", currentAccounts);
         
@@ -69,19 +68,17 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
     try {
       console.log("Requesting accounts...");
+      // This will trigger the MetaMask popup
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       
       console.log("New accounts received:", newAccounts);
       if (newAccounts.length > 0) {
-        setAccounts(newAccounts);
-        setShowAccountDialog(true);
-      } else {
+        onConnect(true, newAccounts[0]);
         toast({
-          title: "No Accounts Found",
-          description: "Please unlock your MetaMask wallet and try again.",
-          variant: "destructive",
+          title: "Wallet Connected",
+          description: `Connected to account: ${newAccounts[0].slice(0, 6)}...${newAccounts[0].slice(-4)}`,
         });
       }
     } catch (error) {
@@ -94,49 +91,10 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     }
   };
 
-  const handleAccountSelect = (account: string) => {
-    console.log("Selected account:", account);
-    onConnect(true, account);
-    setShowAccountDialog(false);
-    toast({
-      title: "Account Connected",
-      description: `Connected to account: ${account.slice(0, 6)}...${account.slice(-4)}`,
-    });
-  };
-
   return (
-    <>
-      <Button onClick={handleConnect} className="bg-[#33C3F0] hover:opacity-90">
-        Connect Wallet
-      </Button>
-
-      <Dialog open={showAccountDialog} onOpenChange={setShowAccountDialog}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Account</DialogTitle>
-            <DialogDescription>
-              Choose which MetaMask account to connect
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            {accounts.length === 0 ? (
-              <p className="text-sm text-gray-500">No accounts found. Please make sure MetaMask is unlocked.</p>
-            ) : (
-              accounts.map((account) => (
-                <Button
-                  key={account}
-                  onClick={() => handleAccountSelect(account)}
-                  variant="outline"
-                  className="w-full justify-between"
-                >
-                  {`${account.slice(0, 6)}...${account.slice(-4)}`}
-                </Button>
-              ))
-            )}
-          </div>
-        </DialogContent>
-      </Dialog>
-    </>
+    <Button onClick={handleConnect} className="bg-[#33C3F0] hover:opacity-90">
+      Connect Wallet
+    </Button>
   );
 };
 
