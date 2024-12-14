@@ -15,8 +15,12 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
   const getNetworkName = () => {
     if (!chainId) return "";
+    
+    // Add mapping for Ethereum Mainnet
+    if (chainId === "0x1") return " (Ethereum Mainnet)";
+    
     const chain = SUPPORTED_CHAINS[chainId];
-    return chain ? ` (${chain.chainName})` : "";
+    return chain ? ` (${chain.chainName})` : ` (Chain ID: ${chainId})`;
   };
 
   return (

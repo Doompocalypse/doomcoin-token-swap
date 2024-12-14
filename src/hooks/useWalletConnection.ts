@@ -78,16 +78,6 @@ export const useWalletConnection = (
     try {
       console.log("Requesting accounts...");
       
-      const switched = await switchToArbitrum();
-      if (!switched) {
-        toast({
-          title: "Network Switch Failed",
-          description: "Please manually switch to Arbitrum One network",
-          variant: "destructive",
-        });
-        return;
-      }
-
       await window.ethereum.request({
         method: 'wallet_requestPermissions',
         params: [{ eth_accounts: {} }],
