@@ -12,10 +12,10 @@ const Doomy = () => {
   const [messages, setMessages] = useState<Message[]>([
     { 
       text: "👋 Hello! I'm Doomy, your friendly crypto assistant. I'm here to help you with:\n\n" +
-            "• Connecting your wallet\n" +
-            "• Making token swaps\n" +
-            "• Checking exchange rates\n" +
-            "• Understanding crypto basics\n\n" +
+            "• [Connect your wallet](https://metamask.io/download/)\n" +
+            "• [Making token swaps](https://ethereum.org/en/defi/)\n" +
+            "• [Checking exchange rates](https://coinmarketcap.com/)\n" +
+            "• [Understanding crypto basics](https://ethereum.org/en/what-is-ethereum/)\n\n" +
             "How can I assist you today?", 
       isBot: true 
     },
@@ -31,13 +31,13 @@ const Doomy = () => {
     let botResponse = "";
 
     if (userInput.includes("wallet") || userInput.includes("connect")) {
-      botResponse = "To connect your wallet, click the 'Connect Wallet' button in the top right corner. I'll guide you through the process!";
+      botResponse = "To connect your wallet, [click here to learn about MetaMask](https://metamask.io/download/) or click the 'Connect Wallet' button in the top right corner. I'll guide you through the process!";
     } else if (userInput.includes("swap") || userInput.includes("exchange")) {
-      botResponse = "To swap tokens, first make sure your wallet is connected. Then enter the amount of ETH you want to swap and click the 'Swap' button.";
+      botResponse = "To swap tokens, first make sure your wallet is connected. Then enter the amount of ETH you want to swap and click the 'Swap' button. Learn more about [DeFi and token swaps here](https://ethereum.org/en/defi/).";
     } else if (userInput.includes("price") || userInput.includes("rate")) {
-      botResponse = "The current exchange rate is shown above the swap input field. It's updated every minute to ensure accuracy!";
+      botResponse = "The current exchange rate is shown above the swap input field. It's updated every minute to ensure accuracy! Check [CoinMarketCap](https://coinmarketcap.com/) for more detailed price information.";
     } else {
-      botResponse = "I'm here to help with wallet setup and transactions. Could you please clarify what you'd like to know about?";
+      botResponse = "I'm here to help with wallet setup and transactions. Check out [Ethereum basics](https://ethereum.org/en/what-is-ethereum/) or let me know what specific help you need!";
     }
 
     setTimeout(() => {
