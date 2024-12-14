@@ -10,7 +10,7 @@ export const useWalletConnectConnection = () => {
   const { toast } = useToast();
   const { ensureArbitrumNetwork } = useNetworkSwitch();
 
-  const connectWalletConnect = async () => {
+  const connectWalletConnect = async (): Promise<string[]> => {
     try {
       console.log("Starting WalletConnect connection process...");
       
@@ -25,7 +25,7 @@ export const useWalletConnectConnection = () => {
       }
 
       // Set up a timeout promise
-      const timeoutPromise = new Promise((_, reject) => {
+      const timeoutPromise = new Promise<never>((_, reject) => {
         setTimeout(() => reject(new Error("Connection timed out")), 30000);
       });
 
@@ -64,7 +64,8 @@ export const useWalletConnectConnection = () => {
       // Check network after successful connection
       await ensureArbitrumNetwork();
       
-      return [connectedAddress];
+      // Ensure we return a string array with the address
+      return [connectedAddress as string];
       
     } catch (error: any) {
       console.error("WalletConnect error:", error);
