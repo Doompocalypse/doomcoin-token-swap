@@ -1,10 +1,21 @@
 import { Message } from "./types";
+import { useEffect, useRef } from "react";
 
 interface ChatMessagesProps {
   messages: Message[];
 }
 
 const ChatMessages = ({ messages }: ChatMessagesProps) => {
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
   const renderMessageWithLinks = (text: string) => {
     const segments = text.split(/(\[.*?\]\(.*?\))/g);
     
@@ -56,6 +67,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           </div>
         </div>
       ))}
+      <div ref={messagesEndRef} />
     </div>
   );
 };
