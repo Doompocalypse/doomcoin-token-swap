@@ -67,8 +67,30 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
       return;
     }
 
+    // Add validation for minimum and maximum amounts
+    const ethAmount = Number(ethValue);
+    if (ethAmount < 0.001) {
+      toast({
+        title: "Amount Too Small",
+        description: "Minimum transaction amount is 0.001 ETH",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (ethAmount > 10) {
+      toast({
+        title: "Amount Too Large",
+        description: "Maximum transaction amount is 10 ETH",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       console.log("Starting exchange with account:", connectedAccount);
+      console.log("Requested ETH amount:", ethValue);
+      
       const { txHash } = await handleTokenExchange(connectedAccount, ethValue);
       
       console.log("Transaction hash:", txHash);

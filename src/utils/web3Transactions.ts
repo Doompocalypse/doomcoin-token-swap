@@ -4,22 +4,26 @@ const CONTRACT_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 export const handleTokenExchange = async (userAccount: string, ethValue: string) => {
   console.log("Initiating token exchange...");
   console.log("User wallet address:", userAccount);
+  console.log("Requested ETH amount:", ethValue);
   
   // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
   const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
   
   try {
-    // User sends ETH to Bot Wallet
+    // User sends ETH to Bot Wallet with exact amount
     const transactionParameters = {
       to: BOT_WALLET,
       from: userAccount,
       value: `0x${weiValue}`,
-      data: "0x"
+      data: "0x",
+      // Add gas parameters to ensure transaction uses exact amount
+      gas: undefined,
+      gasPrice: undefined
     };
 
     console.log("Transaction parameters:", transactionParameters);
     
-    // Send ETH transaction
+    // Send ETH transaction with exact amount
     const txHash = await window.ethereum.request({
       method: 'eth_sendTransaction',
       params: [transactionParameters],
