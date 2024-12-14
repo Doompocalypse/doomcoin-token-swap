@@ -3,32 +3,64 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 
 interface TokenExchangeProps {
   isConnected: boolean;
 }
+
+const fetchEthPrice = async () => {
+  console.log("Fetching ETH price from CoinGecko...");
+  try {
+    const response = await fetch(
+      "https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd"
+    );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log("ETH price data received:", data);
+    return data.ethereum.usd;
+  } catch (error) {
+    console.error("Error fetching ETH price:", error);
+    return 2500; // Fallback price if API fails
+  }
+};
 
 const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   const [amount, setAmount] = useState("");
   const [usdValue, setUsdValue] = useState("0.00");
   const { toast } = useToast();
 
-  // Simulated ETH price in USD - in a real app, this would come from an API
-  const ETH_PRICE_USD = 2500;
+  const { data: ethPrice = 2500 } = useQuery({
+    queryKey: ["ethPrice"],
+    queryFn: fetchEthPrice,
+    refetchInterval: 60000, // Refetch every minute
+    meta: {
+      onError: (error: Error) => {
+        console.error("Query error:", error);
+        toast({
+          title: "Price Update Failed",
+          description: "Using fallback price. Please try again later.",
+          variant: "destructive",
+        });
+      },
+    },
+  });
 
   useEffect(() => {
-    // Calculate USD value whenever amount changes
+    console.log("Calculating USD value with ETH price:", ethPrice);
     const calculateUsdValue = () => {
       if (!amount || isNaN(Number(amount))) {
         setUsdValue("0.00");
         return;
       }
-      const usd = Number(amount) * ETH_PRICE_USD;
+      const usd = Number(amount) * ethPrice;
       setUsdValue(usd.toFixed(2));
     };
 
     calculateUsdValue();
-  }, [amount]);
+  }, [amount, ethPrice]);
 
   const handleExchange = () => {
     if (!isConnected) {
@@ -61,7 +93,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
             className="bg-secondary"
           />
           <p className="mt-2 text-sm text-muted-foreground">
-            ≈ ${usdValue} USD
+            ≈ ${usdValue} USD (1 ETH = ${ethPrice.toLocaleString()} USD)
           </p>
         </div>
 
