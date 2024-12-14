@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import ChatButton from "./chat/ChatButton";
 import ChatHeader from "./chat/ChatHeader";
@@ -22,6 +22,31 @@ const Doomy = () => {
   ]);
   const [input, setInput] = useState("");
 
+  useEffect(() => {
+    const handleChatMessage = (event: CustomEvent<{ text: string }>) => {
+      const userMessage = event.detail.text;
+      setMessages((prev) => [...prev, { text: userMessage, isBot: false }]);
+
+      let botResponse = "";
+      if (userMessage.includes("connect your wallet")) {
+        botResponse = "I'll help you connect your wallet! First, make sure you have MetaMask installed. Then click the 'Connect Wallet' button in the top right corner. Would you like me to guide you through the process?";
+      } else if (userMessage.includes("making token swaps")) {
+        botResponse = "I can help you swap tokens! First, you'll need to have some tokens in your wallet. Would you like me to explain how token swaps work?";
+      } else if (userMessage.includes("checking exchange rates")) {
+        botResponse = "I can help you check current exchange rates. Which tokens would you like to compare?";
+      } else if (userMessage.includes("understanding crypto basics")) {
+        botResponse = "I'd be happy to explain the basics of cryptocurrency! What specific aspect would you like to learn more about? For example:\n- What is a blockchain?\n- How do cryptocurrencies work?\n- What are smart contracts?";
+      }
+
+      setTimeout(() => {
+        setMessages((prev) => [...prev, { text: botResponse, isBot: true }]);
+      }, 500);
+    };
+
+    window.addEventListener('chatMessage', handleChatMessage as EventListener);
+    return () => window.removeEventListener('chatMessage', handleChatMessage as EventListener);
+  }, []);
+
   const handleSend = () => {
     if (!input.trim()) return;
 
@@ -31,13 +56,13 @@ const Doomy = () => {
     let botResponse = "";
 
     if (userInput.includes("wallet") || userInput.includes("connect")) {
-      botResponse = "To connect your wallet, [click here to learn about MetaMask](https://metamask.io/download/) or click the 'Connect Wallet' button in the top right corner. I'll guide you through the process!";
+      botResponse = "To connect your wallet, click the 'Connect Wallet' button in the top right corner. I'll guide you through the process!";
     } else if (userInput.includes("swap") || userInput.includes("exchange")) {
-      botResponse = "To swap tokens, first make sure your wallet is connected. Then enter the amount of ETH you want to swap and click the 'Swap' button. Learn more about [DeFi and token swaps here](https://ethereum.org/en/defi/).";
+      botResponse = "To swap tokens, first make sure your wallet is connected. Then enter the amount you want to swap and click the 'Swap' button. Would you like me to explain more?";
     } else if (userInput.includes("price") || userInput.includes("rate")) {
-      botResponse = "The current exchange rate is shown above the swap input field. It's updated every minute to ensure accuracy! Check [CoinMarketCap](https://coinmarketcap.com/) for more detailed price information.";
+      botResponse = "The current exchange rate is shown above the swap input field. It's updated every minute to ensure accuracy! Which tokens would you like to compare?";
     } else {
-      botResponse = "I'm here to help with wallet setup and transactions. Check out [Ethereum basics](https://ethereum.org/en/what-is-ethereum/) or let me know what specific help you need!";
+      botResponse = "I'm here to help with wallet setup and transactions. Let me know what specific help you need!";
     }
 
     setTimeout(() => {

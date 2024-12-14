@@ -12,19 +12,24 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
       const linkMatch = segment.match(/\[(.*?)\]\((.*?)\)/);
       
       if (linkMatch) {
-        const [_, text, url] = linkMatch;
+        const [_, text] = linkMatch;
         // Add extra margin-top to the first link ("Connect your wallet")
         const isConnectWallet = text.includes("Connect your wallet");
         return (
           <div key={index} className={`my-2 ${isConnectWallet ? "mt-4" : ""}`}>
-            <a
-              href={url}
-              className="text-cyan-400 hover:text-purple-400 transition-colors block"
-              target="_blank"
-              rel="noopener noreferrer"
+            <button
+              className="text-cyan-400 hover:text-purple-400 transition-colors block text-left"
+              onClick={(e) => {
+                e.preventDefault();
+                // Simulate a user message with the clicked topic
+                const messageEvent = new CustomEvent('chatMessage', {
+                  detail: { text: text.toLowerCase() }
+                });
+                window.dispatchEvent(messageEvent);
+              }}
             >
               {text}
-            </a>
+            </button>
           </div>
         );
       }
