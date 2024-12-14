@@ -104,6 +104,12 @@ export const useWalletConnection = (
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
 
+    // Check if already connected
+    if (accounts.length > 0) {
+      console.log("Wallet already connected:", accounts[0]);
+      return;
+    }
+
     if (!window.ethereum) {
       toast({
         title: "MetaMask Required",
