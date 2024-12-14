@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAccount, useDisconnect, useChainId } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/wagmi';
+import { useWeb3Modal } from '@web3modal/wagmi/react';
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;

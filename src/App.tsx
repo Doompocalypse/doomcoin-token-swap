@@ -6,9 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
-import { walletConnectProvider } from '@web3modal/wagmi';
-import { WalletConnectConnector } from 'wagmi/connectors/walletConnect';
-import { InjectedConnector } from 'wagmi/connectors/injected';
+import { w3mConnectors } from '@web3modal/wagmi';
 import Index from "./pages/Index";
 
 // WalletConnect v2 Project ID
@@ -24,24 +22,14 @@ const metadata = {
 const chains = [mainnet];
 
 const config = createConfig({
-  connectors: [
-    new WalletConnectConnector({ 
-      chains,
-      options: { 
-        projectId,
-        metadata 
-      } 
-    }),
-    new InjectedConnector({ 
-      chains,
-      options: { 
-        name: 'Injected',
-        shimDisconnect: true 
-      } 
-    })
-  ],
+  chains,
+  connectors: w3mConnectors({ 
+    chains,
+    projectId, 
+    metadata 
+  }),
   transports: {
-    [mainnet.id]: walletConnectProvider({ projectId })
+    [mainnet.id]: http()
   }
 });
 
