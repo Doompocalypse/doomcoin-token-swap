@@ -57,6 +57,7 @@ export const useWalletConnection = (
 
     const handleChainChanged = (chainId: string) => {
       console.log("Network changed to:", chainId);
+      // Refresh the page when network changes to ensure all states are updated
       window.location.reload();
     };
 
