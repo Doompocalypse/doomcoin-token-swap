@@ -10,39 +10,6 @@ export const useWalletConnectConnection = () => {
   const { toast } = useToast();
   const { ensureArbitrumNetwork } = useNetworkSwitch();
 
-  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
-
-  const attemptConnection = async (connector: any, attempt: number = 1): Promise<string> => {
-    try {
-      console.log(`Connection attempt ${attempt}...`);
-      await connect({ connector });
-      
-      // Check connection with exponential backoff
-      const maxRetries = 5;
-      const baseDelay = 1000; // Start with 1 second
-      
-      for (let i = 0; i < maxRetries; i++) {
-        if (isConnected && address) {
-          console.log(`Connection successful on retry ${i + 1}`);
-          return address;
-        }
-        
-        const waitTime = baseDelay * Math.pow(2, i);
-        console.log(`Waiting ${waitTime}ms before next check...`);
-        await delay(waitTime);
-      }
-      
-      throw new Error("Connection verification failed");
-    } catch (error) {
-      if (attempt < 3) { // Try up to 3 times
-        console.log(`Retrying connection, attempt ${attempt + 1}`);
-        await delay(1000); // Wait 1 second before retry
-        return attemptConnection(connector, attempt + 1);
-      }
-      throw error;
-    }
-  };
-
   const connectWalletConnect = async (): Promise<string[]> => {
     try {
       console.log("Starting WalletConnect connection process...");
@@ -56,36 +23,55 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      console.log("Opening WalletConnect modal...");
-      
+      // Show connecting toast before opening modal
       toast({
-        title: "Connecting Wallet",
-        description: "Please approve the connection in your wallet...",
+        title: "Initiating Connection",
+        description: "Opening WalletConnect...",
       });
-      
+
+      // First open the modal
       await open();
-      console.log("Modal opened, attempting connection...");
+      console.log("WalletConnect modal opened");
+
+      // Then attempt the connection
+      toast({
+        title: "Connecting",
+        description: "Please approve the connection request in your wallet",
+      });
+
+      // Direct connection attempt
+      await connect({ connector: walletConnectConnector });
       
-      const connectedAddress = await attemptConnection(walletConnectConnector);
-      console.log("WalletConnect connection successful:", connectedAddress);
+      // Wait for connection to be established
+      let attempts = 0;
+      const maxAttempts = 10;
       
-      // Network check with 5s timeout
-      await Promise.race([
-        ensureArbitrumNetwork(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Network check timed out")), 5000))
-      ]);
+      while (attempts < maxAttempts && (!isConnected || !address)) {
+        console.log(`Waiting for connection... Attempt ${attempts + 1}/${maxAttempts}`);
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        attempts++;
+      }
+
+      if (!isConnected || !address) {
+        throw new Error("Failed to establish connection");
+      }
+
+      console.log("WalletConnect connection successful:", address);
+
+      // Check network after successful connection
+      await ensureArbitrumNetwork();
       
-      return [connectedAddress];
-      
+      return [address];
+
     } catch (error: any) {
       console.error("WalletConnect error:", error);
       
       const errorMessage = error.message?.toLowerCase() || '';
       
-      if (errorMessage.includes("verification failed")) {
+      if (errorMessage.includes("failed to establish")) {
         toast({
           title: "Connection Failed",
-          description: "Unable to verify wallet connection. Please try again.",
+          description: "Unable to establish connection. Please try again.",
           variant: "destructive",
         });
       } else if (errorMessage.includes("user rejected") || 
@@ -103,11 +89,12 @@ export const useWalletConnectConnection = () => {
         });
       } else {
         toast({
-          title: "Connection Failed",
-          description: "Failed to connect with WalletConnect. Please try again.",
+          title: "Connection Error",
+          description: "Failed to connect. Please try again.",
           variant: "destructive",
         });
       }
+      
       throw error;
     }
   };
