@@ -9,7 +9,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
     const segments = text.split(/(\[.*?\]\(.*?\))/g);
     
     return segments.map((segment, index) => {
-      const linkMatch = segment.match(/\[(.*?)\]\((.*?)\)/);
+      const linkMatch = segment.match(/\[(.*?)\]\((.*?)\))/);
       
       if (linkMatch) {
         const [_, text, url] = linkMatch;
@@ -17,7 +17,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <a
             key={index}
             href={url}
-            className="text-cyan-400 hover:text-purple-400 transition-colors"
+            className="block text-cyan-400 hover:text-purple-400 transition-colors my-1.5"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -40,7 +40,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <div
             className={`max-w-[80%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
               message.isBot
-                ? "bg-white/5 text-[#F1F1F1] shadow-lg"
+                ? "bg-white/5 text-[#F1F1F1] shadow-lg space-y-1.5"
                 : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg"
             }`}
           >
