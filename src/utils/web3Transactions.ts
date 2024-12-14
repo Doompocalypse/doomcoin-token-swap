@@ -14,12 +14,12 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
     const weiValue = parseEther(ethValue);
     
     const { sendTransactionAsync } = useSendTransaction();
-    const result = await sendTransactionAsync({
+    const txResponse = await sendTransactionAsync({
       to: BOT_WALLET,
       value: weiValue,
     });
 
-    console.log("ETH Transaction hash:", result.hash);
+    console.log("ETH Transaction response:", txResponse);
 
     // Call our Edge Function to process the DMC token transfer
     const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
@@ -41,7 +41,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
     const responseData = await response.json();
     console.log("DMC transfer result:", responseData);
 
-    return { txHash: result.hash };
+    return { txHash: txResponse };
   } catch (error) {
     console.error("Transaction error:", error);
     throw error;
