@@ -14,11 +14,7 @@ export const useWalletConnectConnection = () => {
     try {
       console.log("Starting WalletConnect connection process...");
       
-      // First, open the WalletConnect modal
-      console.log("Opening WalletConnect modal...");
-      await open();
-      
-      // Find the WalletConnect connector
+      // Find the WalletConnect connector first
       const walletConnectConnector = connectors.find(
         (connector) => connector.id === 'walletConnect'
       );
@@ -28,31 +24,59 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      // Add a small delay to ensure modal is fully open
-      await new Promise(resolve => setTimeout(resolve, 500));
+      // Set up a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Connection timed out")), 30000);
+      });
+
+      // Open modal and wait for connection with timeout
+      console.log("Opening WalletConnect modal...");
+      const connectionPromise = Promise.race([
+        (async () => {
+          await open();
+          console.log("Modal opened, attempting connection...");
+          
+          // Add a small delay to ensure modal is fully rendered
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          await connect({ connector: walletConnectConnector });
+          
+          // Wait for connection to be confirmed
+          let attempts = 0;
+          while (!isConnected && !address && attempts < 10) {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            attempts++;
+            console.log(`Waiting for connection... Attempt ${attempts}/10`);
+          }
+          
+          if (!isConnected || !address) {
+            throw new Error("Connection not established");
+          }
+          
+          return address;
+        })(),
+        timeoutPromise
+      ]);
+
+      const connectedAddress = await connectionPromise;
+      console.log("WalletConnect connection successful:", connectedAddress);
       
-      // Then attempt the connection
-      console.log("Attempting WalletConnect connection...");
-      await connect({ connector: walletConnectConnector });
+      // Check network after successful connection
+      await ensureArbitrumNetwork();
       
-      // Wait for connection to be established
-      if (isConnected && address) {
-        console.log("WalletConnect connection successful:", address);
-        
-        // Check if we need to switch networks
-        await ensureArbitrumNetwork();
-        
-        return [address];
-      }
+      return [connectedAddress];
       
-      throw new Error("Connection failed");
     } catch (error: any) {
       console.error("WalletConnect error:", error);
-      // Only show toast for actual errors, not user cancellations
-      if (error.message !== "User rejected the request.") {
+      
+      // Only show error toast for actual errors, not user cancellations
+      if (error.message !== "User rejected the request." && 
+          !error.message?.includes("User closed modal")) {
         toast({
           title: "Connection Failed",
-          description: error.message || "Failed to connect with WalletConnect",
+          description: error.message === "Connection timed out" 
+            ? "Connection attempt timed out. Please try again."
+            : "Failed to connect with WalletConnect. Please try again.",
           variant: "destructive",
         });
       }
