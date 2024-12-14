@@ -51,7 +51,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button className="bg-[#33C3F0] hover:opacity-90">
+          <Button className="bg-white text-black hover:bg-white/90">
             {formatAddress(accounts[0])}{getNetworkName()}
           </Button>
         </DropdownMenuTrigger>
@@ -82,7 +82,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button className="bg-[#33C3F0] hover:opacity-90">
+        <Button className="bg-white text-black hover:bg-white/90">
           Connect Wallet
         </Button>
       </DropdownMenuTrigger>
