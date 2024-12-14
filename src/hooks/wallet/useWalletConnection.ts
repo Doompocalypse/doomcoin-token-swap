@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useInitialConnection } from "./useInitialConnection";
 import { useWalletDisconnect } from "./useWalletDisconnect";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -36,8 +37,37 @@ export const useWalletConnection = (
     }
 
     try {
-      console.log("Requesting accounts...");
+      console.log("Requesting network switch to Arbitrum One...");
       
+      // First, try to switch to Arbitrum One
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: ARBITRUM_CHAIN_ID }],
+        });
+      } catch (switchError: any) {
+        // This error code indicates that the chain has not been added to MetaMask
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: ARBITRUM_CHAIN_ID,
+              chainName: 'Arbitrum One',
+              nativeCurrency: {
+                name: 'ETH',
+                symbol: 'ETH',
+                decimals: 18
+              },
+              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+              blockExplorerUrls: ['https://arbiscan.io/']
+            }]
+          });
+        } else {
+          throw switchError;
+        }
+      }
+      
+      console.log("Requesting accounts...");
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
