@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiConfig } from 'wagmi';
 import { arbitrum } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
-import { w3mConnectors } from '@web3modal/wagmi/react';
+import { defaultWagmiConfig } from '@web3modal/wagmi/config';
 import { http } from 'viem';
 import Index from "./pages/Index";
 
@@ -22,13 +22,10 @@ const metadata = {
 
 const chains = [arbitrum];
 
-const config = createConfig({
-  chains: [arbitrum],
-  connectors: w3mConnectors({ 
-    projectId, 
-    chains,
-    metadata 
-  }),
+const config = defaultWagmiConfig({ 
+  chains,
+  projectId,
+  metadata,
   transports: {
     [arbitrum.id]: http()
   }
