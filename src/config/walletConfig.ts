@@ -19,13 +19,7 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains,
-    metadata: {
-      name: 'DoomCoin Token Swap',
-      description: 'Swap tokens on Arbitrum',
-      url: currentDomain,
-      icons: [`${currentDomain}/favicon.ico`]
-    }
+    chains
   }),
   publicClient,
 });
