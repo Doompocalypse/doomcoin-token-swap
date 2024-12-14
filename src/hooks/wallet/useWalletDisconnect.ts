@@ -1,11 +1,15 @@
-import { Toast } from "@/components/ui/use-toast";
+import { useToast } from "@/components/ui/use-toast";
+
+type ToastProps = {
+  toast: {
+    (props: { title: string; description: string; variant?: "default" | "destructive" }): void;
+  };
+};
 
 export const useWalletDisconnect = (
   setAccounts: (accounts: string[]) => void,
   onConnect: (connected: boolean) => void,
-  toast: {
-    toast: ({ title, description, variant }: Toast) => void;
-  }
+  { toast }: ToastProps
 ) => {
   const disconnectWallet = async () => {
     try {
@@ -39,7 +43,7 @@ export const useWalletDisconnect = (
         }
       }
 
-      toast.toast({
+      toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected successfully.",
       });
@@ -50,7 +54,7 @@ export const useWalletDisconnect = (
       window.location.reload();
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
-      toast.toast({
+      toast({
         title: "Error",
         description: "Failed to disconnect wallet. Please try again.",
         variant: "destructive",
