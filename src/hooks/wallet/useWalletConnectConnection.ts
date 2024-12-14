@@ -23,27 +23,35 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      // Reduced timeout to 8 seconds for faster feedback
+      // Increased timeout to 20 seconds for slower connections
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Connection timed out")), 8000);
+        setTimeout(() => {
+          console.log("Connection attempt timed out");
+          reject(new Error("Connection timed out"));
+        }, 20000);
       });
 
       console.log("Opening WalletConnect modal...");
       
-      // Immediately try to connect after modal opens
       const connectionPromise = (async () => {
         await open();
-        console.log("Modal opened, connecting...");
+        console.log("Modal opened, attempting connection...");
+        
+        // Show connecting toast
+        toast({
+          title: "Connecting Wallet",
+          description: "Please approve the connection in your wallet...",
+        });
         
         await connect({ connector: walletConnectConnector });
         
-        // Check connection status more frequently
-        for (let i = 0; i < 16; i++) {
+        // Check connection status more frequently with more attempts
+        for (let i = 0; i < 40; i++) {
           if (isConnected && address) {
             console.log("Connection established on attempt", i + 1);
             return address;
           }
-          await new Promise(resolve => setTimeout(resolve, 250)); // 250ms intervals
+          await new Promise(resolve => setTimeout(resolve, 500)); // 500ms intervals
           console.log("Checking connection status...", i + 1);
         }
         
@@ -57,10 +65,10 @@ export const useWalletConnectConnection = () => {
 
       console.log("WalletConnect connection successful:", connectedAddress);
       
-      // Quick network check with 3s timeout
+      // Network check with 5s timeout
       await Promise.race([
         ensureArbitrumNetwork(),
-        new Promise((_, reject) => setTimeout(() => reject(new Error("Network check timed out")), 3000))
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Network check timed out")), 5000))
       ]);
       
       return [connectedAddress as string];
@@ -70,14 +78,27 @@ export const useWalletConnectConnection = () => {
       
       // More specific error messages
       const errorMessage = error.message?.toLowerCase() || '';
+      
       if (errorMessage.includes("timed out")) {
         toast({
           title: "Connection Timeout",
           description: "The connection attempt took too long. Please try again.",
           variant: "destructive",
         });
-      } else if (!errorMessage.includes("user rejected") && 
-                 !errorMessage.includes("user closed")) {
+      } else if (errorMessage.includes("user rejected") || 
+                 errorMessage.includes("user closed")) {
+        toast({
+          title: "Connection Cancelled",
+          description: "You cancelled the connection attempt.",
+          variant: "destructive",
+        });
+      } else if (errorMessage.includes("unauthorized")) {
+        toast({
+          title: "Connection Failed",
+          description: "Unable to establish secure connection. Please try again.",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Connection Failed",
           description: "Failed to connect with WalletConnect. Please try again.",
