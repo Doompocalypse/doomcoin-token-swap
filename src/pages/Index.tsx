@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import TokenExchange from "@/components/TokenExchange";
 import TransactionHistory from "@/components/TransactionHistory";
 import WalletConnect from "@/components/WalletConnect";
+import Doomy from "@/components/Doomy";
 import { useState } from "react";
 
 const Index = () => {
@@ -35,6 +36,7 @@ const Index = () => {
           <TransactionHistory />
         </div>
       </div>
+      <Doomy />
     </div>
   );
 };
