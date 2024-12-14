@@ -17,7 +17,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <a
             key={index}
             href={url}
-            className="block text-cyan-400 hover:text-purple-400 transition-colors my-1.5"
+            className="text-cyan-400 hover:text-purple-400 transition-colors"
             target="_blank"
             rel="noopener noreferrer"
           >
