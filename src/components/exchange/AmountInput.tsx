@@ -15,9 +15,6 @@ const AmountInput = ({ usdAmount, ethPrice, ethValue, onAmountChange }: AmountIn
       <label className="text-sm text-[#8E9196]">Amount (USD)</label>
       <PriceDisplay ethPrice={ethPrice} />
     </div>
-    <div className="mb-2">
-      <p className="text-sm text-[#8E9196]">Swapping for DMC (Doomy Coin)</p>
-    </div>
     <Input
       type="number"
       placeholder="0.0"
