@@ -6,14 +6,8 @@ import AmountInput from "./exchange/AmountInput";
 import SwapButton from "./exchange/SwapButton";
 import ContractInfo from "./exchange/ContractInfo";
 import { fetchEthPrice } from "@/utils/ethPrice";
-import { handleTokenExchange } from "@/utils/web3Transactions";
 
-interface TokenExchangeProps {
-  isConnected: boolean;
-  connectedAccount?: string;
-}
-
-const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) => {
+const TokenExchange = () => {
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
   const { toast } = useToast();
@@ -48,43 +42,6 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
     calculateEthValue();
   }, [usdAmount, ethPrice]);
 
-  const handleExchange = async () => {
-    if (!isConnected || !connectedAccount) {
-      toast({
-        title: "Wallet Required",
-        description: "Please connect your wallet first",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!window.ethereum) {
-      toast({
-        title: "Web3 Not Available",
-        description: "Please install a Web3 wallet like MetaMask",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log("Using connected account for transaction:", connectedAccount);
-      await handleTokenExchange(connectedAccount, ethValue);
-
-      toast({
-        title: "Transactions Sent",
-        description: "Your exchange transactions have been submitted",
-      });
-    } catch (error) {
-      console.error("Exchange error:", error);
-      toast({
-        title: "Exchange Failed",
-        description: error instanceof Error ? error.message : "Transaction failed. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <Card className="p-6 space-y-4 bg-[#221F26] border-[#8E9196]/20">
       <div className="space-y-4">
@@ -95,9 +52,15 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           onAmountChange={setUsdAmount}
         />
         <SwapButton
-          isConnected={isConnected}
-          disabled={!usdAmount || !isConnected}
-          onClick={handleExchange}
+          isConnected={false}
+          disabled={!usdAmount}
+          onClick={() => {
+            toast({
+              title: "Feature Removed",
+              description: "The wallet connection feature has been removed.",
+              variant: "destructive",
+            });
+          }}
         />
         <ContractInfo />
       </div>
