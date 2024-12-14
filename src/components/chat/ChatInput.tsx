@@ -17,7 +17,7 @@ const ChatInput = ({ input, onChange, onSend, onKeyPress }: ChatInputProps) => (
         onChange={(e) => onChange(e.target.value)}
         onKeyPress={onKeyPress}
         placeholder="Type your message..."
-        className="bg-white/5 border-[#8E9196]/20 focus:border-cyan-500 text-[#F1F1F1] placeholder:text-[#8E9196] rounded-full"
+        className="flex-1 min-w-[260px] bg-white/5 border-[#8E9196]/20 focus:border-cyan-500 text-[#F1F1F1] placeholder:text-[#8E9196] rounded-full"
       />
       <Button 
         onClick={onSend} 
