@@ -12,7 +12,7 @@ export const useWalletConnection = (
 
   useInitialConnection(setAccounts, setChainId, onConnect);
 
-  const { disconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
+  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
 
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
@@ -65,6 +65,7 @@ export const useWalletConnection = (
     accounts,
     chainId,
     connectWallet,
-    disconnectWallet
+    disconnectWallet,
+    forceDisconnectWallet
   };
 };
