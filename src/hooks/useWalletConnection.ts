@@ -55,24 +55,42 @@ export const useWalletConnection = (
       }
     };
 
-    const handleChainChanged = (chainId: string) => {
+    const handleChainChanged = async (chainId: string) => {
       console.log("Network changed to:", chainId);
-      // Refresh the page when network changes to ensure all states are updated
-      window.location.reload();
+      try {
+        // Force a page reload to ensure all states are properly updated
+        window.location.reload();
+      } catch (error) {
+        console.error("Error handling chain change:", error);
+        toast({
+          title: "Network Change Error",
+          description: "There was an error handling the network change. Please refresh the page.",
+          variant: "destructive",
+        });
+      }
     };
 
     if (window.ethereum) {
+      // Remove any existing listeners before adding new ones
+      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+      window.ethereum.removeListener('chainChanged', handleChainChanged);
+      
+      // Add new listeners
       window.ethereum.on('accountsChanged', handleAccountsChanged);
       window.ethereum.on('chainChanged', handleChainChanged);
+      
+      // Log that listeners are set up
+      console.log("Network and account change listeners initialized");
     }
 
     return () => {
       if (window.ethereum) {
         window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
         window.ethereum.removeListener('chainChanged', handleChainChanged);
+        console.log("Cleanup: Removed network and account listeners");
       }
     };
-  }, [onConnect]);
+  }, [onConnect, toast]);
 
   const switchToArbitrum = async () => {
     if (!window.ethereum) return false;
