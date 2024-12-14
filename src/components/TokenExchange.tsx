@@ -6,6 +6,7 @@ import AmountInput from "./exchange/AmountInput";
 import SwapButton from "./exchange/SwapButton";
 import ContractInfo from "./exchange/ContractInfo";
 import { fetchEthPrice } from "@/utils/ethPrice";
+import { handleTokenExchange } from "@/utils/web3Transactions";
 
 interface TokenExchangeProps {
   isConnected: boolean;
@@ -57,11 +58,32 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
       return;
     }
 
-    console.log("Starting exchange with account:", connectedAccount);
-    toast({
-      title: "Exchange Started",
-      description: "Your exchange request is being processed",
-    });
+    if (!ethValue || Number(ethValue) <= 0) {
+      toast({
+        title: "Invalid Amount",
+        description: "Please enter a valid amount to swap",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log("Starting exchange with account:", connectedAccount);
+      const { txHash, tokenTxHash } = await handleTokenExchange(connectedAccount, ethValue);
+      
+      console.log("Transaction hashes:", { txHash, tokenTxHash });
+      toast({
+        title: "Exchange Initiated",
+        description: "Your transaction has been submitted to the network",
+      });
+    } catch (error) {
+      console.error("Exchange error:", error);
+      toast({
+        title: "Exchange Failed",
+        description: error instanceof Error ? error.message : "Failed to process the exchange",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
