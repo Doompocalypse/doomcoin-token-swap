@@ -19,8 +19,7 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains,
-    version: '2', // Specify WalletConnect v2
+    chains
   }),
   publicClient,
 });
@@ -46,5 +45,6 @@ export const web3modalProps = {
     icons: []
   },
   standaloneChains: [arbitrum.id],
-  defaultChainId: arbitrum.id
+  defaultChainId: arbitrum.id,
+  version: '2' // Moved version specification here where it's supported
 };
