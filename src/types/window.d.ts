@@ -3,5 +3,8 @@ interface Window {
     request: (args: { method: string; params?: any[] }) => Promise<any>;
     on: (event: string, callback: (params: any) => void) => void;
     removeListener: (event: string, callback: (params: any) => void) => void;
+    isWalletConnect?: boolean;
+    isMetaMask?: boolean;
+    disconnect?: () => Promise<void>;
   };
 }
