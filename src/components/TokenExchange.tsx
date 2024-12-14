@@ -110,7 +110,7 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
   };
 
   return (
-    <Card className="p-6 space-y-4 bg-[#221F26] border-[#8E9196]/20">
+    <Card className="p-6 space-y-4 bg-transparent border-[#8E9196]/20">
       <div className="space-y-4">
         <AmountInput
           usdAmount={usdAmount}
