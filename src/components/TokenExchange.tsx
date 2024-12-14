@@ -2,7 +2,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 interface TokenExchangeProps {
   isConnected: boolean;
@@ -10,7 +10,25 @@ interface TokenExchangeProps {
 
 const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   const [amount, setAmount] = useState("");
+  const [usdValue, setUsdValue] = useState("0.00");
   const { toast } = useToast();
+
+  // Simulated ETH price in USD - in a real app, this would come from an API
+  const ETH_PRICE_USD = 2500;
+
+  useEffect(() => {
+    // Calculate USD value whenever amount changes
+    const calculateUsdValue = () => {
+      if (!amount || isNaN(Number(amount))) {
+        setUsdValue("0.00");
+        return;
+      }
+      const usd = Number(amount) * ETH_PRICE_USD;
+      setUsdValue(usd.toFixed(2));
+    };
+
+    calculateUsdValue();
+  }, [amount]);
 
   const handleExchange = () => {
     if (!isConnected) {
@@ -42,6 +60,9 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
             onChange={(e) => setAmount(e.target.value)}
             className="bg-secondary"
           />
+          <p className="mt-2 text-sm text-muted-foreground">
+            ≈ ${usdValue} USD
+          </p>
         </div>
 
         <div className="flex justify-center">
