@@ -22,13 +22,18 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // Remove all ethereum event listeners
+      // Remove ethereum event listeners
       if (window.ethereum) {
         const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
         events.forEach(event => {
-          window.ethereum?.removeAllListeners(event);
+          if (window.ethereum?.removeAllListeners) {
+            window.ethereum.removeAllListeners(event);
+          } else {
+            // Fallback to removeListener with an empty function if removeAllListeners is not available
+            window.ethereum?.removeListener(event, () => {});
+          }
         });
-        console.log("Removed all ethereum event listeners");
+        console.log("Removed ethereum event listeners");
       }
 
       toast({
