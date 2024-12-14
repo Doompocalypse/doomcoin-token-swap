@@ -35,8 +35,10 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { buyerAddress, ethAmount } = await req.json();
-    console.log(`Processing transaction for buyer: ${buyerAddress}, ETH amount: ${ethAmount}`);
+    const { buyerAddress, ethAmount, dmcAmount } = await req.json();
+    console.log(`Processing transaction for buyer: ${buyerAddress}`);
+    console.log(`ETH amount received: ${ethAmount}`);
+    console.log(`DMC amount to send (equal to USD value): ${dmcAmount}`);
 
     // Get Alchemy API key from environment
     const alchemyApiKey = Deno.env.get("ALCHEMY_API_KEY");
@@ -66,20 +68,20 @@ Deno.serve(async (req) => {
     const dmcTokenAddress = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
     const dmcContract = new ethers.Contract(dmcTokenAddress, DMC_ABI, botWallet);
 
-    // Calculate DMC amount (1:1 ratio with ETH)
-    const dmcAmount = ethers.parseEther(ethAmount);
-    console.log(`Attempting to send ${ethAmount} DMC tokens to ${buyerAddress}`);
+    // Convert DMC amount (USD value) to token amount with 18 decimals
+    const dmcTokenAmount = ethers.parseEther(dmcAmount);
+    console.log(`Attempting to send ${dmcAmount} DMC tokens to ${buyerAddress}`);
 
     // Check bot's DMC balance with retries
     const botBalance = await retryWithBackoff(() => dmcContract.balanceOf(botWallet.address));
     console.log(`Bot DMC balance: ${ethers.formatEther(botBalance)} DMC`);
 
-    if (botBalance < dmcAmount) {
+    if (botBalance < dmcTokenAmount) {
       throw new Error("Insufficient DMC balance in bot wallet");
     }
 
     // Send DMC tokens with retries
-    const tx = await retryWithBackoff(() => dmcContract.transfer(buyerAddress, dmcAmount));
+    const tx = await retryWithBackoff(() => dmcContract.transfer(buyerAddress, dmcTokenAmount));
     console.log("Transaction sent:", tx.hash);
     
     const receipt = await retryWithBackoff(() => tx.wait());

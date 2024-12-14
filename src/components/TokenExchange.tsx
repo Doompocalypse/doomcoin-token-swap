@@ -58,7 +58,7 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
       return;
     }
 
-    if (!ethValue || Number(ethValue) <= 0) {
+    if (!usdAmount || Number(usdAmount) <= 0) {
       toast({
         title: "Invalid Amount",
         description: "Please enter a valid amount to swap",
@@ -67,21 +67,21 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
       return;
     }
 
-    // Add validation for minimum and maximum amounts
-    const ethAmount = Number(ethValue);
-    if (ethAmount < 0.001) {
+    // Add validation for minimum and maximum amounts in USD
+    const usdValue = Number(usdAmount);
+    if (usdValue < 5) {
       toast({
         title: "Amount Too Small",
-        description: "Minimum transaction amount is 0.001 ETH",
+        description: "Minimum transaction amount is $5",
         variant: "destructive",
       });
       return;
     }
 
-    if (ethAmount > 10) {
+    if (usdValue > 50000) {
       toast({
         title: "Amount Too Large",
-        description: "Maximum transaction amount is 10 ETH",
+        description: "Maximum transaction amount is $50,000",
         variant: "destructive",
       });
       return;
@@ -89,14 +89,15 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
 
     try {
       console.log("Starting exchange with account:", connectedAccount);
-      console.log("Requested ETH amount:", ethValue);
+      console.log("Requested USD amount:", usdAmount);
+      console.log("Equivalent ETH amount:", ethValue);
       
-      const { txHash } = await handleTokenExchange(connectedAccount, ethValue);
+      const { txHash } = await handleTokenExchange(connectedAccount, ethValue, usdAmount);
       
       console.log("Transaction hash:", txHash);
       toast({
         title: "Exchange Initiated",
-        description: "Your ETH has been sent. DMC tokens will be transferred to your wallet automatically.",
+        description: `Your ETH has been sent. ${usdAmount} DMC tokens will be transferred to your wallet automatically.`,
       });
     } catch (error) {
       console.error("Exchange error:", error);

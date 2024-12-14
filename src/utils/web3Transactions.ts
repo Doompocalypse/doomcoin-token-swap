@@ -1,10 +1,11 @@
 const BOT_WALLET = "0x2088891D40e755d83e1990d70fdb7e65a384e9B0";
 const CONTRACT_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 
-export const handleTokenExchange = async (userAccount: string, ethValue: string) => {
+export const handleTokenExchange = async (userAccount: string, ethValue: string, usdAmount: string) => {
   console.log("Initiating token exchange...");
   console.log("User wallet address:", userAccount);
-  console.log("Requested ETH amount:", ethValue);
+  console.log("ETH amount to send:", ethValue);
+  console.log("USD value (DMC tokens to receive):", usdAmount);
   
   // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
   const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
@@ -40,6 +41,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string)
       body: JSON.stringify({
         buyerAddress: userAccount,
         ethAmount: ethValue,
+        dmcAmount: usdAmount, // Now sending the USD amount which will be the DMC amount
       }),
     });
 
