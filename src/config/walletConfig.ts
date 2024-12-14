@@ -28,4 +28,9 @@ export const web3modalProps = {
   ethereumClient,
   defaultChain: arbitrum,
   themeMode: 'dark' as const,
+  enableExplorer: true, // Enable the explorer feature
+  mobileWallets: [], // Clear default mobile wallets to focus on QR scanning
+  desktopWallets: [], // Clear default desktop wallets to focus on QR scanning
+  explorerRecommendedWalletIds: [], // Clear recommended wallets
+  explorerExcludedWalletIds: ['metaMask'], // Exclude MetaMask from explorer
 };
