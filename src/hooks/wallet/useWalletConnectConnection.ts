@@ -10,6 +10,39 @@ export const useWalletConnectConnection = () => {
   const { toast } = useToast();
   const { ensureArbitrumNetwork } = useNetworkSwitch();
 
+  const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+  const attemptConnection = async (connector: any, attempt: number = 1): Promise<string> => {
+    try {
+      console.log(`Connection attempt ${attempt}...`);
+      await connect({ connector });
+      
+      // Check connection with exponential backoff
+      const maxRetries = 5;
+      const baseDelay = 1000; // Start with 1 second
+      
+      for (let i = 0; i < maxRetries; i++) {
+        if (isConnected && address) {
+          console.log(`Connection successful on retry ${i + 1}`);
+          return address;
+        }
+        
+        const waitTime = baseDelay * Math.pow(2, i);
+        console.log(`Waiting ${waitTime}ms before next check...`);
+        await delay(waitTime);
+      }
+      
+      throw new Error("Connection verification failed");
+    } catch (error) {
+      if (attempt < 3) { // Try up to 3 times
+        console.log(`Retrying connection, attempt ${attempt + 1}`);
+        await delay(1000); // Wait 1 second before retry
+        return attemptConnection(connector, attempt + 1);
+      }
+      throw error;
+    }
+  };
+
   const connectWalletConnect = async (): Promise<string[]> => {
     try {
       console.log("Starting WalletConnect connection process...");
@@ -23,46 +56,17 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      // Increased timeout to 20 seconds for slower connections
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => {
-          console.log("Connection attempt timed out");
-          reject(new Error("Connection timed out"));
-        }, 20000);
-      });
-
       console.log("Opening WalletConnect modal...");
       
-      const connectionPromise = (async () => {
-        await open();
-        console.log("Modal opened, attempting connection...");
-        
-        // Show connecting toast
-        toast({
-          title: "Connecting Wallet",
-          description: "Please approve the connection in your wallet...",
-        });
-        
-        await connect({ connector: walletConnectConnector });
-        
-        // Check connection status more frequently with more attempts
-        for (let i = 0; i < 40; i++) {
-          if (isConnected && address) {
-            console.log("Connection established on attempt", i + 1);
-            return address;
-          }
-          await new Promise(resolve => setTimeout(resolve, 500)); // 500ms intervals
-          console.log("Checking connection status...", i + 1);
-        }
-        
-        throw new Error("Connection not established");
-      })();
-
-      const connectedAddress = await Promise.race([
-        connectionPromise,
-        timeoutPromise
-      ]);
-
+      toast({
+        title: "Connecting Wallet",
+        description: "Please approve the connection in your wallet...",
+      });
+      
+      await open();
+      console.log("Modal opened, attempting connection...");
+      
+      const connectedAddress = await attemptConnection(walletConnectConnector);
       console.log("WalletConnect connection successful:", connectedAddress);
       
       // Network check with 5s timeout
@@ -71,18 +75,17 @@ export const useWalletConnectConnection = () => {
         new Promise((_, reject) => setTimeout(() => reject(new Error("Network check timed out")), 5000))
       ]);
       
-      return [connectedAddress as string];
+      return [connectedAddress];
       
     } catch (error: any) {
       console.error("WalletConnect error:", error);
       
-      // More specific error messages
       const errorMessage = error.message?.toLowerCase() || '';
       
-      if (errorMessage.includes("timed out")) {
+      if (errorMessage.includes("verification failed")) {
         toast({
-          title: "Connection Timeout",
-          description: "The connection attempt took too long. Please try again.",
+          title: "Connection Failed",
+          description: "Unable to verify wallet connection. Please try again.",
           variant: "destructive",
         });
       } else if (errorMessage.includes("user rejected") || 
