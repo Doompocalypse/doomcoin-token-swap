@@ -17,15 +17,23 @@ export const useWalletConnection = (
 
   const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
 
-  const connectWallet = async () => {
+  const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
     if (typeof window === 'undefined') return;
+
+    // If a specific account is selected, switch to it
+    if (selectedAccount && accounts.includes(selectedAccount)) {
+      console.log("Switching to account:", selectedAccount);
+      setAccounts([selectedAccount]);
+      onConnect(true, selectedAccount);
+      return;
+    }
 
     // Clear the disconnected flag when user explicitly connects
     localStorage.removeItem('wallet_disconnected');
 
-    if (!window.ethereum) {
-      console.log("No Web3 wallet detected, opening WalletConnect modal");
-      // Open WalletConnect modal
+    // Handle WalletConnect
+    if (walletType === "walletconnect" || (!window.ethereum && !walletType)) {
+      console.log("Opening WalletConnect modal");
       const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
       const wcModal = document.createElement('w3m-core');
       wcModal.setAttribute('project-id', wcProjectId);
@@ -34,11 +42,12 @@ export const useWalletConnection = (
       
       toast({
         title: "Connect Wallet",
-        description: "Please select a wallet to connect",
+        description: "Please select a wallet to connect using WalletConnect",
       });
       return;
     }
 
+    // Handle MetaMask or default case
     try {
       console.log("Starting wallet connection process...");
       
@@ -52,7 +61,6 @@ export const useWalletConnection = (
         console.log("Successfully switched to Arbitrum One");
       } catch (switchError: any) {
         console.log("Network switch error:", switchError);
-        // This error code indicates that the chain has not been added to MetaMask
         if (switchError.code === 4902) {
           console.log("Arbitrum One not found, attempting to add network...");
           try {
@@ -89,7 +97,7 @@ export const useWalletConnection = (
         }
       }
       
-      // Now request accounts
+      // Request accounts
       console.log("Requesting accounts...");
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
