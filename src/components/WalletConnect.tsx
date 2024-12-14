@@ -38,6 +38,11 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     return " (Wrong Network)";
   };
 
+  const handleConnectClick = () => {
+    console.log("Connect button clicked");
+    connectWallet();
+  };
+
   if (accounts && accounts.length > 0) {
     return (
       <DropdownMenu>
@@ -56,7 +61,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   }
 
   return (
-    <Button onClick={connectWallet} className="bg-[#33C3F0] hover:opacity-90">
+    <Button onClick={handleConnectClick} className="bg-[#33C3F0] hover:opacity-90">
       Connect Wallet
     </Button>
   );

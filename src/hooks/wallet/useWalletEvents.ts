@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletEvents = (
@@ -6,27 +6,39 @@ export const useWalletEvents = (
   setChainId: (chainId: string) => void,
   setAccounts: (accounts: string[]) => void
 ) => {
+  // Use refs to maintain stable references to the setter functions
+  const onConnectRef = useRef(onConnect);
+  const setChainIdRef = useRef(setChainId);
+  const setAccountsRef = useRef(setAccounts);
+
+  // Update refs when dependencies change
+  useEffect(() => {
+    onConnectRef.current = onConnect;
+    setChainIdRef.current = setChainId;
+    setAccountsRef.current = setAccounts;
+  }, [onConnect, setChainId, setAccounts]);
+
   const handleAccountsUpdate = useCallback((newAccounts: string[]) => {
     console.log("Accounts update event:", newAccounts);
-    setAccounts(newAccounts);
+    setAccountsRef.current(newAccounts);
     if (newAccounts.length > 0) {
-      onConnect(true, newAccounts[0]);
+      onConnectRef.current(true, newAccounts[0]);
     } else {
-      onConnect(false);
+      onConnectRef.current(false);
     }
-  }, [onConnect, setAccounts]);
+  }, []);
 
-  const handleChainUpdate = useCallback(async (newChainId: string) => {
+  const handleChainUpdate = useCallback((newChainId: string) => {
     console.log("Chain ID updated:", newChainId);
-    setChainId(newChainId);
+    setChainIdRef.current(newChainId);
     
     // If the new chain is not Arbitrum One, disconnect
     if (newChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
       console.log("Switched away from Arbitrum One, disconnecting");
-      setAccounts([]);
-      onConnect(false);
+      setAccountsRef.current([]);
+      onConnectRef.current(false);
     }
-  }, [onConnect, setChainId, setAccounts]);
+  }, []);
 
   useEffect(() => {
     if (!window.ethereum) {
