@@ -13,7 +13,15 @@ const Doomy = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
-    { text: "Hi! I'm Doomy, your crypto assistant. How can I help you today?", isBot: true },
+    { 
+      text: "👋 Hello! I'm Doomy, your friendly crypto assistant. I'm here to help you with:\n\n" +
+            "• Connecting your wallet\n" +
+            "• Making token swaps\n" +
+            "• Checking exchange rates\n" +
+            "• Understanding crypto basics\n\n" +
+            "How can I assist you today?", 
+      isBot: true 
+    },
   ]);
   const [input, setInput] = useState("");
 
@@ -54,17 +62,19 @@ const Doomy = () => {
     return (
       <Button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 rounded-full w-12 h-12 bg-[#33C3F0] p-0 shadow-lg hover:opacity-90"
+        className="fixed bottom-4 right-4 rounded-full w-12 h-12 bg-[#33C3F0] p-0 shadow-lg hover:opacity-90 animate-bounce hover:animate-none transition-all duration-300"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-6 h-6 animate-pulse" />
       </Button>
     );
   }
 
   return (
-    <Card className={`fixed right-4 bg-[#221F26] border-[#8E9196]/20 shadow-lg transition-all duration-300 ${
-      isMinimized ? "bottom-4 h-12 w-72" : "bottom-4 w-72 h-96"
-    }`}>
+    <Card 
+      className={`fixed right-4 bg-[#221F26] border-[#8E9196]/20 shadow-lg transition-all duration-300 animate-fade-in ${
+        isMinimized ? "bottom-4 h-12 w-72" : "bottom-4 w-72 h-96"
+      }`}
+    >
       <div className="flex items-center justify-between p-3 border-b border-[#8E9196]/20">
         <span className="font-medium text-[#F1F1F1]">Doomy</span>
         <div className="flex gap-2">
@@ -96,7 +106,7 @@ const Doomy = () => {
                 className={`flex ${message.isBot ? "justify-start" : "justify-end"}`}
               >
                 <div
-                  className={`max-w-[80%] rounded-lg px-3 py-2 ${
+                  className={`max-w-[80%] rounded-lg px-3 py-2 animate-fade-in ${
                     message.isBot
                       ? "bg-[#1A1F2C] text-[#F1F1F1]"
                       : "bg-[#33C3F0] text-white"
