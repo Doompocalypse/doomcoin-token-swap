@@ -10,7 +10,7 @@ interface AmountInputProps {
 }
 
 const AmountInput = ({ usdAmount, ethPrice, ethValue, onAmountChange }: AmountInputProps) => (
-  <div>
+  <div className="bg-transparent">
     <div className="flex justify-between items-center mb-2">
       <label className="text-sm text-white">Enter An Amount ($USD)</label>
       <PriceDisplay ethPrice={ethPrice} />
@@ -20,7 +20,7 @@ const AmountInput = ({ usdAmount, ethPrice, ethValue, onAmountChange }: AmountIn
       placeholder="0.0"
       value={usdAmount}
       onChange={(e) => onAmountChange(e.target.value)}
-      className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#8E9196] text-lg text-white"
+      className="bg-transparent border-[#8E9196]/20 focus:border-[#8E9196] text-lg text-white"
     />
     <p className="mt-2 text-sm text-white">≈ {ethValue} ETH</p>
   </div>
