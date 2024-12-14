@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface WalletConnectProps {
-  onConnect: (connected: boolean) => void;
+  onConnect: (connected: boolean, account?: string) => void;
 }
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
@@ -49,7 +49,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
   const handleAccountSelect = (account: string) => {
     console.log("Selected account:", account);
-    onConnect(true);
+    onConnect(true, account);
     setShowAccountDialog(false);
     toast({
       title: "Account Connected",

@@ -15,6 +15,7 @@ interface TokenExchangeProps {
 const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
+  const [selectedAccount, setSelectedAccount] = useState<string>("");
   const { toast } = useToast();
 
   const { data: ethPrice = 2500 } = useQuery({
