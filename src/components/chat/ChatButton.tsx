@@ -9,7 +9,7 @@ const ChatButton = ({ onClick }: ChatButtonProps) => (
     onClick={onClick}
     className="fixed bottom-4 right-4 rounded-full bg-white text-black hover:bg-white/90 transition-all duration-500 animate-in fade-in slide-in-from-bottom-4"
   >
-    <span className="inline-block animate-[pulse_3s_ease-in-out_infinite] transition-all duration-500">
+    <span className="inline-block animate-[pulse_5s_ease-in-out_infinite] transition-all duration-700">
       Need Help? Click Here
     </span>
   </Button>
