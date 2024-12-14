@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useInitialConnection } from "./useInitialConnection";
 import { useWalletDisconnect } from "./useWalletDisconnect";
+import { useWalletEvents } from "./useWalletEvents";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletConnection = (
@@ -12,6 +13,7 @@ export const useWalletConnection = (
   const { toast } = useToast();
 
   useInitialConnection(setAccounts, setChainId, onConnect);
+  useWalletEvents(onConnect, setChainId, setAccounts);
 
   const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
 
@@ -22,6 +24,7 @@ export const useWalletConnection = (
     localStorage.removeItem('wallet_disconnected');
 
     if (!window.ethereum) {
+      console.log("No Web3 wallet detected, opening WalletConnect modal");
       // Open WalletConnect modal
       const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
       const wcModal = document.createElement('w3m-core');
@@ -37,36 +40,56 @@ export const useWalletConnection = (
     }
 
     try {
-      console.log("Requesting network switch to Arbitrum One...");
+      console.log("Starting wallet connection process...");
       
       // First, try to switch to Arbitrum One
       try {
+        console.log("Requesting network switch to Arbitrum One...");
         await window.ethereum.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: ARBITRUM_CHAIN_ID }],
         });
+        console.log("Successfully switched to Arbitrum One");
       } catch (switchError: any) {
+        console.log("Network switch error:", switchError);
         // This error code indicates that the chain has not been added to MetaMask
         if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: ARBITRUM_CHAIN_ID,
-              chainName: 'Arbitrum One',
-              nativeCurrency: {
-                name: 'ETH',
-                symbol: 'ETH',
-                decimals: 18
-              },
-              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-              blockExplorerUrls: ['https://arbiscan.io/']
-            }]
+          console.log("Arbitrum One not found, attempting to add network...");
+          try {
+            await window.ethereum.request({
+              method: 'wallet_addEthereumChain',
+              params: [{
+                chainId: ARBITRUM_CHAIN_ID,
+                chainName: 'Arbitrum One',
+                nativeCurrency: {
+                  name: 'ETH',
+                  symbol: 'ETH',
+                  decimals: 18
+                },
+                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                blockExplorerUrls: ['https://arbiscan.io/']
+              }]
+            });
+            console.log("Successfully added Arbitrum One network");
+          } catch (addError) {
+            console.error("Error adding Arbitrum network:", addError);
+            throw addError;
+          }
+        } else if (switchError.code === 4001) {
+          console.log("User rejected network switch");
+          toast({
+            title: "Network Switch Required",
+            description: "Please switch to Arbitrum One network to continue",
+            variant: "destructive",
           });
+          return;
         } else {
+          console.error("Unexpected error switching network:", switchError);
           throw switchError;
         }
       }
       
+      // Now request accounts
       console.log("Requesting accounts...");
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
@@ -81,11 +104,19 @@ export const useWalletConnection = (
           description: `Connected to account: ${newAccounts[0].slice(0, 6)}...${newAccounts[0].slice(-4)}`,
         });
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Connection error:", error);
+      let errorMessage = "Failed to connect to your wallet. Please try again.";
+      
+      if (error.code === 4001) {
+        errorMessage = "You rejected the connection request.";
+      } else if (error.code === -32002) {
+        errorMessage = "Connection request already pending. Please check your wallet.";
+      }
+      
       toast({
         title: "Connection Failed",
-        description: "Failed to connect to your wallet. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     }
