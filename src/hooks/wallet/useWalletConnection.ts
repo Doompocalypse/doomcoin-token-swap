@@ -1,6 +1,8 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { useInitialConnection } from "./useInitialConnection";
+import { useWalletEvents } from "./useWalletEvents";
+import { useWalletDisconnect } from "./useWalletDisconnect";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -9,112 +11,15 @@ export const useWalletConnection = (
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
 
-  useEffect(() => {
-    const checkConnection = async () => {
-      if (!window.ethereum) {
-        console.log("No Web3 wallet detected");
-        return;
-      }
-
-      try {
-        const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
-        const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
-        console.log("Current connected accounts:", currentAccounts);
-        console.log("Current chain ID:", currentChainId);
-        
-        setChainId(currentChainId);
-        
-        if (currentAccounts.length > 0) {
-          setAccounts(currentAccounts);
-          onConnect(true, currentAccounts[0]);
-        }
-      } catch (error) {
-        console.error("Error checking connection:", error);
-        setAccounts([]);
-      }
-    };
-
-    checkConnection();
-
-    const handleAccountsUpdate = (newAccounts: string[]) => {
-      console.log("Accounts update event:", newAccounts);
-      setAccounts(newAccounts);
-      if (newAccounts.length > 0) {
-        onConnect(true, newAccounts[0]);
-      } else {
-        onConnect(false);
-      }
-    };
-
-    const handleChainUpdate = async (newChainId: string) => {
-      console.log("Chain ID updated:", newChainId);
-      setChainId(newChainId);
-    };
-
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsUpdate);
-      window.ethereum.on('chainChanged', handleChainUpdate);
-
-      return () => {
-        window.ethereum.removeListener('accountsChanged', handleAccountsUpdate);
-        window.ethereum.removeListener('chainChanged', handleChainUpdate);
-      };
-    }
-  }, [onConnect]);
-
-  const disconnectWallet = async () => {
-    try {
-      console.log("Starting wallet disconnection process...");
-      
-      // Clear local state first
-      setAccounts([]);
-      onConnect(false);
-      
-      // For WalletConnect
-      if (window.ethereum?.isWalletConnect) {
-        try {
-          await window.ethereum.disconnect();
-          console.log("WalletConnect disconnected");
-        } catch (error) {
-          console.error("Error disconnecting WalletConnect:", error);
-        }
-      }
-      
-      // For MetaMask, request new permissions to force disconnect
-      if (window.ethereum?.isMetaMask) {
-        try {
-          await window.ethereum.request({
-            method: "wallet_requestPermissions",
-            params: [{ eth_accounts: {} }],
-          });
-          console.log("MetaMask permissions reset");
-        } catch (error) {
-          // User rejected the permission request, which effectively disconnects them
-          console.log("User rejected connection after disconnect request");
-        }
-      }
-
-      toast({
-        title: "Wallet Disconnected",
-        description: "Your wallet has been disconnected successfully.",
-      });
-      
-      console.log("Wallet disconnected successfully");
-      
-      // Force reload the page to ensure clean state
-      window.location.reload();
-    } catch (error) {
-      console.error("Error disconnecting wallet:", error);
-      toast({
-        title: "Error",
-        description: "Failed to disconnect wallet. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  useInitialConnection(setAccounts, setChainId, onConnect);
+  useWalletEvents(onConnect, setChainId, setAccounts);
+  const { disconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
 
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
+
+    // Clear the disconnected flag when user explicitly connects
+    localStorage.removeItem('wallet_disconnected');
 
     if (!window.ethereum) {
       // Open WalletConnect modal

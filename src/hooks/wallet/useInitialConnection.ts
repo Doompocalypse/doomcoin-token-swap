@@ -7,6 +7,14 @@ export const useInitialConnection = (
 ) => {
   useEffect(() => {
     const checkConnection = async () => {
+      // Check if user explicitly disconnected in their last session
+      const wasDisconnected = localStorage.getItem('wallet_disconnected') === 'true';
+      
+      if (wasDisconnected) {
+        console.log("User was previously disconnected, not auto-connecting");
+        return;
+      }
+
       if (!window.ethereum) {
         console.log("No Web3 wallet detected");
         return;

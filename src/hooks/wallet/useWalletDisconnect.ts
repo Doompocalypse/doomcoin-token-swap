@@ -15,6 +15,9 @@ export const useWalletDisconnect = (
     try {
       console.log("Starting wallet disconnection process...");
       
+      // Set disconnected flag in localStorage
+      localStorage.setItem('wallet_disconnected', 'true');
+      
       // Clear local state first
       setAccounts([]);
       onConnect(false);
