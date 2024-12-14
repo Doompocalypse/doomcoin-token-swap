@@ -3,6 +3,17 @@ import { SupportedChains } from "@/types/wallet";
 export const ARBITRUM_CHAIN_ID = "0xa4b1"; // Arbitrum One Chain ID
 
 export const SUPPORTED_CHAINS: SupportedChains = {
+  "0x1": {
+    chainId: "0x1",
+    chainName: "Ethereum Mainnet",
+    nativeCurrency: {
+      name: "ETH",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    rpcUrls: ["https://mainnet.infura.io/v3/"],
+    blockExplorerUrls: ["https://etherscan.io/"],
+  },
   "0xa4b1": {
     chainId: "0xa4b1",
     chainName: "Arbitrum One",
@@ -17,28 +28,6 @@ export const SUPPORTED_CHAINS: SupportedChains = {
 };
 
 export const switchToArbitrum = async () => {
-  if (!window.ethereum) return false;
-
-  try {
-    await window.ethereum.request({
-      method: 'wallet_switchEthereumChain',
-      params: [{ chainId: ARBITRUM_CHAIN_ID }],
-    });
-    return true;
-  } catch (switchError: any) {
-    if (switchError.code === 4902) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [SUPPORTED_CHAINS[ARBITRUM_CHAIN_ID]],
-        });
-        return true;
-      } catch (addError) {
-        console.error('Error adding Arbitrum network:', addError);
-        return false;
-      }
-    }
-    console.error('Error switching to Arbitrum:', switchError);
-    return false;
-  }
+  // Remove this function's implementation since we don't want to force network switching
+  return true;
 };

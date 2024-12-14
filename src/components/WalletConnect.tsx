@@ -15,15 +15,23 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
   const getNetworkName = () => {
     if (!chainId) return "";
+    console.log("Getting network name for chainId:", chainId);
     
     // Handle Ethereum Mainnet explicitly
-    if (chainId === "0x1") return " (Ethereum Mainnet)";
+    if (chainId === "0x1") {
+      console.log("Detected Ethereum Mainnet");
+      return " (Ethereum Mainnet)";
+    }
     
     // Handle other supported chains
     const chain = SUPPORTED_CHAINS[chainId];
-    if (chain) return ` (${chain.chainName})`;
+    if (chain) {
+      console.log("Found supported chain:", chain.chainName);
+      return ` (${chain.chainName})`;
+    }
     
     // Fallback for unknown chains
+    console.log("Unknown chain ID:", chainId);
     return ` (Chain ID: ${chainId})`;
   };
 
