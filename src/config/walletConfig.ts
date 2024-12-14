@@ -46,6 +46,6 @@ export const web3modalProps = {
     url: currentDomain,
     icons: []
   },
-  standaloneChains: chains.map(chain => chain.id),
+  standaloneChains: [arbitrum.id],
   defaultChainId: arbitrum.id
 };
