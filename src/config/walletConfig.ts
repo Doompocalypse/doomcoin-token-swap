@@ -6,31 +6,63 @@ import { Web3Modal } from '@web3modal/react';
 // WalletConnect Project ID
 const projectId = '0d63e4b93b8abc2ea0a58328d7e7c053';
 
-// Configure chains & providers
+// Get the current domain for allowed origins
+const currentDomain = typeof window !== 'undefined' ? window.location.host : '';
+
+// Configure chains & providers with metadata
 const { chains, publicClient } = configureChains(
   [arbitrum],
-  [w3mProvider({ projectId })]
+  [w3mProvider({ 
+    projectId,
+    metadata: {
+      name: 'DoomCoin Token Swap',
+      description: 'Swap tokens on Arbitrum',
+      url: typeof window !== 'undefined' ? window.location.origin : '',
+      icons: []
+    }
+  })]
 );
 
 // Set up wagmi config with autoConnect disabled
 export const wagmiConfig = createConfig({
-  autoConnect: false, // Explicitly disable auto-connect
-  connectors: w3mConnectors({ projectId, chains }),
+  autoConnect: false,
+  connectors: w3mConnectors({ 
+    projectId, 
+    chains,
+    version: '2', // Use latest version
+    metadata: {
+      name: 'DoomCoin Token Swap',
+      description: 'Swap tokens on Arbitrum',
+      url: typeof window !== 'undefined' ? window.location.origin : '',
+      icons: []
+    }
+  }),
   publicClient,
 });
 
 // Web3Modal Ethereum Client
 export const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
-// Web3Modal Component Props
+// Web3Modal Component Props with updated configuration
 export const web3modalProps = {
   projectId,
   ethereumClient,
   defaultChain: arbitrum,
   themeMode: 'dark' as const,
-  enableExplorer: true, // Enable the explorer feature
-  mobileWallets: [], // Clear default mobile wallets to focus on QR scanning
-  desktopWallets: [], // Clear default desktop wallets to focus on QR scanning
-  explorerRecommendedWalletIds: [], // Clear recommended wallets
-  explorerExcludedWalletIds: ['metaMask'], // Exclude MetaMask from explorer
+  enableExplorer: true,
+  mobileWallets: [],
+  desktopWallets: [],
+  explorerRecommendedWalletIds: [],
+  explorerExcludedWalletIds: ['metaMask'],
+  // Add metadata for WalletConnect
+  metadata: {
+    name: 'DoomCoin Token Swap',
+    description: 'Swap tokens on Arbitrum',
+    url: typeof window !== 'undefined' ? window.location.origin : '',
+    icons: []
+  },
+  // Enable all available wallet connection methods
+  walletImages: {},
+  privacyPolicyUrl: undefined,
+  termsOfServiceUrl: undefined,
 };
