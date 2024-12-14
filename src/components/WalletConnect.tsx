@@ -3,7 +3,8 @@ import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import ConnectDialog from "./wallet/ConnectDialog";
 import AccountDialog from "./wallet/AccountDialog";
-import { Dialog } from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -59,6 +60,11 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogTrigger asChild>
+        <Button className="bg-white text-black hover:bg-white/90">
+          Connect Wallet
+        </Button>
+      </DialogTrigger>
       <ConnectDialog
         onConnectMetaMask={handleConnectMetaMask}
         onConnectWalletConnect={handleConnectWalletConnect}
