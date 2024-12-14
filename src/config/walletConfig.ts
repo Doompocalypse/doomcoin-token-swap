@@ -5,9 +5,6 @@ import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum'
 // WalletConnect Project ID
 const projectId = '0d63e4b93b8abc2ea0a58328d7e7c053';
 
-// Get the current domain for allowed origins
-const currentDomain = typeof window !== 'undefined' ? window.location.origin : '';
-
 // Configure chains & providers with proper metadata
 const { chains, publicClient } = configureChains(
   [arbitrum],
@@ -19,7 +16,9 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains
+    chains,
+    // Only include essential connector options
+    version: '2',
   }),
   publicClient,
 });
@@ -41,8 +40,8 @@ export const web3modalProps = {
   metadata: {
     name: 'DoomCoin Token Swap',
     description: 'Swap tokens on Arbitrum',
-    url: currentDomain,
-    icons: [`${currentDomain}/favicon.ico`]
+    url: 'https://doomcoin.com', // Use a generic URL that will be overridden by WalletConnect
+    icons: ['https://avatars.githubusercontent.com/u/37784886']
   },
   standaloneChains: [arbitrum.id],
   defaultChainId: arbitrum.id,
