@@ -1,20 +1,30 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
+import { SUPPORTED_CHAINS } from "@/utils/chainConfig";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
 }
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
-  const { connectWallet, accounts } = useWalletConnection(onConnect);
+  const { connectWallet, accounts, chainId } = useWalletConnection(onConnect);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
+  const getNetworkName = () => {
+    if (!chainId) return "";
+    const chain = SUPPORTED_CHAINS[chainId];
+    return chain ? ` (${chain.chainName})` : "";
+  };
+
   return (
     <Button onClick={connectWallet} className="bg-[#33C3F0] hover:opacity-90">
-      {accounts.length > 0 ? formatAddress(accounts[0]) : "Connect Wallet"}
+      {accounts.length > 0 
+        ? `${formatAddress(accounts[0])}${getNetworkName()}`
+        : "Connect Wallet"
+      }
     </Button>
   );
 };

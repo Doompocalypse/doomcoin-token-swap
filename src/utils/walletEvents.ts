@@ -2,6 +2,7 @@ import { toast } from "@/components/ui/use-toast";
 
 export const setupWalletEventHandlers = (
   onAccountsChanged: (accounts: string[]) => void,
+  onChainChanged: (chainId: string) => void,
   cleanup = false
 ) => {
   const handleAccountsChanged = (newAccounts: string[]) => {
@@ -12,6 +13,7 @@ export const setupWalletEventHandlers = (
   const handleChainChanged = async (chainId: string) => {
     console.log("Network changed to:", chainId);
     try {
+      onChainChanged(chainId);
       window.location.reload();
     } catch (error) {
       console.error("Error handling chain change:", error);

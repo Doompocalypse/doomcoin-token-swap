@@ -7,6 +7,7 @@ export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
   const [accounts, setAccounts] = useState<string[]>([]);
+  const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
 
   useEffect(() => {
@@ -18,7 +19,11 @@ export const useWalletConnection = (
 
       try {
         const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
+        const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
         console.log("Current connected accounts:", currentAccounts);
+        console.log("Current chain ID:", currentChainId);
+        
+        setChainId(currentChainId);
         
         if (currentAccounts.length > 0) {
           setAccounts(currentAccounts);
@@ -41,10 +46,15 @@ export const useWalletConnection = (
       }
     };
 
-    setupWalletEventHandlers(handleAccountsUpdate);
+    const handleChainUpdate = async (newChainId: string) => {
+      console.log("Chain ID updated:", newChainId);
+      setChainId(newChainId);
+    };
+
+    setupWalletEventHandlers(handleAccountsUpdate, handleChainUpdate);
 
     return () => {
-      setupWalletEventHandlers(handleAccountsUpdate, true);
+      setupWalletEventHandlers(handleAccountsUpdate, handleChainUpdate, true);
     };
   }, [onConnect, toast]);
 
@@ -108,6 +118,7 @@ export const useWalletConnection = (
 
   return {
     accounts,
+    chainId,
     connectWallet
   };
 };
