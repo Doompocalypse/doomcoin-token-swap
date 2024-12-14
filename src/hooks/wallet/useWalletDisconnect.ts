@@ -1,4 +1,4 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 type ToastProps = {
   toast: {
@@ -26,12 +26,7 @@ export const useWalletDisconnect = (
       if (window.ethereum) {
         const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
         events.forEach(event => {
-          if (window.ethereum?.removeAllListeners) {
-            window.ethereum.removeAllListeners(event);
-          } else {
-            // Fallback to removeListener with an empty function if removeAllListeners is not available
-            window.ethereum?.removeListener(event, () => {});
-          }
+          window.ethereum?.removeListener(event, () => {});
         });
         console.log("Removed Arbitrum network event listeners");
       }
@@ -42,6 +37,9 @@ export const useWalletDisconnect = (
       });
       
       console.log("Wallet disconnected successfully from Arbitrum One");
+      
+      // Force reload the page to ensure clean state
+      window.location.reload();
       
     } catch (error) {
       console.error("Error disconnecting wallet from Arbitrum One:", error);
