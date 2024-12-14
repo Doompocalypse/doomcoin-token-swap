@@ -3,6 +3,7 @@ import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import ConnectDialog from "./wallet/ConnectDialog";
 import AccountDialog from "./wallet/AccountDialog";
+import { Dialog } from "@/components/ui/dialog";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -10,7 +11,7 @@ interface WalletConnectProps {
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
-  const [isOpen, setIsOpen] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const getNetworkName = () => {
     if (!chainId) return "";
@@ -31,13 +32,13 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const handleConnectMetaMask = async () => {
     console.log("Connecting MetaMask...");
     await connectWallet("metamask");
-    setIsOpen(false);
+    setDialogOpen(false);
   };
 
   const handleConnectWalletConnect = async () => {
     console.log("Connecting WalletConnect...");
     await connectWallet("walletconnect");
-    setIsOpen(false);
+    setDialogOpen(false);
   };
 
   const handleSwitchAccount = async (account: string) => {
@@ -57,12 +58,12 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   }
 
   return (
-    <ConnectDialog
-      isOpen={isOpen}
-      onOpenChange={setIsOpen}
-      onConnectMetaMask={handleConnectMetaMask}
-      onConnectWalletConnect={handleConnectWalletConnect}
-    />
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+      <ConnectDialog
+        onConnectMetaMask={handleConnectMetaMask}
+        onConnectWalletConnect={handleConnectWalletConnect}
+      />
+    </Dialog>
   );
 };
 

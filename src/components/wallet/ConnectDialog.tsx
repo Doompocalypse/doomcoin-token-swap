@@ -1,6 +1,5 @@
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
@@ -10,22 +9,18 @@ import {
 import { Wallet, Wallet2 } from "lucide-react";
 
 interface ConnectDialogProps {
-  isOpen: boolean;
-  onOpenChange: (open: boolean) => void;
   onConnectMetaMask: () => Promise<void>;
   onConnectWalletConnect: () => Promise<void>;
 }
 
 const ConnectDialog = ({
-  isOpen,
-  onOpenChange,
   onConnectMetaMask,
   onConnectWalletConnect,
 }: ConnectDialogProps) => {
-  console.log("ConnectDialog render - isOpen:", isOpen);
+  console.log("ConnectDialog render");
   
   return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
+    <>
       <DialogTrigger asChild>
         <Button className="bg-white text-black hover:bg-white/90">
           Connect Wallet
@@ -63,7 +58,7 @@ const ConnectDialog = ({
           </Button>
         </div>
       </DialogContent>
-    </Dialog>
+    </>
   );
 };
 
