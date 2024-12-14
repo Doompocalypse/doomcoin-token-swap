@@ -12,9 +12,9 @@ const { chains, publicClient } = configureChains(
   [w3mProvider({ projectId })]
 );
 
-// Set up wagmi config
+// Set up wagmi config with autoConnect disabled
 export const wagmiConfig = createConfig({
-  autoConnect: true,
+  autoConnect: false, // Explicitly disable auto-connect
   connectors: w3mConnectors({ projectId, chains }),
   publicClient,
 });

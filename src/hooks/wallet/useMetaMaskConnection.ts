@@ -18,6 +18,13 @@ export const useMetaMaskConnection = () => {
     try {
       console.log("Requesting fresh MetaMask connection...");
       
+      // Force a fresh connection request
+      await window.ethereum.request({
+        method: "wallet_requestPermissions",
+        params: [{ eth_accounts: {} }]
+      });
+      
+      // After permission granted, request accounts
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });

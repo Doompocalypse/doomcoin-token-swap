@@ -25,20 +25,17 @@ export const useInitialConnection = (
       }
     }
 
-    if (!window.ethereum) {
+    // Only get chain ID for reference, but don't connect
+    if (window.ethereum) {
+      try {
+        const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
+        console.log("Current chain ID:", currentChainId);
+        setChainId(currentChainId);
+      } catch (error) {
+        console.error("Error checking chain:", error);
+      }
+    } else {
       console.log("No Web3 wallet detected");
-      return;
-    }
-
-    try {
-      // Only get chain ID for reference
-      const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
-      console.log("Current chain ID:", currentChainId);
-      setChainId(currentChainId);
-    } catch (error) {
-      console.error("Error checking chain:", error);
-      setAccounts([]);
-      onConnect(false);
     }
   }, [setAccounts, setChainId, onConnect]);
 
