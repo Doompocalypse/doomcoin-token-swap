@@ -25,8 +25,10 @@ export const useWalletDisconnect = (
       // Store event handler references so we can properly remove them
       const accountsHandler = (accounts: string[]) => {
         console.log('Accounts changed:', accounts);
-        setAccounts(accounts);
-        onConnect(accounts.length > 0);
+        if (!localStorage.getItem('wallet_disconnected')) {
+          setAccounts(accounts);
+          onConnect(accounts.length > 0);
+        }
       };
 
       const chainHandler = (chainId: string) => {

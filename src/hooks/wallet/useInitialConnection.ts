@@ -12,6 +12,8 @@ export const useInitialConnection = (
       
       if (wasDisconnected) {
         console.log("User was previously disconnected, not auto-connecting");
+        setAccounts([]);
+        onConnect(false);
         return;
       }
 
@@ -28,7 +30,7 @@ export const useInitialConnection = (
         
         setChainId(currentChainId);
         
-        if (currentAccounts.length > 0) {
+        if (currentAccounts.length > 0 && !wasDisconnected) {
           setAccounts(currentAccounts);
           onConnect(true, currentAccounts[0]);
         }
