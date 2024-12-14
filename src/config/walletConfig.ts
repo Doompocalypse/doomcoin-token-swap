@@ -19,7 +19,8 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains 
+    chains,
+    version: '2', // Specify WalletConnect v2
   }),
   publicClient,
 });
