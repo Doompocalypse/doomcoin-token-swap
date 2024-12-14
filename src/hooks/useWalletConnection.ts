@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { switchToArbitrum } from "@/utils/chainConfig";
-import { setupWalletEventHandlers } from "@/utils/walletEvents";
+import { SUPPORTED_CHAINS } from "@/utils/chainConfig";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -13,7 +12,7 @@ export const useWalletConnection = (
   useEffect(() => {
     const checkConnection = async () => {
       if (!window.ethereum) {
-        console.log("MetaMask not installed");
+        console.log("No Web3 wallet detected");
         return;
       }
 
@@ -22,7 +21,6 @@ export const useWalletConnection = (
         const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
         console.log("Current connected accounts:", currentAccounts);
         console.log("Current chain ID:", currentChainId);
-        console.log("Is this Ethereum Mainnet?", currentChainId === "0x1");
         
         setChainId(currentChainId);
         
@@ -49,41 +47,40 @@ export const useWalletConnection = (
 
     const handleChainUpdate = async (newChainId: string) => {
       console.log("Chain ID updated:", newChainId);
-      console.log("Is this Ethereum Mainnet?", newChainId === "0x1");
       setChainId(newChainId);
     };
 
-    setupWalletEventHandlers(handleAccountsUpdate, handleChainUpdate);
+    if (window.ethereum) {
+      window.ethereum.on('accountsChanged', handleAccountsUpdate);
+      window.ethereum.on('chainChanged', handleChainUpdate);
 
-    return () => {
-      setupWalletEventHandlers(handleAccountsUpdate, handleChainUpdate, true);
-    };
-  }, [onConnect, toast]);
+      return () => {
+        window.ethereum.removeListener('accountsChanged', handleAccountsUpdate);
+        window.ethereum.removeListener('chainChanged', handleChainUpdate);
+      };
+    }
+  }, [onConnect]);
 
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
 
-    if (accounts.length > 0) {
-      console.log("Wallet already connected:", accounts[0]);
-      return;
-    }
-
     if (!window.ethereum) {
+      // Open WalletConnect modal
+      const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
+      const wcModal = document.createElement('w3m-core');
+      wcModal.setAttribute('project-id', wcProjectId);
+      wcModal.setAttribute('theme', 'dark');
+      document.body.appendChild(wcModal);
+      
       toast({
-        title: "MetaMask Required",
-        description: "Please install MetaMask to connect your wallet",
-        variant: "destructive",
+        title: "Connect Wallet",
+        description: "Please select a wallet to connect",
       });
       return;
     }
 
     try {
       console.log("Requesting accounts...");
-      
-      await window.ethereum.request({
-        method: 'wallet_requestPermissions',
-        params: [{ eth_accounts: {} }],
-      });
       
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",

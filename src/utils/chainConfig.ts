@@ -28,6 +28,29 @@ export const SUPPORTED_CHAINS: SupportedChains = {
 };
 
 export const switchToArbitrum = async () => {
-  // Remove this function's implementation since we don't want to force network switching
-  return true;
+  if (!window.ethereum) return false;
+  
+  try {
+    await window.ethereum.request({
+      method: 'wallet_switchEthereumChain',
+      params: [{ chainId: ARBITRUM_CHAIN_ID }],
+    });
+    return true;
+  } catch (switchError: any) {
+    // This error code indicates that the chain has not been added to MetaMask.
+    if (switchError.code === 4902) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [SUPPORTED_CHAINS[ARBITRUM_CHAIN_ID]],
+        });
+        return true;
+      } catch (addError) {
+        console.error('Error adding Arbitrum chain:', addError);
+        return false;
+      }
+    }
+    console.error('Error switching to Arbitrum chain:', switchError);
+    return false;
+  }
 };
