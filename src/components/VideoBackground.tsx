@@ -24,7 +24,7 @@ const VideoBackground = () => {
               left: '50%',
               width: '100%',
               height: '100%',
-              transform: `translate(-50%, -50%) scale(${isMobile ? 1.75 : 1.25})`, // Different scale for mobile and desktop
+              transform: `translate(-50%, -50%) scale(${isMobile ? 1.75 : 1.1})`, // Reduced scale for desktop while keeping mobile the same
               pointerEvents: 'none',
               objectFit: 'cover'
             }}
