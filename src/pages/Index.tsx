@@ -4,7 +4,8 @@ import TokenExchange from "@/components/TokenExchange";
 import TransactionHistory from "@/components/TransactionHistory";
 import WalletConnect from "@/components/WalletConnect";
 import Doomy from "@/components/Doomy";
-import { useState, Suspense, ErrorBoundary } from "react";
+import { useState, Suspense } from "react";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] p-4 md:p-8 flex items-center justify-center">
