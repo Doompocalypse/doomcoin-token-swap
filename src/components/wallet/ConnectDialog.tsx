@@ -5,20 +5,22 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Wallet, Wallet2 } from "lucide-react";
+import { Wallet, Wallet2, Loader2 } from "lucide-react";
 
 interface ConnectDialogProps {
   onConnectMetaMask: () => Promise<void>;
   onConnectWalletConnect: () => Promise<void>;
   isConnecting: boolean;
+  connectionType: "metamask" | "walletconnect" | null;
 }
 
 const ConnectDialog = ({
   onConnectMetaMask,
   onConnectWalletConnect,
   isConnecting,
+  connectionType,
 }: ConnectDialogProps) => {
-  console.log("ConnectDialog render, isConnecting:", isConnecting);
+  console.log("ConnectDialog render, isConnecting:", isConnecting, "connectionType:", connectionType);
   
   return (
     <DialogContent className="sm:max-w-md bg-black/20 backdrop-blur-sm border border-white/10">
@@ -35,7 +37,11 @@ const ConnectDialog = ({
           className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
           disabled={isConnecting}
         >
-          <Wallet className="mr-4 h-6 w-6" />
+          {isConnecting && connectionType === "metamask" ? (
+            <Loader2 className="mr-4 h-6 w-6 animate-spin" />
+          ) : (
+            <Wallet className="mr-4 h-6 w-6" />
+          )}
           <div className="flex flex-col items-start">
             <span className="font-semibold">MetaMask</span>
             <span className="text-sm text-gray-300">Connect using browser wallet</span>
@@ -47,7 +53,11 @@ const ConnectDialog = ({
           className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
           disabled={isConnecting}
         >
-          <Wallet2 className="mr-4 h-6 w-6" />
+          {isConnecting && connectionType === "walletconnect" ? (
+            <Loader2 className="mr-4 h-6 w-6 animate-spin" />
+          ) : (
+            <Wallet2 className="mr-4 h-6 w-6" />
+          )}
           <div className="flex flex-col items-start">
             <span className="font-semibold">WalletConnect</span>
             <span className="text-sm text-gray-300">Connect using WalletConnect</span>
