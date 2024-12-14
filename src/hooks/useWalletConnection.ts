@@ -1,20 +1,7 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-
-const ARBITRUM_CHAIN_ID = "0xa4b1"; // Arbitrum One Chain ID
-const SUPPORTED_CHAINS = {
-  "0xa4b1": {
-    chainId: "0xa4b1",
-    chainName: "Arbitrum One",
-    nativeCurrency: {
-      name: "ETH",
-      symbol: "ETH",
-      decimals: 18,
-    },
-    rpcUrls: ["https://arb1.arbitrum.io/rpc"],
-    blockExplorerUrls: ["https://arbiscan.io/"],
-  },
-};
+import { switchToArbitrum } from "@/utils/chainConfig";
+import { setupWalletEventHandlers } from "@/utils/walletEvents";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -45,8 +32,7 @@ export const useWalletConnection = (
 
     checkConnection();
 
-    const handleAccountsChanged = (newAccounts: string[]) => {
-      console.log("Accounts changed:", newAccounts);
+    const handleAccountsUpdate = (newAccounts: string[]) => {
       setAccounts(newAccounts);
       if (newAccounts.length > 0) {
         onConnect(true, newAccounts[0]);
@@ -55,75 +41,16 @@ export const useWalletConnection = (
       }
     };
 
-    const handleChainChanged = async (chainId: string) => {
-      console.log("Network changed to:", chainId);
-      try {
-        // Force a page reload to ensure all states are properly updated
-        window.location.reload();
-      } catch (error) {
-        console.error("Error handling chain change:", error);
-        toast({
-          title: "Network Change Error",
-          description: "There was an error handling the network change. Please refresh the page.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    if (window.ethereum) {
-      // Remove any existing listeners before adding new ones
-      window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-      window.ethereum.removeListener('chainChanged', handleChainChanged);
-      
-      // Add new listeners
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
-      window.ethereum.on('chainChanged', handleChainChanged);
-      
-      // Log that listeners are set up
-      console.log("Network and account change listeners initialized");
-    }
+    setupWalletEventHandlers(handleAccountsUpdate);
 
     return () => {
-      if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
-        window.ethereum.removeListener('chainChanged', handleChainChanged);
-        console.log("Cleanup: Removed network and account listeners");
-      }
+      setupWalletEventHandlers(handleAccountsUpdate, true);
     };
   }, [onConnect, toast]);
-
-  const switchToArbitrum = async () => {
-    if (!window.ethereum) return false;
-
-    try {
-      await window.ethereum.request({
-        method: 'wallet_switchEthereumChain',
-        params: [{ chainId: ARBITRUM_CHAIN_ID }],
-      });
-      return true;
-    } catch (switchError: any) {
-      // This error code indicates that the chain has not been added to MetaMask
-      if (switchError.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [SUPPORTED_CHAINS[ARBITRUM_CHAIN_ID]],
-          });
-          return true;
-        } catch (addError) {
-          console.error('Error adding Arbitrum network:', addError);
-          return false;
-        }
-      }
-      console.error('Error switching to Arbitrum:', switchError);
-      return false;
-    }
-  };
 
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
 
-    // Check if already connected
     if (accounts.length > 0) {
       console.log("Wallet already connected:", accounts[0]);
       return;
@@ -141,7 +68,6 @@ export const useWalletConnection = (
     try {
       console.log("Requesting accounts...");
       
-      // First try to switch to Arbitrum
       const switched = await switchToArbitrum();
       if (!switched) {
         toast({
