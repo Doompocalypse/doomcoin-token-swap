@@ -61,6 +61,24 @@ export const useWalletConnection = (
     }
   }, [onConnect]);
 
+  const disconnectWallet = async () => {
+    try {
+      setAccounts([]);
+      onConnect(false);
+      toast({
+        title: "Wallet Disconnected",
+        description: "Your wallet has been disconnected successfully.",
+      });
+    } catch (error) {
+      console.error("Error disconnecting wallet:", error);
+      toast({
+        title: "Error",
+        description: "Failed to disconnect wallet. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const connectWallet = async () => {
     if (typeof window === 'undefined') return;
 
@@ -108,6 +126,7 @@ export const useWalletConnection = (
   return {
     accounts,
     chainId,
-    connectWallet
+    connectWallet,
+    disconnectWallet
   };
 };

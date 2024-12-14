@@ -1,13 +1,19 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
 import { SUPPORTED_CHAINS } from "@/utils/chainConfig";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
 }
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
-  const { connectWallet, accounts, chainId } = useWalletConnection(onConnect);
+  const { connectWallet, disconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -31,12 +37,26 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     return "";
   };
 
+  if (accounts.length > 0) {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="bg-[#33C3F0] hover:opacity-90">
+            {formatAddress(accounts[0])}{getNetworkName()}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuItem onClick={disconnectWallet}>
+            Disconnect Wallet
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  }
+
   return (
     <Button onClick={connectWallet} className="bg-[#33C3F0] hover:opacity-90">
-      {accounts.length > 0 
-        ? `${formatAddress(accounts[0])}${getNetworkName()}`
-        : "Connect Wallet"
-      }
+      Connect Wallet
     </Button>
   );
 };
