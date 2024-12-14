@@ -6,11 +6,15 @@ interface WalletConnectProps {
 }
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
-  const { connectWallet } = useWalletConnection(onConnect);
+  const { connectWallet, accounts } = useWalletConnection(onConnect);
+
+  const formatAddress = (address: string) => {
+    return `${address.slice(0, 6)}...${address.slice(-4)}`;
+  };
 
   return (
     <Button onClick={connectWallet} className="bg-[#33C3F0] hover:opacity-90">
-      Connect Wallet
+      {accounts.length > 0 ? formatAddress(accounts[0]) : "Connect Wallet"}
     </Button>
   );
 };
