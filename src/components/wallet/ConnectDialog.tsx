@@ -22,10 +22,15 @@ const ConnectDialog = ({
   onConnectMetaMask,
   onConnectWalletConnect,
 }: ConnectDialogProps) => {
+  console.log("ConnectDialog render - isOpen:", isOpen);
+  
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogTrigger asChild>
-        <Button className="bg-white text-black hover:bg-white/90">
+        <Button 
+          className="bg-white text-black hover:bg-white/90"
+          onClick={() => onOpenChange(true)}
+        >
           Connect Wallet
         </Button>
       </DialogTrigger>
