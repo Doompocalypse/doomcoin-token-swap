@@ -37,6 +37,7 @@ export const useWalletConnection = (
     checkConnection();
 
     const handleAccountsUpdate = (newAccounts: string[]) => {
+      console.log("Accounts update event:", newAccounts);
       setAccounts(newAccounts);
       if (newAccounts.length > 0) {
         onConnect(true, newAccounts[0]);
@@ -63,12 +64,35 @@ export const useWalletConnection = (
 
   const disconnectWallet = async () => {
     try {
+      console.log("Disconnecting wallet...");
+      
+      // Clear local state
       setAccounts([]);
       onConnect(false);
+      
+      // If using WalletConnect, we need to disconnect from their side too
+      if (window.ethereum?.isWalletConnect) {
+        await window.ethereum.disconnect();
+      }
+      
+      // Force MetaMask to disconnect by requesting accounts and handling the rejection
+      if (window.ethereum?.isMetaMask) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_requestPermissions",
+            params: [{ eth_accounts: {} }],
+          });
+        } catch (error) {
+          console.log("User rejected connection after disconnect request");
+        }
+      }
+
       toast({
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected successfully.",
       });
+      
+      console.log("Wallet disconnected successfully");
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
       toast({
