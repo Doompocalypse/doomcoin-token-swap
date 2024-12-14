@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/useWalletConnection";
-import { SUPPORTED_CHAINS } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,14 +27,15 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     // Normalize chainId to string format
     const normalizedChainId = chainId.toString().toLowerCase();
     
-    // Check for Ethereum Mainnet
-    if (normalizedChainId === "0x1" || normalizedChainId === "1") {
-      console.log("✅ Connected to Ethereum Mainnet");
-      return " (Ethereum)";
+    // Check for Arbitrum One
+    if (normalizedChainId === ARBITRUM_CHAIN_ID.toLowerCase()) {
+      console.log("✅ Connected to Arbitrum One");
+      return " (Arbitrum)";
     }
     
-    // For other networks, just show a generic label
-    return "";
+    // For other networks, show warning in console
+    console.warn("Connected to unsupported network:", normalizedChainId);
+    return " (Wrong Network)";
   };
 
   if (accounts.length > 0) {
