@@ -7,7 +7,12 @@ import SwapButton from "./exchange/SwapButton";
 import ContractInfo from "./exchange/ContractInfo";
 import { fetchEthPrice } from "@/utils/ethPrice";
 
-const TokenExchange = () => {
+interface TokenExchangeProps {
+  isConnected: boolean;
+  connectedAccount?: string;
+}
+
+const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) => {
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
   const { toast } = useToast();
@@ -42,6 +47,23 @@ const TokenExchange = () => {
     calculateEthValue();
   }, [usdAmount, ethPrice]);
 
+  const handleExchange = async () => {
+    if (!isConnected || !connectedAccount) {
+      toast({
+        title: "Wallet Required",
+        description: "Please connect your wallet first",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    console.log("Starting exchange with account:", connectedAccount);
+    toast({
+      title: "Exchange Started",
+      description: "Your exchange request is being processed",
+    });
+  };
+
   return (
     <Card className="p-6 space-y-4 bg-[#221F26] border-[#8E9196]/20">
       <div className="space-y-4">
@@ -52,15 +74,9 @@ const TokenExchange = () => {
           onAmountChange={setUsdAmount}
         />
         <SwapButton
-          isConnected={false}
-          disabled={!usdAmount}
-          onClick={() => {
-            toast({
-              title: "Feature Removed",
-              description: "The wallet connection feature has been removed.",
-              variant: "destructive",
-            });
-          }}
+          isConnected={isConnected}
+          disabled={!usdAmount || !isConnected}
+          onClick={handleExchange}
         />
         <ContractInfo />
       </div>

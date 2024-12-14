@@ -2,10 +2,20 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import TokenExchange from "@/components/TokenExchange";
 import TransactionHistory from "@/components/TransactionHistory";
+import WalletConnect from "@/components/WalletConnect";
 import Doomy from "@/components/Doomy";
+import { useState } from "react";
 
 const Index = () => {
+  const [isConnected, setIsConnected] = useState(false);
+  const [connectedAccount, setConnectedAccount] = useState<string>();
   const { toast } = useToast();
+
+  const handleConnect = (connected: boolean, account?: string) => {
+    console.log("Connection status:", connected, "Account:", account);
+    setIsConnected(connected);
+    setConnectedAccount(account);
+  };
 
   return (
     <div className="min-h-screen bg-[#221F26] p-4 md:p-8">
@@ -14,10 +24,11 @@ const Index = () => {
           <h1 className="text-3xl font-bold text-[#F1F1F1]">
             Swap Tokens
           </h1>
+          <WalletConnect onConnect={handleConnect} />
         </div>
 
         <div className="space-y-8">
-          <TokenExchange isConnected={false} />
+          <TokenExchange isConnected={isConnected} connectedAccount={connectedAccount} />
           <TransactionHistory />
         </div>
       </div>
