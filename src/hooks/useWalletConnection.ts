@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
-import { SUPPORTED_CHAINS } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -91,19 +91,6 @@ export const useWalletConnection = (
         } catch (error) {
           // User rejected the permission request, which effectively disconnects them
           console.log("User rejected connection after disconnect request");
-        }
-      }
-
-      // Clear any cached provider state
-      if (window.ethereum) {
-        try {
-          await window.ethereum.request({
-            method: "eth_requestAccounts",
-            params: [],
-          });
-          console.log("Provider state cleared");
-        } catch (error) {
-          console.error("Error clearing provider state:", error);
         }
       }
 
