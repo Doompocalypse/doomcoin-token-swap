@@ -11,10 +11,10 @@ const Doomy = () => {
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { 
-      text: "👋 Hello! I'm Doomy, your friendly crypto assistant. I'm here to help you with: " +
-            "[Connect your wallet](https://metamask.io/download/) " +
-            "[Making token swaps](https://ethereum.org/en/defi/) " +
-            "[Checking exchange rates](https://coinmarketcap.com/) " +
+      text: "👋 Hello! I'm Doomy, your friendly crypto assistant. I'm here to help you with:\n\n" +
+            "[Connect your wallet](https://metamask.io/download/)\n" +
+            "[Making token swaps](https://ethereum.org/en/defi/)\n" +
+            "[Checking exchange rates](https://coinmarketcap.com/)\n" +
             "[Understanding crypto basics](https://ethereum.org/en/what-is-ethereum/)" +
             "\n\nHow can I assist you today?", 
       isBot: true 
