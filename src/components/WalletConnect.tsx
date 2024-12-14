@@ -48,6 +48,8 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       console.log("Connecting WalletConnect...");
       await connectWallet("walletconnect");
       setDialogOpen(false);
+    } catch (error) {
+      console.error("WalletConnect connection error:", error);
     } finally {
       setIsConnecting(false);
     }

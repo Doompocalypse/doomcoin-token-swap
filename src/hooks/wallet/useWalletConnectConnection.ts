@@ -14,6 +14,10 @@ export const useWalletConnectConnection = () => {
     try {
       console.log("Starting WalletConnect connection process...");
       
+      // First, open the WalletConnect modal
+      console.log("Opening WalletConnect modal...");
+      await open();
+      
       // Find the WalletConnect connector
       const walletConnectConnector = connectors.find(
         (connector) => connector.id === 'walletConnect'
@@ -24,10 +28,6 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      // First, open the WalletConnect modal
-      console.log("Opening WalletConnect modal...");
-      await open();
-      
       // Add a small delay to ensure modal is fully open
       await new Promise(resolve => setTimeout(resolve, 500));
       
