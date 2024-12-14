@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { useToast } from "@/components/ui/use-toast";
 
 interface WalletConnectProps {
@@ -9,7 +8,6 @@ interface WalletConnectProps {
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const [accounts, setAccounts] = useState<string[]>([]);
-  const [showAccountDialog, setShowAccountDialog] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -68,7 +66,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
     try {
       console.log("Requesting accounts...");
-      // This will trigger the MetaMask popup
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
