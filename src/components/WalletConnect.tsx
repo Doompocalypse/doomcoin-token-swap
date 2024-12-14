@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { useAccount, useDisconnect, useChainId } from 'wagmi';
+import { useAccount, useNetwork, useDisconnect } from 'wagmi';
 import { useWeb3Modal } from '@web3modal/react';
 
 interface WalletConnectProps {
@@ -8,17 +8,17 @@ interface WalletConnectProps {
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { open } = useWeb3Modal();
-  const chainId = useChainId();
   const { address, isConnected } = useAccount({
-    onConnect({ address }) {
+    onConnect: ({ address }) => {
       console.log("Wallet connected:", address);
       onConnect(true, address);
     },
-    onDisconnect() {
+    onDisconnect: () => {
       console.log("Wallet disconnected");
       onConnect(false);
     }
   });
+  const { chain } = useNetwork();
   const { disconnect } = useDisconnect();
 
   const formatAddress = (address: string) => {
@@ -26,16 +26,16 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   };
 
   const getNetworkName = () => {
-    if (!chainId) return "";
+    if (!chain?.id) return "";
     
-    console.log("Current chain:", chainId);
+    console.log("Current chain:", chain);
     
-    if (chainId === 1) {
+    if (chain.id === 1) {
       console.log("✅ Connected to Ethereum Mainnet");
       return " (Ethereum)";
     }
     
-    return ` (Chain ID: ${chainId})`;
+    return ` (${chain.name})`;
   };
 
   const handleClick = async () => {

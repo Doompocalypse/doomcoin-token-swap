@@ -3,31 +3,27 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { createConfig, WagmiConfig } from 'wagmi';
+import { createConfig, WagmiConfig, configureChains } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 import { Web3Modal } from '@web3modal/react';
 import Index from "./pages/Index";
 
-// WalletConnect v2 Project ID
-const projectId = '0d63e4b93b8abc2ea0a58328d7e7c053';
+// 1. Get projectID at https://cloud.walletconnect.com
+const projectId = 'YOUR_PROJECT_ID';
 
-const metadata = {
-  name: 'Web3Modal Example',
-  description: 'Web3Modal Example',
-  url: 'https://web3modal.com', 
-  icons: ['https://avatars.githubusercontent.com/u/37784886']
-};
+const { chains, publicClient } = configureChains(
+  [mainnet],
+  [w3mProvider({ projectId })]
+);
 
 const wagmiConfig = createConfig({
-  chains: [mainnet],
-  transports: {
-    [mainnet.id]: w3mProvider({ projectId })
-  },
-  connectors: w3mConnectors({ projectId, chains: [mainnet], metadata }),
+  autoConnect: true,
+  connectors: w3mConnectors({ projectId, chains }),
+  publicClient,
 });
 
-const ethereumClient = new EthereumClient(wagmiConfig, [mainnet]);
+const ethereumClient = new EthereumClient(wagmiConfig, chains);
 const queryClient = new QueryClient();
 
 const App = () => (

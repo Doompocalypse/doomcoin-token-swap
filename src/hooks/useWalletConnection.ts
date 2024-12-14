@@ -1,16 +1,16 @@
-import { useAccount, useChainId } from 'wagmi';
+import { useAccount, useNetwork } from 'wagmi';
 import { useToast } from "@/components/ui/use-toast";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
   const { address, isConnected } = useAccount();
-  const chainId = useChainId();
+  const { chain } = useNetwork();
   const { toast } = useToast();
 
   return {
     accounts: address ? [address] : [],
-    chainId: chainId ? `0x${chainId.toString(16)}` : undefined,
+    chainId: chain?.id ? `0x${chain.id.toString(16)}` : undefined,
     connectWallet: async () => {
       if (!isConnected) {
         toast({
