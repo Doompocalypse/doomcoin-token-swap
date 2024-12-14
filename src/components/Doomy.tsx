@@ -59,8 +59,8 @@ const Doomy = () => {
 
   return (
     <Card 
-      className={`fixed right-4 bg-[#221F26] border-[#8E9196]/20 shadow-lg transition-all duration-300 animate-fade-in ${
-        isMinimized ? "bottom-4 h-12 w-72" : "bottom-4 w-72 h-96"
+      className={`fixed right-4 bg-[#221F26]/95 backdrop-blur-sm border-[#8E9196]/10 shadow-xl transition-all duration-300 animate-fade-in ${
+        isMinimized ? "bottom-4 h-12 w-72" : "bottom-4 w-72 h-[450px]"
       }`}
     >
       <ChatHeader 
