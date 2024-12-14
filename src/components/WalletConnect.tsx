@@ -38,7 +38,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     return " (Wrong Network)";
   };
 
-  if (accounts.length > 0) {
+  if (accounts && accounts.length > 0) {
     return (
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
