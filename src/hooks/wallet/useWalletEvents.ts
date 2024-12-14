@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletEvents = (
   onConnect: (connected: boolean, account?: string) => void,
@@ -7,7 +8,7 @@ export const useWalletEvents = (
 ) => {
   useEffect(() => {
     const handleAccountsUpdate = (newAccounts: string[]) => {
-      console.log("Accounts update event:", newAccounts);
+      console.log("Accounts update event on Arbitrum One:", newAccounts);
       setAccounts(newAccounts);
       if (newAccounts.length > 0) {
         onConnect(true, newAccounts[0]);
@@ -19,6 +20,13 @@ export const useWalletEvents = (
     const handleChainUpdate = async (newChainId: string) => {
       console.log("Chain ID updated:", newChainId);
       setChainId(newChainId);
+      
+      // If the new chain is not Arbitrum One, disconnect
+      if (newChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+        console.log("Switched away from Arbitrum One, disconnecting");
+        setAccounts([]);
+        onConnect(false);
+      }
     };
 
     if (window.ethereum) {

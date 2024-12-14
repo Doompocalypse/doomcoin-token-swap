@@ -22,7 +22,7 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // Remove ethereum event listeners
+      // Remove network event listeners
       if (window.ethereum) {
         const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
         events.forEach(event => {
@@ -33,21 +33,21 @@ export const useWalletDisconnect = (
             window.ethereum?.removeListener(event, () => {});
           }
         });
-        console.log("Removed ethereum event listeners");
+        console.log("Removed Arbitrum network event listeners");
       }
 
       toast({
         title: "Wallet Disconnected",
-        description: "Your wallet has been disconnected successfully.",
+        description: "Your wallet has been disconnected from Arbitrum One.",
       });
       
-      console.log("Wallet disconnected successfully");
+      console.log("Wallet disconnected successfully from Arbitrum One");
       
     } catch (error) {
-      console.error("Error disconnecting wallet:", error);
+      console.error("Error disconnecting wallet from Arbitrum One:", error);
       toast({
         title: "Error",
-        description: "Failed to disconnect wallet. Please try again.",
+        description: "Failed to disconnect wallet from Arbitrum One. Please try again.",
         variant: "destructive",
       });
     }
