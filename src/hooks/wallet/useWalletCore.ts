@@ -22,7 +22,7 @@ export const useWalletCore = (
     try {
       console.log("Requesting MetaMask account access...");
       
-      // Request account access first - this triggers the MetaMask popup
+      // Always use eth_requestAccounts to force the account selection popup
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts"
       });
