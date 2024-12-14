@@ -61,7 +61,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+          <DialogHeader className="bg-transparent">
             <DialogTitle>Connected Account</DialogTitle>
             <DialogDescription>
               You are connected with account {formatAddress(accounts[0])}
@@ -104,7 +104,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
-        <DialogHeader>
+        <DialogHeader className="bg-transparent">
           <DialogTitle>Connect Your Wallet</DialogTitle>
           <DialogDescription>
             Choose your preferred wallet to connect to our application. Make sure you're on the Arbitrum network.
