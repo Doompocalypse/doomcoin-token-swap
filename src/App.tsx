@@ -4,7 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiConfig } from 'wagmi';
-import { mainnet } from 'wagmi/chains';
+import { arbitrum } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
 import { w3mConnectors } from '@web3modal/wagmi/react';
 import { http } from 'viem';
@@ -20,17 +20,17 @@ const metadata = {
   icons: ['https://avatars.githubusercontent.com/u/37784886']
 };
 
-const chains = [mainnet];
+const chains = [arbitrum];
 
 const config = createConfig({
-  chains: [mainnet],
+  chains: [arbitrum],
   connectors: w3mConnectors({ 
     projectId, 
     chains,
     metadata 
   }),
   transports: {
-    [mainnet.id]: http()
+    [arbitrum.id]: http()
   }
 });
 
