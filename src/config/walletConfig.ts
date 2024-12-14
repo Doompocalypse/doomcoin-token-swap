@@ -12,7 +12,13 @@ const currentDomain = typeof window !== 'undefined' ? window.location.origin : '
 const { chains, publicClient } = configureChains(
   [arbitrum],
   [w3mProvider({ 
-    projectId
+    projectId,
+    metadata: {
+      name: 'DoomCoin Token Swap',
+      description: 'Swap tokens on Arbitrum',
+      url: currentDomain,
+      icons: []
+    }
   })]
 );
 
@@ -21,7 +27,13 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains
+    chains,
+    metadata: {
+      name: 'DoomCoin Token Swap',
+      description: 'Swap tokens on Arbitrum',
+      url: currentDomain,
+      icons: []
+    }
   }),
   publicClient,
 });
