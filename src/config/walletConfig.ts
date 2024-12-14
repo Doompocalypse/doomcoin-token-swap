@@ -12,8 +12,7 @@ const currentDomain = typeof window !== 'undefined' ? window.location.origin : '
 const { chains, publicClient } = configureChains(
   [arbitrum],
   [w3mProvider({ 
-    projectId,
-    relayUrl: 'wss://relay.walletconnect.org'
+    projectId
   })]
 );
 
@@ -23,7 +22,7 @@ export const wagmiConfig = createConfig({
   connectors: w3mConnectors({ 
     projectId, 
     chains,
-    optionalChains: chains 
+    version: '2'
   }),
   publicClient,
 });
@@ -48,8 +47,6 @@ export const web3modalProps = {
     url: currentDomain,
     icons: []
   },
-  // Configure WebSocket options
-  walletConnectVersion: 2,
   standaloneChains: chains.map(chain => chain.id),
   defaultChainId: arbitrum.id
 };
