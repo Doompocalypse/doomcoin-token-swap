@@ -70,20 +70,43 @@ export const useWalletConnection = (
       setAccounts([]);
       onConnect(false);
       
-      // If using WalletConnect, we need to disconnect from their side too
+      // For WalletConnect
       if (window.ethereum?.isWalletConnect) {
-        await window.ethereum.disconnect();
+        try {
+          await window.ethereum.disconnect();
+          console.log("WalletConnect disconnected");
+        } catch (error) {
+          console.error("Error disconnecting WalletConnect:", error);
+        }
       }
       
-      // Force MetaMask to disconnect by requesting accounts and handling the rejection
+      // For MetaMask and other wallets, we'll force a disconnect by requesting permissions
+      // This will trigger the wallet's disconnect flow
       if (window.ethereum?.isMetaMask) {
         try {
+          // Request new permissions which will reset the connection
           await window.ethereum.request({
             method: "wallet_requestPermissions",
             params: [{ eth_accounts: {} }],
           });
+          console.log("MetaMask permissions reset");
         } catch (error) {
+          // User rejected the permission request, which effectively disconnects them
           console.log("User rejected connection after disconnect request");
+        }
+      }
+
+      // Clear any cached provider state
+      if (window.ethereum) {
+        // Request empty accounts to force disconnect
+        try {
+          await window.ethereum.request({
+            method: "eth_accounts",
+            params: [],
+          });
+          console.log("Provider state cleared");
+        } catch (error) {
+          console.error("Error clearing provider state:", error);
         }
       }
 
