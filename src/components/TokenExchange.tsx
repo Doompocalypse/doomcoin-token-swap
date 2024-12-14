@@ -69,12 +69,12 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
 
     try {
       console.log("Starting exchange with account:", connectedAccount);
-      const { txHash, tokenTxHash } = await handleTokenExchange(connectedAccount, ethValue);
+      const { txHash } = await handleTokenExchange(connectedAccount, ethValue);
       
-      console.log("Transaction hashes:", { txHash, tokenTxHash });
+      console.log("Transaction hash:", txHash);
       toast({
         title: "Exchange Initiated",
-        description: "Your transaction has been submitted to the network",
+        description: "Your ETH has been sent. DMC tokens will be transferred to your wallet automatically.",
       });
     } catch (error) {
       console.error("Exchange error:", error);

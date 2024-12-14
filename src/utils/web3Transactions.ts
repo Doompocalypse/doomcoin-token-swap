@@ -9,7 +9,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string)
   const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
   
   try {
-    // First transaction: User sends ETH to Bot Wallet
+    // User sends ETH to Bot Wallet
     const transactionParameters = {
       to: BOT_WALLET,
       from: userAccount,
@@ -27,28 +27,8 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string)
 
     console.log("ETH Transaction hash:", txHash);
 
-    // Create ERC20 transfer data (function signature + parameters)
-    const transferData = `0xa9059cbb${userAccount.slice(2).padStart(64, '0')}${weiValue.padStart(64, '0')}`;
-
-    // Second transaction: Bot sends tokens to user
-    const tokenTransactionParameters = {
-      from: BOT_WALLET,
-      to: CONTRACT_ADDRESS,
-      data: transferData,
-      value: "0x0"
-    };
-
-    console.log("Token transaction parameters:", tokenTransactionParameters);
-
-    // Send token transaction
-    const tokenTxHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [tokenTransactionParameters],
-    });
-
-    console.log("Token Transaction hash:", tokenTxHash);
-
-    return { txHash, tokenTxHash };
+    // Return only the ETH transaction hash
+    return { txHash };
   } catch (error) {
     console.error("Transaction error:", error);
     throw error;
