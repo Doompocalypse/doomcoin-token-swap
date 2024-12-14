@@ -17,6 +17,7 @@ export const wagmiConfig = createConfig({
   connectors: w3mConnectors({ 
     projectId, 
     chains,
+    optionalChains: chains,
   }),
   publicClient,
 });
@@ -30,11 +31,6 @@ export const web3modalProps = {
   ethereumClient,
   defaultChain: arbitrum,
   themeMode: 'dark' as const,
-  enableExplorer: true,
-  mobileWallets: [],
-  desktopWallets: [],
-  explorerRecommendedWalletIds: [],
-  explorerExcludedWalletIds: ['metaMask'],
   metadata: {
     name: 'DoomCoin Token Swap',
     description: 'Swap tokens on Arbitrum',
