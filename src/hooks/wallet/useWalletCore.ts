@@ -60,12 +60,26 @@ export const useWalletCore = (
 
   const connectWalletConnect = async () => {
     try {
+      console.log("Opening WalletConnect modal...");
       await open();
       
+      // Wait for connection to be established
       if (isConnected && address) {
+        console.log("WalletConnect connection successful:", address);
         setAccounts([address]);
         setChainId(chain?.id.toString(16));
         onConnect(true, address);
+        
+        // Check if we need to switch networks
+        if (chain?.id !== arbitrum.id) {
+          console.log("Switching to Arbitrum network...");
+          await switchNetwork?.(arbitrum.id);
+        }
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to account: ${address.slice(0, 6)}...${address.slice(-4)}`,
+        });
       }
     } catch (error: any) {
       console.error("WalletConnect error:", error);
