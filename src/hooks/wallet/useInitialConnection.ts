@@ -12,35 +12,39 @@ export const useInitialConnection = (
       const wasDisconnected = localStorage.getItem('wallet_disconnected') === 'true';
       
       if (wasDisconnected) {
-        console.log("User was previously disconnected from Arbitrum One, not auto-connecting");
+        console.log("User was previously disconnected, skipping auto-connect");
         setAccounts([]);
         onConnect(false);
         return;
       }
 
       if (!window.ethereum) {
-        console.log("No Web3 wallet detected for Arbitrum One connection");
+        console.log("No Web3 wallet detected");
         return;
       }
 
       try {
         const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
         const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
-        console.log("Current connected accounts on Arbitrum One:", currentAccounts);
-        console.log("Current chain ID (should be Arbitrum One):", currentChainId);
+        console.log("Current connected accounts:", currentAccounts);
+        console.log("Current chain ID:", currentChainId);
         
         setChainId(currentChainId);
         
-        // Only connect if we have accounts AND user hasn't disconnected AND we're on Arbitrum One
-        if (currentAccounts.length > 0 && !wasDisconnected && currentChainId.toLowerCase() === ARBITRUM_CHAIN_ID.toLowerCase()) {
+        // Only connect if we have accounts AND we're on Arbitrum One AND user hasn't disconnected
+        if (currentAccounts.length > 0 && 
+            !wasDisconnected && 
+            currentChainId.toLowerCase() === ARBITRUM_CHAIN_ID.toLowerCase()) {
+          console.log("Auto-connecting to previously connected wallet");
           setAccounts(currentAccounts);
           onConnect(true, currentAccounts[0]);
         } else {
+          console.log("Not auto-connecting: conditions not met");
           setAccounts([]);
           onConnect(false);
         }
       } catch (error) {
-        console.error("Error checking Arbitrum One connection:", error);
+        console.error("Error checking connection:", error);
         setAccounts([]);
         onConnect(false);
       }
