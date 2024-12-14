@@ -55,6 +55,8 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   }, [onConnect]);
 
   const handleConnect = async () => {
+    if (typeof window === 'undefined') return;
+
     if (!window.ethereum) {
       toast({
         title: "MetaMask Required",
@@ -66,12 +68,19 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
 
     try {
       console.log("Requesting accounts...");
+      // Force MetaMask to show the popup
+      await window.ethereum.request({
+        method: 'wallet_requestPermissions',
+        params: [{ eth_accounts: {} }],
+      });
+      
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
       
       console.log("New accounts received:", newAccounts);
       if (newAccounts.length > 0) {
+        setAccounts(newAccounts);
         onConnect(true, newAccounts[0]);
         toast({
           title: "Wallet Connected",
