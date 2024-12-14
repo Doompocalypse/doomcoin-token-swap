@@ -38,7 +38,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           className={`flex ${message.isBot ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2`}
         >
           <div
-            className={`max-w-[80%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
+            className={`max-w-[90%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
               message.isBot
                 ? "bg-white/5 text-[#F1F1F1] shadow-lg space-y-1.5"
                 : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg"
