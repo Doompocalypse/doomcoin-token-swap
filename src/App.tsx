@@ -6,7 +6,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiConfig } from 'wagmi';
 import { mainnet } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
-import { w3mConnectors } from '@web3modal/wagmi';
+import { w3mConnectors } from '@web3modal/wagmi/react';
+import { http } from 'viem';
 import Index from "./pages/Index";
 
 // WalletConnect v2 Project ID
@@ -22,10 +23,10 @@ const metadata = {
 const chains = [mainnet];
 
 const config = createConfig({
-  chains,
+  chains: [mainnet],
   connectors: w3mConnectors({ 
-    chains,
     projectId, 
+    chains,
     metadata 
   }),
   transports: {
