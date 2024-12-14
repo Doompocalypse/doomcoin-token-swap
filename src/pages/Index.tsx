@@ -9,10 +9,12 @@ import { useState } from "react";
 
 const Index = () => {
   const [isConnected, setIsConnected] = useState(false);
+  const [connectedAccount, setConnectedAccount] = useState<string>();
   const { toast } = useToast();
 
-  const handleConnect = (connected: boolean) => {
+  const handleConnect = (connected: boolean, account?: string) => {
     setIsConnected(connected);
+    setConnectedAccount(account);
     if (connected) {
       toast({
         title: "Wallet Connected",
@@ -32,7 +34,7 @@ const Index = () => {
         </div>
 
         <div className="space-y-8">
-          <TokenExchange isConnected={isConnected} />
+          <TokenExchange isConnected={isConnected} connectedAccount={connectedAccount} />
           <TransactionHistory />
         </div>
       </div>

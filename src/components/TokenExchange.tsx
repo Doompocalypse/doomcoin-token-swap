@@ -10,12 +10,12 @@ import { handleTokenExchange } from "@/utils/web3Transactions";
 
 interface TokenExchangeProps {
   isConnected: boolean;
+  connectedAccount?: string;
 }
 
-const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
+const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) => {
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
   const { toast } = useToast();
 
   const { data: ethPrice = 2500 } = useQuery({
@@ -49,7 +49,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   }, [usdAmount, ethPrice]);
 
   const handleExchange = async () => {
-    if (!isConnected) {
+    if (!isConnected || !connectedAccount) {
       toast({
         title: "Wallet Required",
         description: "Please connect your wallet first",
@@ -68,15 +68,8 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
     }
 
     try {
-      // Request account access
-      const accounts = await window.ethereum.request({ 
-        method: 'eth_requestAccounts' 
-      });
-      
-      const account = accounts[0];
-      console.log("Connected account:", account);
-
-      await handleTokenExchange(account, ethValue);
+      console.log("Using connected account for transaction:", connectedAccount);
+      await handleTokenExchange(connectedAccount, ethValue);
 
       toast({
         title: "Transactions Sent",
