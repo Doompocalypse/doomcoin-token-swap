@@ -14,7 +14,11 @@ export const useWalletConnection = (
   } = useWalletCore(onConnect);
 
   useWalletEvents(onConnect, setChainId, setAccounts);
-  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect);
+  
+  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(
+    setAccounts,
+    onConnect
+  );
 
   const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
     console.log("Connecting wallet with type:", walletType);

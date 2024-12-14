@@ -1,16 +1,11 @@
 import { useToast } from "@/hooks/use-toast";
 
-type ToastProps = {
-  toast: {
-    (props: { title: string; description: string; variant?: "default" | "destructive" }): void;
-  };
-};
-
 export const useWalletDisconnect = (
   setAccounts: (accounts: string[]) => void,
-  onConnect: (connected: boolean) => void,
-  { toast }: ToastProps
+  onConnect: (connected: boolean) => void
 ) => {
+  const { toast } = useToast();
+
   const forceDisconnectWallet = async () => {
     try {
       console.log("Starting force wallet disconnection process...");
