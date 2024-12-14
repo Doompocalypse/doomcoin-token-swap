@@ -41,7 +41,7 @@ const Index = () => {
           <div className="max-w-2xl mx-auto space-y-8">
             <div className="flex flex-col md:flex-row justify-between items-center gap-4">
               <h1 className="text-3xl font-bold text-[#F1F1F1]">
-                Swap Tokens
+                DoomCoin Token Swap
               </h1>
               <WalletConnect onConnect={handleConnect} />
             </div>
