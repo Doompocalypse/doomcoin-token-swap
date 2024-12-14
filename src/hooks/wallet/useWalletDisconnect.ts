@@ -65,32 +65,43 @@ export const useWalletDisconnect = (
     try {
       console.log("Starting wallet disconnection process...");
       
-      // Set disconnected flag FIRST to prevent auto-reconnection
-      localStorage.setItem('wallet_disconnected', 'true');
-      
-      // Clear local state immediately
+      // Clear local state first
       setAccounts([]);
       onConnect(false);
       
-      // Remove network event listeners
-      if (window.ethereum) {
-        const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
-        events.forEach(event => {
-          window.ethereum?.removeListener(event, () => {});
-        });
-        console.log("Removed network event listeners");
+      // For WalletConnect
+      if (window.ethereum?.isWalletConnect) {
+        try {
+          await window.ethereum.disconnect();
+          console.log("WalletConnect disconnected");
+        } catch (error) {
+          console.error("Error disconnecting WalletConnect:", error);
+        }
+      }
+      
+      // For MetaMask, request new permissions to force disconnect
+      if (window.ethereum?.isMetaMask) {
+        try {
+          await window.ethereum.request({
+            method: "wallet_requestPermissions",
+            params: [{ eth_accounts: {} }],
+          });
+          console.log("MetaMask permissions reset");
+        } catch (error) {
+          // User rejected the permission request, which effectively disconnects them
+          console.log("User rejected connection after disconnect request");
+        }
       }
 
       toast({
         title: "Wallet Disconnected",
-        description: "Your wallet has been disconnected.",
+        description: "Your wallet has been disconnected successfully.",
       });
       
       console.log("Wallet disconnected successfully");
       
       // Force reload the page to ensure clean state
       window.location.reload();
-      
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
       toast({
@@ -101,5 +112,8 @@ export const useWalletDisconnect = (
     }
   };
 
-  return { disconnectWallet, forceDisconnectWallet };
+  return {
+    disconnectWallet,
+    forceDisconnectWallet
+  };
 };

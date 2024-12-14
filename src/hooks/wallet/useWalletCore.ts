@@ -21,7 +21,8 @@ export const useWalletCore = (
 
     try {
       console.log("Requesting MetaMask account access...");
-      // This will trigger the MetaMask popup for account selection
+      
+      // Request account access first - this triggers the MetaMask popup
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts"
       });
@@ -29,38 +30,44 @@ export const useWalletCore = (
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        // After user selects account, try switching to Arbitrum
-        try {
-          await window.ethereum.request({
-            method: 'wallet_switchEthereumChain',
-            params: [{ chainId: ARBITRUM_CHAIN_ID }],
-          });
-          
-          setAccounts(accounts);
-          setChainId(ARBITRUM_CHAIN_ID);
-          onConnect(true, accounts[0]);
-          
-          toast({
-            title: "Wallet Connected",
-            description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
-          });
-        } catch (switchError: any) {
-          console.error("Network switch error:", switchError);
-          if (switchError.code === 4902) {
+        // After user selects account, check if we're on Arbitrum
+        const currentChainId = await window.ethereum.request({
+          method: 'eth_chainId'
+        });
+        
+        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+          try {
             await window.ethereum.request({
-              method: 'wallet_addEthereumChain',
-              params: [{
-                chainId: ARBITRUM_CHAIN_ID,
-                chainName: 'Arbitrum One',
-                nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-                blockExplorerUrls: ['https://arbiscan.io/']
-              }]
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: ARBITRUM_CHAIN_ID }],
             });
-          } else {
-            throw switchError;
+          } catch (switchError: any) {
+            console.error("Network switch error:", switchError);
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: ARBITRUM_CHAIN_ID,
+                  chainName: 'Arbitrum One',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                  blockExplorerUrls: ['https://arbiscan.io/']
+                }]
+              });
+            } else {
+              throw switchError;
+            }
           }
         }
+        
+        setAccounts(accounts);
+        setChainId(ARBITRUM_CHAIN_ID);
+        onConnect(true, accounts[0]);
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+        });
       }
     } catch (error: any) {
       console.error("MetaMask connection error:", error);
