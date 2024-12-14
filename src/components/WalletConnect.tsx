@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, WalletConnect as WalletConnectIcon } from "lucide-react";
+import { Wallet, Wallet2 } from "lucide-react";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -92,7 +92,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           MetaMask
         </DropdownMenuItem>
         <DropdownMenuItem onClick={handleConnectWalletConnect} className="cursor-pointer">
-          <WalletConnectIcon className="mr-2 h-4 w-4" />
+          <Wallet2 className="mr-2 h-4 w-4" />
           WalletConnect
         </DropdownMenuItem>
       </DropdownMenuContent>
