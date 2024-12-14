@@ -49,9 +49,19 @@ export const useWalletDisconnect = (
 
       // Force clear any cached provider state
       if (window.ethereum) {
-        // Remove all account listeners
-        window.ethereum.removeAllListeners('accountsChanged');
-        window.ethereum.removeAllListeners('chainChanged');
+        // Store references to the event handlers
+        const handleAccountsChanged = (accounts: string[]) => {
+          console.log('Accounts changed:', accounts);
+        };
+        const handleChainChanged = (chainId: string) => {
+          console.log('Chain changed:', chainId);
+        };
+
+        // Remove individual listeners
+        window.ethereum.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum.removeListener('chainChanged', handleChainChanged);
+        
+        console.log("Removed ethereum event listeners");
       }
 
       toast({
