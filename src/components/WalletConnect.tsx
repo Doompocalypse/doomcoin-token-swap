@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useAccount, useDisconnect, useChainId } from 'wagmi';
-import { useWeb3Modal } from '@web3modal/wagmi/react';
+import { useWeb3Modal } from '@web3modal/wagmi';
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -9,18 +9,16 @@ interface WalletConnectProps {
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { open } = useWeb3Modal();
   const chainId = useChainId();
-  const { address, isConnected } = useAccount({
-    onDisconnect() {
-      console.log("Wallet disconnected");
-      onConnect(false);
-    }
-  });
+  const { address, isConnected } = useAccount();
   const { disconnect } = useDisconnect();
 
   // Handle connection status changes
   if (address && isConnected) {
     console.log("Wallet connected:", address);
     onConnect(true, address);
+  } else if (!isConnected) {
+    console.log("Wallet disconnected");
+    onConnect(false);
   }
 
   const formatAddress = (address: string) => {
