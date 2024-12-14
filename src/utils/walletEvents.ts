@@ -13,8 +13,12 @@ export const setupWalletEventHandlers = (
   const handleChainChanged = async (chainId: string) => {
     console.log("Network changed to:", chainId);
     try {
-      onChainChanged(chainId);
-      window.location.reload();
+      // Call onChainChanged first to update the state
+      await onChainChanged(chainId);
+      // Add a small delay before reload to ensure state is updated
+      setTimeout(() => {
+        window.location.reload();
+      }, 100);
     } catch (error) {
       console.error("Error handling chain change:", error);
       toast({
