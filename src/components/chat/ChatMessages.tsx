@@ -17,7 +17,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <a
             key={index}
             href={url}
-            className="text-[#33C3F0] hover:underline"
+            className="text-cyan-400 hover:text-purple-400 transition-colors"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -31,17 +31,17 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 h-64 scrollbar-thin scrollbar-thumb-[#33C3F0]/20 scrollbar-track-transparent">
+    <div className="flex-1 overflow-y-auto p-4 space-y-4 h-[calc(100%-8rem)] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
       {messages.map((message, index) => (
         <div
           key={index}
-          className={`flex ${message.isBot ? "justify-start" : "justify-end"} animate-fade-in`}
+          className={`flex ${message.isBot ? "justify-start" : "justify-end"} animate-in fade-in slide-in-from-bottom-2`}
         >
           <div
-            className={`max-w-[80%] rounded-lg px-4 py-3 whitespace-pre-line leading-relaxed ${
+            className={`max-w-[80%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
               message.isBot
-                ? "bg-[#1A1F2C]/80 text-[#F1F1F1] shadow-lg"
-                : "bg-[#33C3F0] text-white shadow-lg"
+                ? "bg-white/5 text-[#F1F1F1] shadow-lg"
+                : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg"
             }`}
           >
             {message.isBot ? renderMessageWithLinks(message.text) : message.text}
