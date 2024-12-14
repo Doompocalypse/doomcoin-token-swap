@@ -18,7 +18,7 @@ export const useWalletDisconnect = (
       // Set disconnected flag in localStorage
       localStorage.setItem('wallet_disconnected', 'true');
       
-      // Clear local state first
+      // Clear local state first to ensure UI updates immediately
       setAccounts([]);
       onConnect(false);
       
@@ -32,18 +32,26 @@ export const useWalletDisconnect = (
         }
       }
       
-      // For MetaMask, request new permissions to force disconnect
+      // For MetaMask, clear permissions
       if (window.ethereum?.isMetaMask) {
         try {
+          // Request new permissions which will clear the current connection
           await window.ethereum.request({
             method: "wallet_requestPermissions",
             params: [{ eth_accounts: {} }],
           });
           console.log("MetaMask permissions reset");
         } catch (error) {
-          // User rejected the permission request, which effectively disconnects them
-          console.log("User rejected connection after disconnect request");
+          // User rejected or error occurred, which is fine as it means they're disconnected
+          console.log("MetaMask disconnection completed", error);
         }
+      }
+
+      // Force clear any cached provider state
+      if (window.ethereum) {
+        // Remove all account listeners
+        window.ethereum.removeAllListeners('accountsChanged');
+        window.ethereum.removeAllListeners('chainChanged');
       }
 
       toast({
@@ -51,7 +59,7 @@ export const useWalletDisconnect = (
         description: "Your wallet has been disconnected successfully.",
       });
       
-      console.log("Wallet disconnected successfully");
+      console.log("Wallet disconnection process completed");
       
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
