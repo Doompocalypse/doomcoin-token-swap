@@ -63,7 +63,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
     calculateEthValue();
   }, [usdAmount, ethPrice]);
 
-  const handleExchange = () => {
+  const handleExchange = async () => {
     if (!isConnected) {
       toast({
         title: "Wallet Required",
@@ -73,10 +73,58 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
       return;
     }
 
-    toast({
-      title: "Feature Not Available",
-      description: "Token exchange functionality is not implemented in this demo",
-    });
+    if (!window.ethereum) {
+      toast({
+        title: "Web3 Not Available",
+        description: "Please install a Web3 wallet like MetaMask",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log("Initiating token exchange...");
+      // Request account access
+      const accounts = await window.ethereum.request({ 
+        method: 'eth_requestAccounts' 
+      });
+      
+      const account = accounts[0];
+      console.log("Connected account:", account);
+
+      // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
+      const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
+      
+      // Create transaction parameters
+      const transactionParameters = {
+        from: account,
+        to: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073", // Contract address
+        value: `0x${weiValue}`, // Value in Wei (hexadecimal)
+        data: "0x", // No additional data needed for basic ETH transfer
+      };
+
+      console.log("Transaction parameters:", transactionParameters);
+
+      // Send transaction
+      const txHash = await window.ethereum.request({
+        method: 'eth_sendTransaction',
+        params: [transactionParameters],
+      });
+
+      console.log("Transaction hash:", txHash);
+
+      toast({
+        title: "Transaction Sent",
+        description: "Your exchange transaction has been submitted",
+      });
+    } catch (error) {
+      console.error("Exchange error:", error);
+      toast({
+        title: "Exchange Failed",
+        description: error instanceof Error ? error.message : "Transaction failed. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
