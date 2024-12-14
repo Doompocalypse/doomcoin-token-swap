@@ -14,19 +14,20 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
       if (linkMatch) {
         const [_, text, url] = linkMatch;
         return (
-          <a
-            key={index}
-            href={url}
-            className="text-cyan-400 hover:text-purple-400 transition-colors"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {text}
-          </a>
+          <div key={index} className="my-2">
+            <a
+              href={url}
+              className="text-cyan-400 hover:text-purple-400 transition-colors block"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {text}
+            </a>
+          </div>
         );
       }
       
-      return <span key={index}>{segment}</span>;
+      return <span key={index} className="leading-relaxed">{segment}</span>;
     });
   };
 
