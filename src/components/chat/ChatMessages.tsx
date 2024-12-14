@@ -13,8 +13,10 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
       
       if (linkMatch) {
         const [_, text, url] = linkMatch;
+        // Add extra margin-top to the first link ("Connect your wallet")
+        const isConnectWallet = text.includes("Connect your wallet");
         return (
-          <div key={index} className="my-2">
+          <div key={index} className={`my-2 ${isConnectWallet ? "mt-4" : ""}`}>
             <a
               href={url}
               className="text-cyan-400 hover:text-purple-400 transition-colors block"
