@@ -55,8 +55,8 @@ Deno.serve(async (req) => {
     // Initialize wallet with retries
     const botWallet = await retryWithBackoff(async () => {
       const wallet = new ethers.Wallet(botPrivateKey, provider);
-      // Test connection by getting the wallet's balance
-      await wallet.getBalance();
+      // Test connection by getting the wallet's balance using provider
+      await provider.getBalance(wallet.address);
       return wallet;
     });
 
