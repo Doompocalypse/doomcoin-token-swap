@@ -1,27 +1,39 @@
 import { useWeb3Modal } from '@web3modal/react';
-import { useAccount } from 'wagmi';
+import { useAccount, useConnect } from 'wagmi';
 import { useToast } from "@/hooks/use-toast";
 import { useNetworkSwitch } from "./useNetworkSwitch";
 
 export const useWalletConnectConnection = () => {
   const { open } = useWeb3Modal();
   const { address, isConnected } = useAccount();
+  const { connect, connectors } = useConnect();
   const { toast } = useToast();
   const { ensureArbitrumNetwork } = useNetworkSwitch();
 
   const connectWalletConnect = async () => {
     try {
-      console.log("Opening WalletConnect modal...");
+      console.log("Starting WalletConnect connection process...");
       
+      // Find the WalletConnect connector
+      const walletConnectConnector = connectors.find(
+        (connector) => connector.id === 'walletConnect'
+      );
+
+      if (!walletConnectConnector) {
+        throw new Error("WalletConnect connector not found");
+      }
+
       // First, open the WalletConnect modal
       await open();
       
-      // We need to wait for the connection to be established
-      // The Web3Modal will handle the QR code display and scanning
+      // Connect using the WalletConnect connector
+      await connect({ connector: walletConnectConnector });
+      
+      // Wait for connection to be established
       if (isConnected && address) {
         console.log("WalletConnect connection successful:", address);
         
-        // Check if we need to switch networks first
+        // Check if we need to switch networks
         await ensureArbitrumNetwork();
         
         return [address];

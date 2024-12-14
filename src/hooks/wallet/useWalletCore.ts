@@ -15,6 +15,7 @@ export const useWalletCore = (
   const { connectWalletConnect } = useWalletConnectConnection();
 
   const handleSuccessfulConnection = (newAccounts: string[]) => {
+    console.log("Handling successful connection with accounts:", newAccounts);
     setAccounts(newAccounts);
     setChainId(currentChain?.id.toString(16));
     onConnect(true, newAccounts[0]);
@@ -27,19 +28,25 @@ export const useWalletCore = (
 
   const handleMetaMaskConnection = async () => {
     try {
+      console.log("Initiating MetaMask connection...");
       const newAccounts = await connectMetaMask();
       handleSuccessfulConnection(newAccounts);
     } catch (error) {
       console.error("Failed to connect MetaMask:", error);
+      setAccounts([]);
+      onConnect(false);
     }
   };
 
   const handleWalletConnectConnection = async () => {
     try {
+      console.log("Initiating WalletConnect connection...");
       const newAccounts = await connectWalletConnect();
       handleSuccessfulConnection(newAccounts);
     } catch (error) {
       console.error("Failed to connect WalletConnect:", error);
+      setAccounts([]);
+      onConnect(false);
     }
   };
 
