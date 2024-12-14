@@ -16,28 +16,28 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const getNetworkName = () => {
     if (!chainId) return "";
     
-    console.log("Raw chainId:", chainId);
+    console.log("Current chainId:", chainId);
+    console.log("Type of chainId:", typeof chainId);
     
-    // Special handling for Ethereum Mainnet
-    if (chainId === "0x1" || chainId === "1") {
-      console.log("Detected Ethereum Mainnet");
+    // Direct check for Ethereum Mainnet
+    if (chainId === "0x1" || chainId === "1" || chainId === 1) {
+      console.log("✅ Ethereum Mainnet detected");
       return " (Ethereum Mainnet)";
     }
     
-    // For other networks, check the SUPPORTED_CHAINS mapping
-    const chainKey = Object.keys(SUPPORTED_CHAINS).find(
-      key => key.toLowerCase() === chainId.toLowerCase()
-    );
+    // Convert chainId to hex if it's a number
+    const hexChainId = typeof chainId === 'number' ? `0x${chainId.toString(16)}` : chainId;
+    console.log("Converted hexChainId:", hexChainId);
     
-    if (chainKey) {
-      const network = SUPPORTED_CHAINS[chainKey].chainName;
-      console.log("Detected network:", network);
-      return ` (${network})`;
+    // Check supported chains
+    const chain = SUPPORTED_CHAINS[hexChainId];
+    if (chain) {
+      console.log("Found chain configuration:", chain);
+      return ` (${chain.chainName})`;
     }
     
-    // Fallback for unknown networks
-    console.log("Unknown network with chainId:", chainId);
-    return ` (Chain ID: ${chainId})`;
+    console.log("❌ Unknown network:", chainId);
+    return ` (Unknown Network)`;
   };
 
   return (
