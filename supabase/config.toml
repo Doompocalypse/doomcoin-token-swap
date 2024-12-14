@@ -1,1 +1,4 @@
 project_id = "ylzqjxfbtlkmlxdopita"
+
+[functions.process-eth-transaction]
+verify_jwt = false

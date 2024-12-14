@@ -27,7 +27,25 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string)
 
     console.log("ETH Transaction hash:", txHash);
 
-    // Return only the ETH transaction hash
+    // Call our Edge Function to process the DMC token transfer
+    const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        buyerAddress: userAccount,
+        ethAmount: ethValue,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to process DMC token transfer');
+    }
+
+    const result = await response.json();
+    console.log("DMC transfer result:", result);
+
     return { txHash };
   } catch (error) {
     console.error("Transaction error:", error);
