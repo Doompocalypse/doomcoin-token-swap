@@ -53,8 +53,6 @@ export const useWalletDisconnect = (
       
       console.log("Wallet disconnected successfully");
       
-      // Force reload the page to ensure clean state
-      window.location.reload();
     } catch (error) {
       console.error("Error disconnecting wallet:", error);
       toast({
