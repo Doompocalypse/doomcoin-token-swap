@@ -19,14 +19,17 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     console.log("Current chainId:", chainId);
     console.log("Type of chainId:", typeof chainId);
     
-    // Direct check for Ethereum Mainnet
-    if (chainId === "0x1" || chainId === "1" || chainId === 1) {
+    // Direct check for Ethereum Mainnet - convert all to strings for comparison
+    const chainIdStr = String(chainId).toLowerCase();
+    if (chainIdStr === "0x1" || chainIdStr === "1") {
       console.log("✅ Ethereum Mainnet detected");
       return " (Ethereum Mainnet)";
     }
     
     // Convert chainId to hex if it's a number
-    const hexChainId = typeof chainId === 'number' ? `0x${chainId.toString(16)}` : chainId;
+    const hexChainId = typeof chainId === 'string' 
+      ? chainId 
+      : `0x${Number(chainId).toString(16)}`;
     console.log("Converted hexChainId:", hexChainId);
     
     // Check supported chains
