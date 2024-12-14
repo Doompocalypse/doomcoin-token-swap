@@ -9,7 +9,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
     const segments = text.split(/(\[.*?\]\(.*?\))/g);
     
     return segments.map((segment, index) => {
-      const linkMatch = segment.match(/\[(.*?)\]\((.*?)\))/);
+      const linkMatch = segment.match(/\[(.*?)\]\((.*?)\)/);
       
       if (linkMatch) {
         const [_, text, url] = linkMatch;
