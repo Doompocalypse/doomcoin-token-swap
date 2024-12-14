@@ -1,7 +1,5 @@
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import TokenExchange from "@/components/TokenExchange";
-import TransactionHistory from "@/components/TransactionHistory";
 import WalletConnect from "@/components/WalletConnect";
 import Doomy from "@/components/Doomy";
 import { useState, Suspense } from "react";
@@ -48,10 +46,7 @@ const Index = () => {
               <WalletConnect onConnect={handleConnect} />
             </div>
 
-            <div className="space-y-8">
-              <TokenExchange isConnected={isConnected} connectedAccount={connectedAccount} />
-              <TransactionHistory />
-            </div>
+            <TokenExchange isConnected={isConnected} connectedAccount={connectedAccount} />
           </div>
           <Doomy />
         </div>
