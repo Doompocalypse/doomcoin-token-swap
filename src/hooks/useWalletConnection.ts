@@ -22,6 +22,7 @@ export const useWalletConnection = (
         const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
         console.log("Current connected accounts:", currentAccounts);
         console.log("Current chain ID:", currentChainId);
+        console.log("Is this Ethereum Mainnet?", currentChainId === "0x1");
         
         setChainId(currentChainId);
         
@@ -48,6 +49,7 @@ export const useWalletConnection = (
 
     const handleChainUpdate = async (newChainId: string) => {
       console.log("Chain ID updated:", newChainId);
+      console.log("Is this Ethereum Mainnet?", newChainId === "0x1");
       setChainId(newChainId);
     };
 
