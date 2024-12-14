@@ -12,7 +12,7 @@ interface AmountInputProps {
 const AmountInput = ({ usdAmount, ethPrice, ethValue, onAmountChange }: AmountInputProps) => (
   <div>
     <div className="flex justify-between items-center mb-2">
-      <label className="text-sm text-[#8E9196]">Amount (USD)</label>
+      <label className="text-sm text-[#8E9196]">Enter An Amount ($USD)</label>
       <PriceDisplay ethPrice={ethPrice} />
     </div>
     <Input
