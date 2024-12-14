@@ -1,6 +1,3 @@
-import { parseEther } from 'viem';
-import { usePrepareSendTransaction, useSendTransaction } from 'wagmi';
-
 const BOT_WALLET = "0x2088891D40e755d83e1990d70fdb7e65a384e9B0";
 const CONTRACT_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 
@@ -10,15 +7,30 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
   console.log("ETH amount to send:", ethValue);
   console.log("USD value (DMC tokens to receive):", usdAmount);
   
+  // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
+  const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
+  
   try {
-    const weiValue = parseEther(ethValue);
-    
-    const { hash } = await useSendTransaction({
+    // User sends ETH to Bot Wallet with exact amount
+    const transactionParameters = {
       to: BOT_WALLET,
-      value: weiValue,
+      from: userAccount,
+      value: `0x${weiValue}`,
+      data: "0x",
+      // Add gas parameters to ensure transaction uses exact amount
+      gas: undefined,
+      gasPrice: undefined
+    };
+
+    console.log("Transaction parameters:", transactionParameters);
+    
+    // Send ETH transaction with exact amount
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [transactionParameters],
     });
 
-    console.log("ETH Transaction hash:", hash);
+    console.log("ETH Transaction hash:", txHash);
 
     // Call our Edge Function to process the DMC token transfer
     const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
@@ -29,7 +41,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
       body: JSON.stringify({
         buyerAddress: userAccount,
         ethAmount: ethValue,
-        dmcAmount: usdAmount,
+        dmcAmount: usdAmount, // Now sending the USD amount which will be the DMC amount
       }),
     });
 
@@ -40,7 +52,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
     const result = await response.json();
     console.log("DMC transfer result:", result);
 
-    return { txHash: hash };
+    return { txHash };
   } catch (error) {
     console.error("Transaction error:", error);
     throw error;
