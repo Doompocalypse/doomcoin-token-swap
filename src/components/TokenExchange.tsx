@@ -118,6 +118,9 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           ethValue={ethValue}
           onAmountChange={setUsdAmount}
         />
+        <div className="text-sm text-[#8E9196] text-center bg-[#1A1F2C] p-2 rounded">
+          Please ensure you are connected to the Arbitrum One network before swapping tokens
+        </div>
         <SwapButton
           isConnected={isConnected}
           disabled={!usdAmount || !isConnected}
