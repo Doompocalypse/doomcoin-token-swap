@@ -13,7 +13,7 @@ interface WalletConnectProps {
 }
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
-  const { connectWallet, disconnectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
+  const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -47,11 +47,8 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent>
-          <DropdownMenuItem onClick={disconnectWallet}>
+          <DropdownMenuItem onClick={forceDisconnectWallet}>
             Disconnect Wallet
-          </DropdownMenuItem>
-          <DropdownMenuItem onClick={forceDisconnectWallet} className="text-red-500">
-            Force Disconnect
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
