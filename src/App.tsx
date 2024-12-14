@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { createWeb3Modal } from '@web3modal/wagmi/react';
+import { createWeb3Modal, defaultWagmiConfig } from '@web3modal/wagmi/react';
 import { WagmiConfig } from 'wagmi';
 import { arbitrum } from 'wagmi/chains';
 import { http } from 'viem';
@@ -20,14 +20,14 @@ const metadata = {
 };
 
 const chains = [arbitrum];
-const config = {
+const config = defaultWagmiConfig({ 
   chains,
   projectId,
   metadata,
   transports: {
     [arbitrum.id]: http()
   }
-};
+});
 
 createWeb3Modal({
   wagmiConfig: config,
