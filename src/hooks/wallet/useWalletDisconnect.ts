@@ -22,40 +22,21 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // For WalletConnect
-      if (window.ethereum?.isWalletConnect) {
-        try {
-          await window.ethereum.disconnect();
-          console.log("WalletConnect disconnected");
-        } catch (error) {
-          console.error("Error disconnecting WalletConnect:", error);
-        }
-      }
-      
-      // For MetaMask, clear permissions
-      if (window.ethereum?.isMetaMask) {
-        try {
-          // Request new permissions which will clear the current connection
-          await window.ethereum.request({
-            method: "wallet_requestPermissions",
-            params: [{ eth_accounts: {} }],
-          });
-          console.log("MetaMask permissions reset");
-        } catch (error) {
-          // User rejected or error occurred, which is fine as it means they're disconnected
-          console.log("MetaMask disconnection completed", error);
-        }
-      }
+      // Store event handler references so we can properly remove them
+      const accountsHandler = (accounts: string[]) => {
+        console.log('Accounts changed:', accounts);
+        setAccounts(accounts);
+        onConnect(accounts.length > 0);
+      };
 
-      // Remove event listeners
+      const chainHandler = (chainId: string) => {
+        console.log('Chain changed:', chainId);
+      };
+
+      // Remove event listeners with proper references
       if (window.ethereum) {
-        const events = ['accountsChanged', 'chainChanged'];
-        events.forEach(event => {
-          window.ethereum?.removeListener(event, () => {
-            console.log(`Removed ${event} listener`);
-          });
-        });
-        
+        window.ethereum.removeListener('accountsChanged', accountsHandler);
+        window.ethereum.removeListener('chainChanged', chainHandler);
         console.log("Removed ethereum event listeners");
       }
 
