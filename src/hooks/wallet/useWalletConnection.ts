@@ -51,7 +51,15 @@ export const useWalletConnection = (
     try {
       console.log("Starting wallet connection process...");
       
-      // First, try to switch to Arbitrum One
+      // First request accounts to trigger the MetaMask popup
+      console.log("Requesting accounts...");
+      const newAccounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+      });
+      
+      console.log("New accounts received:", newAccounts);
+      
+      // Then try to switch to Arbitrum One
       try {
         console.log("Requesting network switch to Arbitrum One...");
         await window.ethereum.request({
@@ -97,13 +105,6 @@ export const useWalletConnection = (
         }
       }
       
-      // Request accounts
-      console.log("Requesting accounts...");
-      const newAccounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-      });
-      
-      console.log("New accounts received:", newAccounts);
       if (newAccounts.length > 0) {
         setAccounts(newAccounts);
         onConnect(true, newAccounts[0]);
