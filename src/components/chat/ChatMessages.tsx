@@ -24,7 +24,6 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
       
       if (linkMatch) {
         const [_, text] = linkMatch;
-        // Add extra margin-top to the first link ("Connect your wallet")
         const isConnectWallet = text.includes("Connect your wallet");
         return (
           <div key={index} className={`my-2 ${isConnectWallet ? "mt-4" : ""}`}>
@@ -32,7 +31,6 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
               className="text-cyan-400 hover:text-purple-400 transition-colors block text-left"
               onClick={(e) => {
                 e.preventDefault();
-                // Simulate a user message with the clicked topic
                 const messageEvent = new CustomEvent('chatMessage', {
                   detail: { text: text.toLowerCase() }
                 });
@@ -45,12 +43,17 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
         );
       }
       
-      return <span key={index} className="leading-relaxed">{segment}</span>;
+      // Split the text by newlines and add proper spacing
+      return segment.split('\n').map((line, lineIndex) => (
+        <div key={`${index}-${lineIndex}`} className={`${lineIndex > 0 ? 'mt-3' : ''}`}>
+          {line}
+        </div>
+      ));
     });
   };
 
   return (
-    <div className="flex-1 overflow-y-auto p-4 space-y-4 h-[calc(100%-8rem)] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
+    <div className="flex-1 overflow-y-auto p-4 space-y-6 h-[calc(100%-8rem)] scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
       {messages.map((message, index) => (
         <div
           key={index}
@@ -59,7 +62,7 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <div
             className={`max-w-[90%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
               message.isBot
-                ? "bg-white/5 text-[#F1F1F1] shadow-lg space-y-1.5"
+                ? "bg-white/5 text-[#F1F1F1] shadow-lg space-y-2"
                 : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg"
             }`}
           >
