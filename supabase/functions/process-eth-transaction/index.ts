@@ -11,6 +11,23 @@ const DMC_ABI = [
   "function balanceOf(address account) view returns (uint256)",
 ];
 
+// Retry configuration
+const MAX_RETRIES = 3;
+const INITIAL_RETRY_DELAY = 1000; // 1 second
+
+async function retryWithBackoff(operation: () => Promise<any>, retries = MAX_RETRIES, delay = INITIAL_RETRY_DELAY) {
+  try {
+    return await operation();
+  } catch (error) {
+    if (retries === 0) throw error;
+    
+    console.log(`Operation failed, retrying in ${delay}ms... (${retries} retries left)`);
+    await new Promise(resolve => setTimeout(resolve, delay));
+    
+    return retryWithBackoff(operation, retries - 1, delay * 2);
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -21,15 +38,28 @@ Deno.serve(async (req) => {
     const { buyerAddress, ethAmount } = await req.json();
     console.log(`Processing transaction for buyer: ${buyerAddress}, ETH amount: ${ethAmount}`);
 
-    // Initialize provider and wallet
-    const provider = new ethers.JsonRpcProvider("https://eth-mainnet.g.alchemy.com/v2/demo");
+    // Get Alchemy API key from environment
+    const alchemyApiKey = Deno.env.get("ALCHEMY_API_KEY");
+    if (!alchemyApiKey) {
+      throw new Error("Alchemy API key not configured");
+    }
+
+    // Initialize provider with proper API key
+    const provider = new ethers.JsonRpcProvider(`https://eth-mainnet.g.alchemy.com/v2/${alchemyApiKey}`);
     const botPrivateKey = Deno.env.get("BOT_WALLET_PRIVATE_KEY");
     
     if (!botPrivateKey) {
       throw new Error("Bot wallet private key not configured");
     }
 
-    const botWallet = new ethers.Wallet(botPrivateKey, provider);
+    // Initialize wallet with retries
+    const botWallet = await retryWithBackoff(async () => {
+      const wallet = new ethers.Wallet(botPrivateKey, provider);
+      // Test connection by getting the wallet's balance
+      await wallet.getBalance();
+      return wallet;
+    });
+
     console.log("Bot wallet initialized:", botWallet.address);
 
     // DMC Token Contract
@@ -40,19 +70,19 @@ Deno.serve(async (req) => {
     const dmcAmount = ethers.parseEther(ethAmount);
     console.log(`Attempting to send ${ethAmount} DMC tokens to ${buyerAddress}`);
 
-    // Check bot's DMC balance
-    const botBalance = await dmcContract.balanceOf(botWallet.address);
+    // Check bot's DMC balance with retries
+    const botBalance = await retryWithBackoff(() => dmcContract.balanceOf(botWallet.address));
     console.log(`Bot DMC balance: ${ethers.formatEther(botBalance)} DMC`);
 
     if (botBalance < dmcAmount) {
       throw new Error("Insufficient DMC balance in bot wallet");
     }
 
-    // Send DMC tokens
-    const tx = await dmcContract.transfer(buyerAddress, dmcAmount);
+    // Send DMC tokens with retries
+    const tx = await retryWithBackoff(() => dmcContract.transfer(buyerAddress, dmcAmount));
     console.log("Transaction sent:", tx.hash);
     
-    const receipt = await tx.wait();
+    const receipt = await retryWithBackoff(() => tx.wait());
     console.log("Transaction confirmed in block:", receipt.blockNumber);
 
     return new Response(
