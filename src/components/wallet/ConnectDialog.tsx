@@ -10,13 +10,15 @@ import { Wallet, Wallet2 } from "lucide-react";
 interface ConnectDialogProps {
   onConnectMetaMask: () => Promise<void>;
   onConnectWalletConnect: () => Promise<void>;
+  isConnecting: boolean;
 }
 
 const ConnectDialog = ({
   onConnectMetaMask,
   onConnectWalletConnect,
+  isConnecting,
 }: ConnectDialogProps) => {
-  console.log("ConnectDialog render");
+  console.log("ConnectDialog render, isConnecting:", isConnecting);
   
   return (
     <DialogContent className="sm:max-w-md bg-black/20 backdrop-blur-sm border border-white/10">
@@ -31,6 +33,7 @@ const ConnectDialog = ({
           onClick={onConnectMetaMask}
           variant="outline"
           className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
+          disabled={isConnecting}
         >
           <Wallet className="mr-4 h-6 w-6" />
           <div className="flex flex-col items-start">
@@ -42,6 +45,7 @@ const ConnectDialog = ({
           onClick={onConnectWalletConnect}
           variant="outline"
           className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
+          disabled={isConnecting}
         >
           <Wallet2 className="mr-4 h-6 w-6" />
           <div className="flex flex-col items-start">

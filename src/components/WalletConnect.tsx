@@ -13,6 +13,7 @@ interface WalletConnectProps {
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [isConnecting, setIsConnecting] = useState(false);
 
   const getNetworkName = () => {
     if (!chainId) return "";
@@ -31,15 +32,25 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   };
 
   const handleConnectMetaMask = async () => {
-    console.log("Connecting MetaMask...");
-    await connectWallet("metamask");
-    setDialogOpen(false);
+    try {
+      setIsConnecting(true);
+      console.log("Connecting MetaMask...");
+      await connectWallet("metamask");
+      setDialogOpen(false);
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   const handleConnectWalletConnect = async () => {
-    console.log("Connecting WalletConnect...");
-    await connectWallet("walletconnect");
-    setDialogOpen(false);
+    try {
+      setIsConnecting(true);
+      console.log("Connecting WalletConnect...");
+      await connectWallet("walletconnect");
+      setDialogOpen(false);
+    } finally {
+      setIsConnecting(false);
+    }
   };
 
   const handleSwitchAccount = async (account: string) => {
@@ -61,13 +72,17 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-white text-black hover:bg-white/90">
-          Connect Wallet
+        <Button 
+          className="bg-white text-black hover:bg-white/90"
+          disabled={isConnecting}
+        >
+          {isConnecting ? "Connecting..." : "Connect Wallet"}
         </Button>
       </DialogTrigger>
       <ConnectDialog
         onConnectMetaMask={handleConnectMetaMask}
         onConnectWalletConnect={handleConnectWalletConnect}
+        isConnecting={isConnecting}
       />
     </Dialog>
   );

@@ -20,13 +20,19 @@ export const useWalletConnectConnection = () => {
       );
 
       if (!walletConnectConnector) {
+        console.error("WalletConnect connector not found");
         throw new Error("WalletConnect connector not found");
       }
 
       // First, open the WalletConnect modal
+      console.log("Opening WalletConnect modal...");
       await open();
       
-      // Connect using the WalletConnect connector
+      // Add a small delay to ensure modal is fully open
+      await new Promise(resolve => setTimeout(resolve, 500));
+      
+      // Then attempt the connection
+      console.log("Attempting WalletConnect connection...");
       await connect({ connector: walletConnectConnector });
       
       // Wait for connection to be established
@@ -42,11 +48,14 @@ export const useWalletConnectConnection = () => {
       throw new Error("Connection failed");
     } catch (error: any) {
       console.error("WalletConnect error:", error);
-      toast({
-        title: "Connection Failed",
-        description: error.message || "Failed to connect with WalletConnect",
-        variant: "destructive",
-      });
+      // Only show toast for actual errors, not user cancellations
+      if (error.message !== "User rejected the request.") {
+        toast({
+          title: "Connection Failed",
+          description: error.message || "Failed to connect with WalletConnect",
+          variant: "destructive",
+        });
+      }
       throw error;
     }
   };
