@@ -8,10 +8,9 @@ const VideoBackground = () => {
           position: 'absolute',
           top: '50%',
           left: '50%',
-          width: '100vw',
-          height: '100vh',
+          width: '200vw', // Increased width to ensure coverage
+          height: '200vh', // Increased height to ensure coverage
           transform: 'translate(-50%, -50%)',
-          objectFit: 'cover',
           overflow: 'hidden'
         }}>
           <iframe
@@ -20,10 +19,11 @@ const VideoBackground = () => {
               position: 'absolute',
               top: '50%',
               left: '50%',
-              width: '100vw',
-              height: '100vh',
-              transform: 'translate(-50%, -50%)',
-              pointerEvents: 'none'
+              width: '100%',
+              height: '100%',
+              transform: 'translate(-50%, -50%) scale(1.5)', // Added scale to ensure full coverage
+              pointerEvents: 'none',
+              objectFit: 'cover'
             }}
             frameBorder="0"
             allow="autoplay; fullscreen"
