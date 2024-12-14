@@ -6,7 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { createConfig, WagmiConfig } from 'wagmi';
 import { arbitrum } from 'wagmi/chains';
 import { createWeb3Modal } from '@web3modal/wagmi';
-import { defaultWagmiConfig } from '@web3modal/wagmi/config/react';
+import { defaultWagmiConfig } from '@web3modal/wagmi/dist/config/react';
 import { http } from 'viem';
 import Index from "./pages/Index";
 
