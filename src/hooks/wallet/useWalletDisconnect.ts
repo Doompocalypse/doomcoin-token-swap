@@ -15,31 +15,20 @@ export const useWalletDisconnect = (
     try {
       console.log("Starting wallet disconnection process...");
       
-      // Set disconnected flag in localStorage
+      // Set disconnected flag FIRST to prevent auto-reconnection
       localStorage.setItem('wallet_disconnected', 'true');
       
-      // Clear local state first to ensure UI updates immediately
+      // Clear local state immediately
       setAccounts([]);
       onConnect(false);
       
-      // Store event handler references so we can properly remove them
-      const accountsHandler = (accounts: string[]) => {
-        console.log('Accounts changed:', accounts);
-        if (!localStorage.getItem('wallet_disconnected')) {
-          setAccounts(accounts);
-          onConnect(accounts.length > 0);
-        }
-      };
-
-      const chainHandler = (chainId: string) => {
-        console.log('Chain changed:', chainId);
-      };
-
-      // Remove event listeners with proper references
+      // Remove all ethereum event listeners
       if (window.ethereum) {
-        window.ethereum.removeListener('accountsChanged', accountsHandler);
-        window.ethereum.removeListener('chainChanged', chainHandler);
-        console.log("Removed ethereum event listeners");
+        const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
+        events.forEach(event => {
+          window.ethereum?.removeAllListeners(event);
+        });
+        console.log("Removed all ethereum event listeners");
       }
 
       toast({
@@ -47,7 +36,7 @@ export const useWalletDisconnect = (
         description: "Your wallet has been disconnected successfully.",
       });
       
-      console.log("Wallet disconnection process completed");
+      console.log("Wallet disconnected successfully");
       
     } catch (error) {
       console.error("Error disconnecting wallet:", error);

@@ -30,13 +30,18 @@ export const useInitialConnection = (
         
         setChainId(currentChainId);
         
+        // Only connect if we have accounts AND user hasn't disconnected
         if (currentAccounts.length > 0 && !wasDisconnected) {
           setAccounts(currentAccounts);
           onConnect(true, currentAccounts[0]);
+        } else {
+          setAccounts([]);
+          onConnect(false);
         }
       } catch (error) {
         console.error("Error checking connection:", error);
         setAccounts([]);
+        onConnect(false);
       }
     };
 

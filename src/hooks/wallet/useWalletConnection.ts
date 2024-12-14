@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { useInitialConnection } from "./useInitialConnection";
-import { useWalletEvents } from "./useWalletEvents";
 import { useWalletDisconnect } from "./useWalletDisconnect";
 
 export const useWalletConnection = (
@@ -12,7 +11,7 @@ export const useWalletConnection = (
   const { toast } = useToast();
 
   useInitialConnection(setAccounts, setChainId, onConnect);
-  useWalletEvents(onConnect, setChainId, setAccounts);
+
   const { disconnectWallet } = useWalletDisconnect(setAccounts, onConnect, { toast });
 
   const connectWallet = async () => {
