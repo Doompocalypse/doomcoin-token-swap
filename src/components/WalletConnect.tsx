@@ -5,6 +5,7 @@ import ConnectDialog from "./wallet/ConnectDialog";
 import AccountDialog from "./wallet/AccountDialog";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -14,6 +15,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [connectionType, setConnectionType] = useState<"metamask" | "walletconnect" | null>(null);
 
   const getNetworkName = () => {
     if (!chainId) return "";
@@ -34,17 +36,20 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const handleConnectMetaMask = async () => {
     try {
       setIsConnecting(true);
+      setConnectionType("metamask");
       console.log("Connecting MetaMask...");
       await connectWallet("metamask");
       setDialogOpen(false);
     } finally {
       setIsConnecting(false);
+      setConnectionType(null);
     }
   };
 
   const handleConnectWalletConnect = async () => {
     try {
       setIsConnecting(true);
+      setConnectionType("walletconnect");
       console.log("Connecting WalletConnect...");
       await connectWallet("walletconnect");
       setDialogOpen(false);
@@ -52,6 +57,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       console.error("WalletConnect connection error:", error);
     } finally {
       setIsConnecting(false);
+      setConnectionType(null);
     }
   };
 
@@ -78,13 +84,21 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           className="bg-white text-black hover:bg-white/90"
           disabled={isConnecting}
         >
-          {isConnecting ? "Connecting..." : "Connect Wallet"}
+          {isConnecting ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Connecting...
+            </>
+          ) : (
+            "Connect Wallet"
+          )}
         </Button>
       </DialogTrigger>
       <ConnectDialog
         onConnectMetaMask={handleConnectMetaMask}
         onConnectWalletConnect={handleConnectWalletConnect}
         isConnecting={isConnecting}
+        connectionType={connectionType}
       />
     </Dialog>
   );

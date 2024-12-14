@@ -24,9 +24,9 @@ export const useWalletConnectConnection = () => {
         throw new Error("WalletConnect connector not found");
       }
 
-      // Set up a timeout promise
+      // Set up a shorter timeout promise (15 seconds instead of 30)
       const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error("Connection timed out")), 30000);
+        setTimeout(() => reject(new Error("Connection timed out")), 15000);
       });
 
       // Open modal and wait for connection with timeout
@@ -36,17 +36,17 @@ export const useWalletConnectConnection = () => {
           await open();
           console.log("Modal opened, attempting connection...");
           
-          // Add a small delay to ensure modal is fully rendered
-          await new Promise(resolve => setTimeout(resolve, 1000));
+          // Reduced delay before connection attempt
+          await new Promise(resolve => setTimeout(resolve, 500));
           
           await connect({ connector: walletConnectConnector });
           
-          // Wait for connection to be confirmed
+          // Optimized connection check with shorter intervals
           let attempts = 0;
-          while (!isConnected && !address && attempts < 10) {
-            await new Promise(resolve => setTimeout(resolve, 1000));
+          while (!isConnected && !address && attempts < 20) {
+            await new Promise(resolve => setTimeout(resolve, 500));
             attempts++;
-            console.log(`Waiting for connection... Attempt ${attempts}/10`);
+            console.log(`Waiting for connection... Attempt ${attempts}/20`);
           }
           
           if (!isConnected || !address) {
@@ -61,16 +61,17 @@ export const useWalletConnectConnection = () => {
       const connectedAddress = await connectionPromise;
       console.log("WalletConnect connection successful:", connectedAddress);
       
-      // Check network after successful connection
-      await ensureArbitrumNetwork();
+      // Optimized network check
+      await Promise.race([
+        ensureArbitrumNetwork(),
+        new Promise((_, reject) => setTimeout(() => reject(new Error("Network check timed out")), 5000))
+      ]);
       
-      // Ensure we return a string array with the address
       return [connectedAddress as string];
       
     } catch (error: any) {
       console.error("WalletConnect error:", error);
       
-      // Only show error toast for actual errors, not user cancellations
       if (error.message !== "User rejected the request." && 
           !error.message?.includes("User closed modal")) {
         toast({
