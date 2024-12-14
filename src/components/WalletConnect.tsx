@@ -17,30 +17,18 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     if (!chainId) return "";
     
     console.log("Current chainId:", chainId);
-    console.log("Type of chainId:", typeof chainId);
     
-    // Direct check for Ethereum Mainnet - convert all to strings for comparison
-    const chainIdStr = String(chainId).toLowerCase();
-    if (chainIdStr === "0x1" || chainIdStr === "1") {
-      console.log("✅ Ethereum Mainnet detected");
-      return " (Ethereum Mainnet)";
+    // Normalize chainId to string format
+    const normalizedChainId = chainId.toString().toLowerCase();
+    
+    // Check for Ethereum Mainnet
+    if (normalizedChainId === "0x1" || normalizedChainId === "1") {
+      console.log("✅ Connected to Ethereum Mainnet");
+      return " (Ethereum)";
     }
     
-    // Convert chainId to hex if it's a number
-    const hexChainId = typeof chainId === 'string' 
-      ? chainId 
-      : `0x${Number(chainId).toString(16)}`;
-    console.log("Converted hexChainId:", hexChainId);
-    
-    // Check supported chains
-    const chain = SUPPORTED_CHAINS[hexChainId];
-    if (chain) {
-      console.log("Found chain configuration:", chain);
-      return ` (${chain.chainName})`;
-    }
-    
-    console.log("❌ Unknown network:", chainId);
-    return ` (Unknown Network)`;
+    // For other networks, just show a generic label
+    return "";
   };
 
   return (
