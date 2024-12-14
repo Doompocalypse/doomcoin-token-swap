@@ -139,11 +139,10 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           ethValue={ethValue}
           onAmountChange={setUsdAmount}
         />
-        <div className="text-sm text-white text-center bg-transparent p-2 rounded border border-[#8E9196]/20">
-          {isMobile ? (
-            "Token swapping is currently only available on desktop devices"
-          ) : (
-            "Please ensure you are connected to the Arbitrum One network before swapping tokens"
+        <div className="text-sm text-white text-center bg-transparent p-2 rounded border border-[#8E9196]/20 space-y-2">
+          <p>Please ensure you are connected to the Arbitrum One network before swapping tokens</p>
+          {isMobile && (
+            <p className="text-red-400">Token swapping is currently only available on desktop devices</p>
           )}
         </div>
         <SwapButton
