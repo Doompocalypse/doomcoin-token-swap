@@ -21,16 +21,16 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen p-4 md:p-8">
-      <div className="max-w-6xl mx-auto space-y-8">
+    <div className="min-h-screen bg-[#1A1F2C] p-4 md:p-8">
+      <div className="max-w-2xl mx-auto space-y-8">
         <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-cyan-400 to-purple-600 bg-clip-text text-transparent">
-            Crypto Exchange Bot
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] bg-clip-text text-transparent">
+            Swap Tokens
           </h1>
           <WalletConnect onConnect={handleConnect} />
         </div>
 
-        <div className="grid md:grid-cols-2 gap-8">
+        <div className="space-y-8">
           <TokenExchange isConnected={isConnected} />
           <TransactionHistory />
         </div>

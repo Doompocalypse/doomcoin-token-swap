@@ -79,37 +79,34 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   };
 
   return (
-    <Card className="p-6 space-y-4">
-      <h2 className="text-xl font-semibold">Exchange Tokens</h2>
-      
+    <Card className="p-6 space-y-4 bg-[#221F26] border-[#8E9196]/20">
       <div className="space-y-4">
         <div>
-          <label className="block text-sm mb-2">Amount (ETH)</label>
+          <div className="flex justify-between items-center mb-2">
+            <label className="text-sm text-[#8E9196]">Amount (ETH)</label>
+            <span className="text-xs text-[#8E9196]">
+              1 ETH = ${ethPrice.toLocaleString()} USD
+            </span>
+          </div>
           <Input
             type="number"
             placeholder="0.0"
             value={amount}
             onChange={(e) => setAmount(e.target.value)}
-            className="bg-secondary"
+            className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#9b87f5] text-lg"
           />
-          <p className="mt-2 text-sm text-muted-foreground">
-            ≈ ${usdValue} USD (1 ETH = ${ethPrice.toLocaleString()} USD)
-          </p>
+          <p className="mt-2 text-sm text-[#8E9196]">≈ ${usdValue} USD</p>
         </div>
 
-        <div className="flex justify-center">
-          <div className="gradient-border">
-            <Button
-              onClick={handleExchange}
-              disabled={!amount || !isConnected}
-              className="bg-background hover:bg-secondary transition-colors"
-            >
-              Exchange
-            </Button>
-          </div>
-        </div>
+        <Button
+          onClick={handleExchange}
+          disabled={!amount || !isConnected}
+          className="w-full bg-gradient-to-r from-[#9b87f5] to-[#8B5CF6] hover:opacity-90 transition-opacity text-white font-medium py-6"
+        >
+          {isConnected ? "Swap" : "Connect Wallet to Swap"}
+        </Button>
 
-        <div className="text-sm text-muted-foreground">
+        <div className="text-xs text-[#8E9196] space-y-1">
           <p>Contract Address: 0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073</p>
           <p>Bot Wallet: 0x2088891D40e755d83e1990d70fdb7e65a384e9B0</p>
         </div>
