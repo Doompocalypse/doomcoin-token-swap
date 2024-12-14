@@ -28,8 +28,8 @@ const fetchEthPrice = async () => {
 };
 
 const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
-  const [amount, setAmount] = useState("");
-  const [usdValue, setUsdValue] = useState("0.00");
+  const [usdAmount, setUsdAmount] = useState("");
+  const [ethValue, setEthValue] = useState("0.00");
   const { toast } = useToast();
 
   const { data: ethPrice = 2500 } = useQuery({
@@ -49,18 +49,18 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
   });
 
   useEffect(() => {
-    console.log("Calculating USD value with ETH price:", ethPrice);
-    const calculateUsdValue = () => {
-      if (!amount || isNaN(Number(amount))) {
-        setUsdValue("0.00");
+    console.log("Calculating ETH value with USD amount:", usdAmount);
+    const calculateEthValue = () => {
+      if (!usdAmount || isNaN(Number(usdAmount))) {
+        setEthValue("0.00");
         return;
       }
-      const usd = Number(amount) * ethPrice;
-      setUsdValue(usd.toFixed(2));
+      const eth = Number(usdAmount) / ethPrice;
+      setEthValue(eth.toFixed(6));
     };
 
-    calculateUsdValue();
-  }, [amount, ethPrice]);
+    calculateEthValue();
+  }, [usdAmount, ethPrice]);
 
   const handleExchange = () => {
     if (!isConnected) {
@@ -83,7 +83,7 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
       <div className="space-y-4">
         <div>
           <div className="flex justify-between items-center mb-2">
-            <label className="text-sm text-[#8E9196]">Amount (ETH)</label>
+            <label className="text-sm text-[#8E9196]">Amount (USD)</label>
             <span className="text-xs text-[#8E9196]">
               1 ETH = ${ethPrice.toLocaleString()} USD
             </span>
@@ -91,16 +91,16 @@ const TokenExchange = ({ isConnected }: TokenExchangeProps) => {
           <Input
             type="number"
             placeholder="0.0"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
+            value={usdAmount}
+            onChange={(e) => setUsdAmount(e.target.value)}
             className="bg-[#1A1F2C] border-[#8E9196]/20 focus:border-[#8E9196] text-lg"
           />
-          <p className="mt-2 text-sm text-[#8E9196]">≈ ${usdValue} USD</p>
+          <p className="mt-2 text-sm text-[#8E9196]">≈ {ethValue} ETH</p>
         </div>
 
         <Button
           onClick={handleExchange}
-          disabled={!amount || !isConnected}
+          disabled={!usdAmount || !isConnected}
           className="w-full bg-[#33C3F0] hover:opacity-90 transition-opacity text-white font-medium py-6"
         >
           {isConnected ? "Swap" : "Connect Wallet to Swap"}
