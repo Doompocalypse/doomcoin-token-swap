@@ -2,6 +2,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { useState, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useIsMobile } from "@/hooks/use-mobile";
 import AmountInput from "./exchange/AmountInput";
 import SwapButton from "./exchange/SwapButton";
 import ContractInfo from "./exchange/ContractInfo";
@@ -17,6 +18,17 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
   const { toast } = useToast();
+  const isMobile = useIsMobile();
+
+  useEffect(() => {
+    if (isMobile) {
+      toast({
+        title: "Desktop Only Feature",
+        description: "Token swapping is currently only available on desktop devices.",
+        variant: "destructive",
+      });
+    }
+  }, [isMobile, toast]);
 
   const { data: ethPrice = 2500 } = useQuery({
     queryKey: ["ethPrice"],
@@ -49,6 +61,15 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
   }, [usdAmount, ethPrice]);
 
   const handleExchange = async () => {
+    if (isMobile) {
+      toast({
+        title: "Desktop Only",
+        description: "Please use a desktop device to perform token swaps.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (!isConnected || !connectedAccount) {
       toast({
         title: "Wallet Required",
@@ -119,11 +140,15 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           onAmountChange={setUsdAmount}
         />
         <div className="text-sm text-white text-center bg-transparent p-2 rounded border border-[#8E9196]/20">
-          Please ensure you are connected to the Arbitrum One network before swapping tokens
+          {isMobile ? (
+            "Token swapping is currently only available on desktop devices"
+          ) : (
+            "Please ensure you are connected to the Arbitrum One network before swapping tokens"
+          )}
         </div>
         <SwapButton
           isConnected={isConnected}
-          disabled={!usdAmount || !isConnected}
+          disabled={!usdAmount || !isConnected || isMobile}
           onClick={handleExchange}
         />
         <ContractInfo />
