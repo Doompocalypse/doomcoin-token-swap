@@ -17,8 +17,6 @@ export const wagmiConfig = createConfig({
   connectors: w3mConnectors({ 
     projectId, 
     chains,
-    // Only include essential connector options
-    version: '2',
   }),
   publicClient,
 });
