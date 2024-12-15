@@ -15,7 +15,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [connectionType, setConnectionType] = useState<"metamask" | "walletconnect" | null>(null);
+  const [connectionType, setConnectionType] = useState<"metamask" | null>(null);
 
   const getNetworkName = () => {
     if (!chainId) return "";

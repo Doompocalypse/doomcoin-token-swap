@@ -5,7 +5,7 @@ import WalletButton from "./buttons/WalletButton";
 interface ConnectDialogProps {
   onConnectMetaMask: () => Promise<void>;
   isConnecting: boolean;
-  connectionType: "metamask" | "walletconnect" | null;
+  connectionType: "metamask" | null;
 }
 
 const ConnectDialog = ({

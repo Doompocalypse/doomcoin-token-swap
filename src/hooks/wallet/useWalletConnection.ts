@@ -10,8 +10,7 @@ export const useWalletConnection = (
     chainId,
     setAccounts,
     setChainId,
-    connectMetaMask,
-    connectWalletConnect
+    connectMetaMask
   } = useWalletCore(onConnect);
 
   useWalletEvents(onConnect, setChainId, setAccounts);
@@ -21,7 +20,7 @@ export const useWalletConnection = (
     onConnect
   );
 
-  const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
+  const connectWallet = async (walletType?: "metamask", selectedAccount?: string) => {
     console.log("Connecting wallet with type:", walletType);
     
     // If switching between connected accounts
@@ -34,8 +33,6 @@ export const useWalletConnection = (
 
     if (walletType === "metamask") {
       await connectMetaMask();
-    } else if (walletType === "walletconnect") {
-      await connectWalletConnect();
     }
   };
 
