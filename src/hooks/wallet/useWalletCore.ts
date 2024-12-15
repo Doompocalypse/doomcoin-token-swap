@@ -9,49 +9,67 @@ export const useWalletCore = (
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
 
+  const getMetaMaskProvider = () => {
+    console.log("Detecting MetaMask provider...");
+    
+    // Check for multiple providers
+    if (window.ethereum?.providers?.length > 0) {
+      console.log("Multiple providers detected:", window.ethereum.providers);
+      // Explicitly find MetaMask provider
+      const metaMaskProvider = window.ethereum.providers.find(
+        (p: any) => p.isMetaMask && !p.isCoinbaseWallet
+      );
+      if (metaMaskProvider) {
+        console.log("Found explicit MetaMask provider in providers array");
+        return metaMaskProvider;
+      }
+    }
+    
+    // Check single provider case
+    if (window.ethereum?.isMetaMask && !window.ethereum?.isCoinbaseWallet) {
+      console.log("Found MetaMask as single provider");
+      return window.ethereum;
+    }
+    
+    console.log("No valid MetaMask provider found");
+    return null;
+  };
+
   const connectMetaMask = async () => {
     console.log("Starting MetaMask connection attempt...");
     
-    // Get the specific MetaMask provider if multiple providers exist
-    let provider;
-    if (window.ethereum?.providers) {
-      provider = window.ethereum.providers.find(p => p.isMetaMask && !p.isCoinbaseWallet);
-      console.log("Found MetaMask provider in providers array:", provider);
-    } else if (window.ethereum?.isMetaMask && !window.ethereum?.isCoinbaseWallet) {
-      provider = window.ethereum;
-      console.log("Using window.ethereum as MetaMask provider");
-    }
-
-    const isMetaMaskInstalled = !!provider;
-    console.log("MetaMask detection:", {
-      provider,
-      isMetaMaskInstalled,
-      providersArray: window.ethereum?.providers,
-    });
+    const provider = getMetaMaskProvider();
     
-    if (!isMetaMaskInstalled) {
+    if (!provider) {
+      console.error("MetaMask provider not found");
       toast({
         title: "MetaMask Not Found",
-        description: "Please install MetaMask to connect.",
+        description: "Please install MetaMask to connect. If you have other wallet extensions, please disable them temporarily.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      console.log("Requesting fresh MetaMask connection...");
+      // Verify it's really MetaMask before proceeding
+      if (!provider.isMetaMask || provider.isCoinbaseWallet) {
+        throw new Error("Invalid wallet detected. Please ensure you're using MetaMask.");
+      }
+
+      console.log("Using verified MetaMask provider:", provider);
       
-      // First, clear any existing permissions
+      // Clear existing permissions
       try {
         await provider.request({
           method: "wallet_revokePermissions",
           params: [{ eth_accounts: {} }]
         });
+        console.log("Cleared existing permissions");
       } catch (error) {
         console.log("No permissions to revoke:", error);
       }
       
-      // Force new account selection
+      // Request accounts with force flag
       const accounts = await provider.request({
         method: "eth_requestAccounts",
         params: [{ force: true }]
@@ -95,14 +113,14 @@ export const useWalletCore = (
         
         toast({
           title: "Wallet Connected",
-          description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+          description: `Connected to MetaMask: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
         });
       }
     } catch (error: any) {
       console.error("MetaMask connection error:", error);
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect to MetaMask",
+        description: error.message || "Failed to connect to MetaMask. Please ensure you're using the correct wallet.",
         variant: "destructive",
       });
     }
