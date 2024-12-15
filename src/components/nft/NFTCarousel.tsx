@@ -19,6 +19,8 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
   useEffect(() => {
     if (!api || !nfts) return;
 
+    console.log('Setting up carousel rotation');
+
     // Function to move to next slide
     const rotateSlide = () => {
       if (current === nfts.length - 1) {
@@ -28,30 +30,32 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
         api.scrollTo(current + 1);
         setCurrent(prev => prev + 1);
       }
+      console.log('Rotating to next slide:', current);
     };
 
     // Set up the interval
-    const intervalId = setInterval(rotateSlide, 3000);
-    console.log('Setting up auto-rotation interval');
+    let intervalId = setInterval(rotateSlide, 3000);
+    console.log('Initial interval set');
 
-    // Reset interval on user interaction
+    // Handle user interaction
     const handleInteraction = () => {
+      console.log('User interaction detected');
+      setCurrent(api.selectedScrollSnap());
+      // Clear the existing interval
       clearInterval(intervalId);
-      console.log('User interaction detected, resetting interval');
-      const newIntervalId = setInterval(rotateSlide, 3000);
-      return () => clearInterval(newIntervalId);
+      // Create a new interval
+      intervalId = setInterval(rotateSlide, 3000);
+      console.log('Interval reset after user interaction');
     };
 
-    api.on('select', () => {
-      setCurrent(api.selectedScrollSnap());
-      handleInteraction();
-    });
+    // Add event listener for user interaction
+    api.on('select', handleInteraction);
 
-    // Cleanup
+    // Cleanup function
     return () => {
-      console.log('Cleaning up interval');
+      console.log('Cleaning up carousel effects');
       clearInterval(intervalId);
-      api.off('select');
+      api.off('select', handleInteraction);
     };
   }, [api, current, nfts]);
 
