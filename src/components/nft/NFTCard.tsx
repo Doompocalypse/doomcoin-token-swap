@@ -70,7 +70,7 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
         <div className="flex-1 min-h-0">
           <ScrollArea className="h-[120px] pr-4">
             {paragraphs.map((paragraph, index) => (
-              <p key={index} className="text-gray-300 text-sm mb-2">
+              <p key={index} className="text-gray-300 text-sm mb-4 last:mb-0">
                 {paragraph}
               </p>
             ))}
