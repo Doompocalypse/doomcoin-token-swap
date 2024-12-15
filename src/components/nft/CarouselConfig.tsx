@@ -1,5 +1,6 @@
 import useEmblaCarousel from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
+import { useCallback, useEffect } from 'react';
 
 export const useCarouselConfig = () => {
   const autoplayOptions = {
@@ -8,18 +9,44 @@ export const useCarouselConfig = () => {
     rootNode: (emblaRoot: any) => emblaRoot.parentElement,
   };
   
-  const [emblaRef] = useEmblaCarousel(
+  const [emblaRef, emblaApi] = useEmblaCarousel(
     { 
       loop: true, 
-      align: "start", 
-      slidesToScroll: 1,
-      dragFree: false,
+      align: "start",
+      dragFree: true,
       containScroll: "trimSnaps",
-      skipSnaps: false,
-      duration: 50,
+      duration: 50
     }, 
     [Autoplay(autoplayOptions)]
   );
+
+  // Reset autoplay when component mounts or updates
+  useEffect(() => {
+    if (emblaApi) {
+      console.log("Initializing carousel autoplay");
+      emblaApi.plugins().autoplay?.reset();
+    }
+  }, [emblaApi]);
+
+  // Handle autoplay reset on user interaction
+  const onInteractionEnd = useCallback(() => {
+    if (emblaApi) {
+      console.log("Resetting autoplay after interaction");
+      emblaApi.plugins().autoplay?.reset();
+    }
+  }, [emblaApi]);
+
+  useEffect(() => {
+    if (emblaApi) {
+      emblaApi.on('pointerUp', onInteractionEnd);
+      emblaApi.on('dragEnd', onInteractionEnd);
+      
+      return () => {
+        emblaApi.off('pointerUp', onInteractionEnd);
+        emblaApi.off('dragEnd', onInteractionEnd);
+      };
+    }
+  }, [emblaApi, onInteractionEnd]);
 
   return emblaRef;
 };
