@@ -18,13 +18,7 @@ export const useMetaMaskConnection = () => {
     try {
       console.log("Requesting fresh MetaMask connection...");
       
-      // Force a fresh connection request
-      await window.ethereum.request({
-        method: "wallet_requestPermissions",
-        params: [{ eth_accounts: {} }]
-      });
-      
-      // After permission granted, request accounts
+      // First get accounts without forcing network switch
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -32,7 +26,13 @@ export const useMetaMaskConnection = () => {
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        await ensureArbitrumNetwork();
+        // After successful connection, check network
+        try {
+          await ensureArbitrumNetwork();
+        } catch (networkError) {
+          console.warn("Network switch failed, but wallet is connected:", networkError);
+          // Don't throw here - we'll let the user switch networks manually if needed
+        }
         return accounts;
       }
       
