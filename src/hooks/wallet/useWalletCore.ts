@@ -10,8 +10,20 @@ export const useWalletCore = (
   const { toast } = useToast();
 
   const connectMetaMask = async () => {
-    // Check specifically for MetaMask
-    const isMetaMaskInstalled = window.ethereum?.isMetaMask && !window.ethereum?.isCoinbaseWallet;
+    // Strict check for MetaMask - must be the primary provider
+    const isMetaMaskInstalled = window.ethereum?.isMetaMask && 
+      !window.ethereum?.isCoinbaseWallet && 
+      (!window.ethereum?.providers || // If no providers array
+       (window.ethereum?.providers && // Or if providers array exists
+        window.ethereum.providers[0]?.isMetaMask && // First provider is MetaMask
+        !window.ethereum.providers[0]?.isCoinbaseWallet)); // And not Coinbase
+
+    console.log("MetaMask detection:", {
+      isMetaMask: window.ethereum?.isMetaMask,
+      isCoinbaseWallet: window.ethereum?.isCoinbaseWallet,
+      providers: window.ethereum?.providers,
+      isMetaMaskInstalled
+    });
     
     if (!isMetaMaskInstalled) {
       toast({

@@ -7,6 +7,10 @@ interface Window {
     isWalletConnect?: boolean;
     isMetaMask?: boolean;
     isCoinbaseWallet?: boolean;
+    providers?: {
+      isMetaMask?: boolean;
+      isCoinbaseWallet?: boolean;
+    }[];
     disconnect?: () => Promise<void>;
   };
 }
