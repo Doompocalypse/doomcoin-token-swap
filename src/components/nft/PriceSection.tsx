@@ -45,7 +45,7 @@ const PriceSection = ({
           disabled={isPurchased}
           className={`${isPurchased ? 'bg-gray-500' : 'bg-white hover:bg-white/90'} text-black`}
         >
-          {isPurchased ? "Owned" : "Purchase"}
+          {isPurchased ? "Owned" : "Mint NFT"}
         </Button>
       </div>
     </div>
