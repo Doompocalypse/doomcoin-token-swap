@@ -10,19 +10,23 @@ export const useWalletCore = (
   const { toast } = useToast();
 
   const connectMetaMask = async () => {
-    // Strict check for MetaMask - must be the primary provider
-    const isMetaMaskInstalled = window.ethereum?.isMetaMask && 
-      !window.ethereum?.isCoinbaseWallet && 
-      (!window.ethereum?.providers || // If no providers array
-       (window.ethereum?.providers && // Or if providers array exists
-        window.ethereum.providers[0]?.isMetaMask && // First provider is MetaMask
-        !window.ethereum.providers[0]?.isCoinbaseWallet)); // And not Coinbase
+    console.log("Starting MetaMask connection attempt...");
+    
+    // Get the specific MetaMask provider if multiple providers exist
+    let provider;
+    if (window.ethereum?.providers) {
+      provider = window.ethereum.providers.find(p => p.isMetaMask && !p.isCoinbaseWallet);
+      console.log("Found MetaMask provider in providers array:", provider);
+    } else if (window.ethereum?.isMetaMask && !window.ethereum?.isCoinbaseWallet) {
+      provider = window.ethereum;
+      console.log("Using window.ethereum as MetaMask provider");
+    }
 
+    const isMetaMaskInstalled = !!provider;
     console.log("MetaMask detection:", {
-      isMetaMask: window.ethereum?.isMetaMask,
-      isCoinbaseWallet: window.ethereum?.isCoinbaseWallet,
-      providers: window.ethereum?.providers,
-      isMetaMaskInstalled
+      provider,
+      isMetaMaskInstalled,
+      providersArray: window.ethereum?.providers,
     });
     
     if (!isMetaMaskInstalled) {
@@ -39,7 +43,7 @@ export const useWalletCore = (
       
       // First, clear any existing permissions
       try {
-        await window.ethereum.request({
+        await provider.request({
           method: "wallet_revokePermissions",
           params: [{ eth_accounts: {} }]
         });
@@ -48,28 +52,28 @@ export const useWalletCore = (
       }
       
       // Force new account selection
-      const accounts = await window.ethereum.request({
+      const accounts = await provider.request({
         method: "eth_requestAccounts",
-        params: [{ force: true }] // Force new account selection
+        params: [{ force: true }]
       });
       
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        const currentChainId = await window.ethereum.request({
+        const currentChainId = await provider.request({
           method: 'eth_chainId'
         });
         
         if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
           try {
-            await window.ethereum.request({
+            await provider.request({
               method: 'wallet_switchEthereumChain',
               params: [{ chainId: ARBITRUM_CHAIN_ID }],
             });
           } catch (switchError: any) {
             console.error("Network switch error:", switchError);
             if (switchError.code === 4902) {
-              await window.ethereum.request({
+              await provider.request({
                 method: 'wallet_addEthereumChain',
                 params: [{
                   chainId: ARBITRUM_CHAIN_ID,
