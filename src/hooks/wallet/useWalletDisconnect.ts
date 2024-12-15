@@ -1,10 +1,12 @@
 import { useToast } from "@/hooks/use-toast";
+import { useDisconnect } from 'wagmi';
 
 export const useWalletDisconnect = (
   setAccounts: (accounts: string[]) => void,
   onConnect: (connected: boolean) => void
 ) => {
   const { toast } = useToast();
+  const { disconnect: disconnectWagmi } = useDisconnect();
 
   const disconnectWallet = async () => {
     try {
@@ -14,24 +16,20 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // For WalletConnect
+      // Disconnect WalletConnect if active
       if (window.ethereum?.isWalletConnect) {
-        try {
-          await window.ethereum.disconnect();
-          console.log("WalletConnect disconnected");
-        } catch (error) {
-          console.error("Error disconnecting WalletConnect:", error);
-        }
+        console.log("Disconnecting WalletConnect...");
+        disconnectWagmi();
       }
       
       // For MetaMask, request new permissions to force disconnect
       if (window.ethereum?.isMetaMask) {
         try {
+          console.log("Resetting MetaMask permissions...");
           await window.ethereum.request({
             method: "wallet_requestPermissions",
             params: [{ eth_accounts: {} }],
           });
-          console.log("MetaMask permissions reset");
         } catch (error) {
           // User rejected the permission request, which effectively disconnects them
           console.log("User rejected connection after disconnect request");
@@ -67,6 +65,12 @@ export const useWalletDisconnect = (
       // Clear local state immediately
       setAccounts([]);
       onConnect(false);
+      
+      // Disconnect WalletConnect if active
+      if (window.ethereum?.isWalletConnect) {
+        console.log("Force disconnecting WalletConnect...");
+        disconnectWagmi();
+      }
       
       // Remove all event listeners
       if (window.ethereum) {
