@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, Wallet2 } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -40,11 +40,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const handleConnectMetaMask = async () => {
     console.log("Connecting MetaMask...");
     await connectWallet("metamask");
-  };
-
-  const handleConnectWalletConnect = async () => {
-    console.log("Connecting WalletConnect...");
-    await connectWallet("walletconnect");
   };
 
   if (accounts && accounts.length > 0) {
@@ -90,10 +85,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
         <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleConnectWalletConnect} className="cursor-pointer">
-          <Wallet2 className="mr-2 h-4 w-4" />
-          WalletConnect
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
