@@ -10,7 +10,10 @@ export const useWalletCore = (
   const { toast } = useToast();
 
   const connectMetaMask = async () => {
-    if (!window.ethereum?.isMetaMask) {
+    // Check specifically for MetaMask
+    const isMetaMaskInstalled = window.ethereum?.isMetaMask && !window.ethereum?.isCoinbaseWallet;
+    
+    if (!isMetaMaskInstalled) {
       toast({
         title: "MetaMask Not Found",
         description: "Please install MetaMask to connect.",

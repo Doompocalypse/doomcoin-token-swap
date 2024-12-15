@@ -6,6 +6,7 @@ interface Window {
     removeAllListeners?: (event: string) => void;
     isWalletConnect?: boolean;
     isMetaMask?: boolean;
+    isCoinbaseWallet?: boolean;
     disconnect?: () => Promise<void>;
   };
 }
