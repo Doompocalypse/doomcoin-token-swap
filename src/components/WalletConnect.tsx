@@ -81,7 +81,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       </DialogTrigger>
       <ConnectDialog
         onConnectMetaMask={handleConnectMetaMask}
-        onConnectWalletConnect={() => {}}
         isConnecting={isConnecting}
         connectionType={connectionType}
       />
