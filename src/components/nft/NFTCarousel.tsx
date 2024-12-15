@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -9,51 +9,18 @@ import {
 import NFTCard from './NFTCard';
 import { useNFTData } from './useNFTData';
 import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
+import { useCarouselRotation } from '@/hooks/useCarouselRotation';
 
-const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
+const NFTCarousel = memo(({ connectedAccount }: { connectedAccount?: string }) => {
   const { nfts, purchasedNfts } = useNFTData(connectedAccount);
   const handlePurchase = useNFTPurchaseHandler(connectedAccount);
-  const [api, setApi] = useState<any>(null);
-  const [current, setCurrent] = useState(0);
+  const { setApi } = useCarouselRotation({ 
+    itemsLength: nfts?.length || 0,
+    name: 'nft-carousel'
+  });
 
   console.log('NFTCarousel render - nfts:', nfts);
   console.log('NFTCarousel render - purchasedNfts:', purchasedNfts);
-
-  useEffect(() => {
-    if (!api || !nfts) return;
-
-    console.log('Setting up carousel rotation');
-
-    const rotateSlide = () => {
-      if (current === nfts.length - 1) {
-        api.scrollTo(0);
-        setCurrent(0);
-      } else {
-        api.scrollTo(current + 1);
-        setCurrent(prev => prev + 1);
-      }
-      console.log('Rotating to next slide:', current);
-    };
-
-    let intervalId = setInterval(rotateSlide, 3000);
-    console.log('Initial interval set');
-
-    const handleInteraction = () => {
-      console.log('User interaction detected');
-      setCurrent(api.selectedScrollSnap());
-      clearInterval(intervalId);
-      intervalId = setInterval(rotateSlide, 3000);
-      console.log('Interval reset after user interaction');
-    };
-
-    api.on('select', handleInteraction);
-
-    return () => {
-      console.log('Cleaning up carousel effects');
-      clearInterval(intervalId);
-      api.off('select', handleInteraction);
-    };
-  }, [api, current, nfts]);
 
   if (!nfts) return null;
 
@@ -88,6 +55,8 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
       </Carousel>
     </div>
   );
-};
+});
+
+NFTCarousel.displayName = 'NFTCarousel';
 
 export default NFTCarousel;

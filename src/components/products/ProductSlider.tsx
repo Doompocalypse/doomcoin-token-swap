@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { memo } from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -7,6 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import ProductCard from "./ProductCard";
+import { useCarouselRotation } from '@/hooks/useCarouselRotation';
 
 const products = [
   {
@@ -39,45 +40,11 @@ const products = [
   }
 ];
 
-const ProductSlider = () => {
-  const [api, setApi] = useState<any>(null);
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    if (!api) return;
-
-    console.log('Setting up product carousel rotation');
-
-    const rotateSlide = () => {
-      if (current === products.length - 1) {
-        api.scrollTo(0);
-        setCurrent(0);
-      } else {
-        api.scrollTo(current + 1);
-        setCurrent(prev => prev + 1);
-      }
-      console.log('Rotating to next product slide:', current);
-    };
-
-    let intervalId = setInterval(rotateSlide, 3000);
-    console.log('Initial product interval set');
-
-    const handleInteraction = () => {
-      console.log('User interaction detected on product slider');
-      setCurrent(api.selectedScrollSnap());
-      clearInterval(intervalId);
-      intervalId = setInterval(rotateSlide, 3000);
-      console.log('Product interval reset after user interaction');
-    };
-
-    api.on('select', handleInteraction);
-
-    return () => {
-      console.log('Cleaning up product carousel effects');
-      clearInterval(intervalId);
-      api.off('select', handleInteraction);
-    };
-  }, [api, current]);
+const ProductSlider = memo(() => {
+  const { setApi } = useCarouselRotation({ 
+    itemsLength: products.length,
+    name: 'product-slider'
+  });
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 relative">
@@ -104,6 +71,8 @@ const ProductSlider = () => {
       </Carousel>
     </div>
   );
-};
+});
+
+ProductSlider.displayName = 'ProductSlider';
 
 export default ProductSlider;

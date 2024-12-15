@@ -57,7 +57,7 @@ const About = () => {
                     Token Swap
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
-                    About
+                    NFT Marketplace
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
