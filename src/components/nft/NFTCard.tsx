@@ -31,7 +31,7 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const formattedPrice = new Intl.NumberFormat('en-US').format(price);
 
   return (
-    <Card className="w-[350px] bg-black/40 border-[#8E9196]/20 flex flex-col">
+    <Card className="w-[350px] h-[500px] bg-black/40 border-[#8E9196]/20 flex flex-col">
       <div className="pt-4">
         <div className="aspect-video w-full">
           <iframe
@@ -42,12 +42,12 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
           />
         </div>
       </div>
-      <div className="p-6 flex flex-col flex-grow">
+      <div className="p-6 flex flex-col flex-1">
         <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
-        <div className="flex-grow overflow-y-auto mb-4">
+        <div className="flex-1 overflow-y-auto mb-4">
           <p className="text-gray-300 text-sm">{description}</p>
         </div>
-        <div className="flex justify-between items-center mt-auto">
+        <div className="flex justify-between items-center">
           <span className="text-white font-bold">${formattedPrice} DMC</span>
           <Button 
             onClick={handlePurchase}
