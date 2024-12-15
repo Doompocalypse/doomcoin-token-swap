@@ -54,8 +54,8 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const paragraphs = description?.split('\n').filter(p => p.trim()) || [];
 
   return (
-    <Card className="w-[350px] h-[500px] bg-black/40 border-[#8E9196]/20 flex flex-col">
-      <div className="p-4 pb-0">
+    <Card className="w-[350px] h-[480px] bg-black/40 border-[#8E9196]/20 flex flex-col">
+      <div className="p-4 pb-2">
         <div className="aspect-video w-full">
           <iframe
             src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
@@ -65,19 +65,17 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
           />
         </div>
       </div>
-      <div className="flex flex-col h-[calc(500px-56.25%-32px)] p-6">
+      <div className="flex flex-col flex-1 p-4">
         <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
-        <div className="flex-1 overflow-hidden">
-          <ScrollArea className="h-[180px] pr-4">
-            {paragraphs.map((paragraph, index) => (
-              <p key={index} className="text-gray-300 text-sm mb-2">
-                {paragraph}
-              </p>
-            ))}
-          </ScrollArea>
-        </div>
-        <div className="pt-4 mt-2 border-t border-gray-700">
-          <div className="text-sm text-yellow-400 mb-2">Sale ends {timeLeft}</div>
+        <ScrollArea className="flex-1 h-[140px] pr-4 mb-2">
+          {paragraphs.map((paragraph, index) => (
+            <p key={index} className="text-gray-300 text-sm mb-2">
+              {paragraph}
+            </p>
+          ))}
+        </ScrollArea>
+        <div className="border-t border-gray-700 pt-2">
+          <div className="text-sm text-yellow-400 mb-1">Sale ends {timeLeft}</div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
               <span className="text-gray-400 line-through text-sm">${formattedOriginalPrice} DMC</span>
