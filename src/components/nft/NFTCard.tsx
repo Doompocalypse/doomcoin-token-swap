@@ -31,8 +31,8 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const formattedPrice = new Intl.NumberFormat('en-US').format(price);
 
   return (
-    <Card className="w-[350px] bg-black/40 border-[#8E9196]/20 h-[420px] flex flex-col">
-      <div className="w-full h-[200px] overflow-hidden rounded-t-lg">
+    <Card className="w-[350px] bg-black/40 border-[#8E9196]/20 flex flex-col">
+      <div className="aspect-video w-full">
         <iframe
           src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
           className="w-full h-full"
