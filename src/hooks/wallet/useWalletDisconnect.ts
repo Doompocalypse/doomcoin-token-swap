@@ -16,13 +16,20 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // Disconnect WalletConnect if active
+      // Handle WalletConnect disconnection
       if (window.ethereum?.isWalletConnect) {
         console.log("Disconnecting WalletConnect...");
+        // First disconnect wagmi
         disconnectWagmi();
+        // Then clear any WalletConnect cached data
+        const wcKeys = Object.keys(window.localStorage).filter(key => 
+          key.toLowerCase().includes('wc@')
+        );
+        wcKeys.forEach(key => window.localStorage.removeItem(key));
+        console.log("WalletConnect data cleared");
       }
       
-      // For MetaMask, request new permissions to force disconnect
+      // Handle MetaMask disconnection
       if (window.ethereum?.isMetaMask) {
         try {
           console.log("Resetting MetaMask permissions...");
@@ -66,10 +73,17 @@ export const useWalletDisconnect = (
       setAccounts([]);
       onConnect(false);
       
-      // Disconnect WalletConnect if active
+      // Handle WalletConnect force disconnection
       if (window.ethereum?.isWalletConnect) {
         console.log("Force disconnecting WalletConnect...");
+        // First disconnect wagmi
         disconnectWagmi();
+        // Then clear any WalletConnect cached data
+        const wcKeys = Object.keys(window.localStorage).filter(key => 
+          key.toLowerCase().includes('wc@')
+        );
+        wcKeys.forEach(key => window.localStorage.removeItem(key));
+        console.log("WalletConnect data forcefully cleared");
       }
       
       // Remove all event listeners
