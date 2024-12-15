@@ -10,7 +10,8 @@ export const useWalletConnection = (
     chainId,
     setAccounts,
     setChainId,
-    connectMetaMask
+    connectMetaMask,
+    connectCoinbase
   } = useWalletCore(onConnect);
 
   useWalletEvents(onConnect, setChainId, setAccounts);
@@ -20,7 +21,7 @@ export const useWalletConnection = (
     onConnect
   );
 
-  const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
+  const connectWallet = async (walletType?: "metamask" | "coinbase" | "walletconnect", selectedAccount?: string) => {
     console.log("Connecting wallet with type:", walletType);
     
     // Clear any existing connections first
@@ -36,6 +37,8 @@ export const useWalletConnection = (
 
     if (walletType === "metamask") {
       await connectMetaMask();
+    } else if (walletType === "coinbase") {
+      await connectCoinbase();
     } else if (walletType === "walletconnect") {
       console.log("Opening WalletConnect modal");
       const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
