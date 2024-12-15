@@ -9,7 +9,62 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      mock_nfts: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          price: number
+          video_url: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          price: number
+          video_url: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          price?: number
+          video_url?: string
+        }
+        Relationships: []
+      }
+      mock_purchases: {
+        Row: {
+          buyer_address: string
+          id: string
+          nft_id: string
+          purchase_date: string
+        }
+        Insert: {
+          buyer_address: string
+          id?: string
+          nft_id: string
+          purchase_date?: string
+        }
+        Update: {
+          buyer_address?: string
+          id?: string
+          nft_id?: string
+          purchase_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mock_purchases_nft_id_fkey"
+            columns: ["nft_id"]
+            isOneToOne: false
+            referencedRelation: "mock_nfts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

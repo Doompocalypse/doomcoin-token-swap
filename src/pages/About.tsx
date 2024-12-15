@@ -1,7 +1,8 @@
 import { useToast } from "@/components/ui/use-toast";
 import WalletConnect from "@/components/WalletConnect";
 import VideoBackground from "@/components/VideoBackground";
-import { Suspense } from "react";
+import NFTCarousel from "@/components/nft/NFTCarousel";
+import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   DropdownMenu,
@@ -20,9 +21,11 @@ const LoadingFallback = () => (
 const About = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [connectedAccount, setConnectedAccount] = useState<string>();
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Connection status:", connected, "Account:", account);
+    setConnectedAccount(account);
   };
 
   return (
@@ -57,15 +60,15 @@ const About = () => {
         </header>
 
         {/* Main Content */}
-        <main className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
-          <div className="w-full max-w-2xl mx-auto text-white">
-            <h2 className="text-3xl font-bold mb-6">About DoomCoin Token Swap</h2>
-            <p className="text-lg mb-4">
-              DoomCoin Token Swap is a decentralized exchange platform that allows users to easily swap tokens on the Arbitrum network.
-            </p>
-            <p className="text-lg mb-4">
-              Our platform provides a secure and efficient way to trade cryptocurrencies with minimal fees and maximum convenience.
-            </p>
+        <main className="pt-24 pb-12 px-4">
+          <div className="w-full max-w-5xl mx-auto space-y-8">
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-bold text-white">Featured NFTs</h2>
+              <p className="text-gray-300 max-w-2xl mx-auto">
+                Discover and collect unique digital artworks. Purchase with DMC tokens on the Arbitrum One network.
+              </p>
+            </div>
+            <NFTCarousel connectedAccount={connectedAccount} />
           </div>
         </main>
       </div>
