@@ -32,7 +32,15 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
   };
   
   const [emblaRef] = useEmblaCarousel(
-    { loop: true, align: "start", slidesToScroll: 2 }, 
+    { 
+      loop: true, 
+      align: "start", 
+      slidesToScroll: 1,
+      dragFree: false,
+      containScroll: "trimSnaps",
+      skipSnaps: false,
+      speed: 10, // Slower transition speed for smoother animation
+    }, 
     [Autoplay(autoplayOptions)]
   );
 
@@ -106,11 +114,15 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
         opts={{
           align: "start",
           loop: true,
+          skipSnaps: false,
+          dragFree: false,
+          containScroll: "trimSnaps",
+          speed: 10,
         }}
       >
         <CarouselContent className="-ml-4">
           {nfts.map((nft) => (
-            <CarouselItem key={nft.id} className="pl-4 basis-1/2">
+            <CarouselItem key={nft.id} className="pl-4 basis-1/2 transition-transform duration-300">
               <NFTCard
                 {...nft}
                 videoUrl={nft.video_url}
