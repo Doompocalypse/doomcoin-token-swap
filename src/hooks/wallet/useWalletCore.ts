@@ -20,22 +20,11 @@ export const useWalletCore = (
     }
 
     try {
-      console.log("Requesting fresh MetaMask connection...");
+      console.log("Requesting MetaMask connection...");
       
-      // First, clear any existing permissions
-      try {
-        await window.ethereum.request({
-          method: "wallet_revokePermissions",
-          params: [{ eth_accounts: {} }]
-        });
-      } catch (error) {
-        console.log("No permissions to revoke:", error);
-      }
-      
-      // Force new account selection
+      // Request accounts directly without trying to revoke permissions first
       const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts",
-        params: [{ force: true }] // Force new account selection
+        method: "eth_requestAccounts"
       });
       
       console.log("Accounts after selection:", accounts);
