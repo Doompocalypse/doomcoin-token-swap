@@ -18,7 +18,7 @@ interface NFTCardProps {
 const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchased }: NFTCardProps) => {
   const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState('');
-  const saleEndDate = new Date('2024-01-30T00:00:00');
+  const saleEndDate = new Date('2025-01-30T00:00:00');
   const originalPrice = price * 2; // Double the original price
   const discountedPrice = price; // Current price is already the discounted price
 
