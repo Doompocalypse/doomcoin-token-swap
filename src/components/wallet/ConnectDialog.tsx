@@ -1,6 +1,7 @@
 import { Wallet, Wallet2, CreditCard, Smartphone } from "lucide-react";
 import DialogLayout from "./dialog/DialogLayout";
 import WalletButton from "./buttons/WalletButton";
+import { useWeb3Modal } from '@web3modal/react';
 
 interface ConnectDialogProps {
   onConnectMetaMask: () => Promise<void>;
@@ -15,7 +16,33 @@ const ConnectDialog = ({
   isConnecting,
   connectionType,
 }: ConnectDialogProps) => {
+  const { open } = useWeb3Modal();
+  
   console.log("ConnectDialog render, isConnecting:", isConnecting, "connectionType:", connectionType);
+  
+  const handleCoinbaseConnect = async () => {
+    try {
+      await open({ view: 'Connect', uri: 'coinbase' });
+    } catch (error) {
+      console.error("Coinbase connection error:", error);
+    }
+  };
+
+  const handleTrustWalletConnect = async () => {
+    try {
+      await open({ view: 'Connect', uri: 'trust' });
+    } catch (error) {
+      console.error("Trust Wallet connection error:", error);
+    }
+  };
+
+  const handleRainbowConnect = async () => {
+    try {
+      await open({ view: 'Connect', uri: 'rainbow' });
+    } catch (error) {
+      console.error("Rainbow connection error:", error);
+    }
+  };
   
   return (
     <DialogLayout>
@@ -28,7 +55,7 @@ const ConnectDialog = ({
         description="Connect using browser wallet"
       />
       <WalletButton
-        onClick={onConnectWalletConnect}
+        onClick={handleCoinbaseConnect}
         isConnecting={isConnecting}
         isActive={connectionType === "walletconnect"}
         icon={CreditCard}
@@ -36,7 +63,7 @@ const ConnectDialog = ({
         description="Connect using Coinbase Wallet"
       />
       <WalletButton
-        onClick={onConnectWalletConnect}
+        onClick={handleTrustWalletConnect}
         isConnecting={isConnecting}
         isActive={connectionType === "walletconnect"}
         icon={Smartphone}
@@ -44,7 +71,7 @@ const ConnectDialog = ({
         description="Connect using Trust Wallet"
       />
       <WalletButton
-        onClick={onConnectWalletConnect}
+        onClick={handleRainbowConnect}
         isConnecting={isConnecting}
         isActive={connectionType === "walletconnect"}
         icon={Wallet2}
