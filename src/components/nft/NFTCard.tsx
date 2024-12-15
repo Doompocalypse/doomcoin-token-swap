@@ -32,7 +32,7 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const formattedPrice = new Intl.NumberFormat('en-US').format(price);
 
   return (
-    <Card className="w-full max-w-sm mx-auto bg-black/40 border-[#8E9196]/20">
+    <Card className="w-full max-w-sm mx-auto bg-black/40 border-[#8E9196]/20 h-[420px] flex flex-col">
       <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
         <iframe
           src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
@@ -41,10 +41,12 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
           frameBorder="0"
         />
       </div>
-      <div className="p-6 space-y-4">
-        <h3 className="text-xl font-bold text-white">{name}</h3>
-        <p className="text-gray-300 text-sm max-h-32 overflow-y-auto">{description}</p>
-        <div className="flex justify-between items-center">
+      <div className="p-6 flex flex-col flex-grow">
+        <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
+        <div className="flex-grow overflow-y-auto mb-4">
+          <p className="text-gray-300 text-sm">{description}</p>
+        </div>
+        <div className="flex justify-between items-center mt-auto">
           <span className="text-white font-bold">${formattedPrice} DMC</span>
           <Button 
             onClick={handlePurchase}
