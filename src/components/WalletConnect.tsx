@@ -2,15 +2,13 @@ import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+  DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
 import { Wallet, Wallet2 } from "lucide-react";
-import { useState } from "react";
 
 interface WalletConnectProps {
   onConnect: (connected: boolean, account?: string) => void;
@@ -18,7 +16,6 @@ interface WalletConnectProps {
 
 const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWalletConnection(onConnect);
-  const [isOpen, setIsOpen] = useState(false);
 
   const formatAddress = (address: string) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
@@ -43,99 +40,63 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const handleConnectMetaMask = async () => {
     console.log("Connecting MetaMask...");
     await connectWallet("metamask");
-    setIsOpen(false);
   };
 
   const handleConnectWalletConnect = async () => {
     console.log("Connecting WalletConnect...");
     await connectWallet("walletconnect");
-    setIsOpen(false);
   };
 
   if (accounts && accounts.length > 0) {
     return (
-      <Dialog>
-        <DialogTrigger asChild>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
           <Button className="bg-white text-black hover:bg-white/90">
             {formatAddress(accounts[0])}{getNetworkName()}
           </Button>
-        </DialogTrigger>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Connected Account</DialogTitle>
-            <DialogDescription>
-              You are connected with account {formatAddress(accounts[0])}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex flex-col gap-4 py-4">
-            {accounts.length > 1 && (
-              <div className="flex flex-col gap-2">
-                <div className="font-semibold">Switch Account</div>
-                {accounts.map((account, index) => (
-                  <Button
-                    key={account}
-                    variant="outline"
-                    onClick={() => connectWallet(undefined, account)}
-                    className="w-full justify-start"
-                  >
-                    Account {index + 1}: {formatAddress(account)}
-                  </Button>
-                ))}
-              </div>
-            )}
-            <Button 
-              onClick={forceDisconnectWallet} 
-              variant="destructive"
-              className="w-full"
-            >
-              Disconnect Wallet
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-56">
+          {accounts.length > 1 && (
+            <>
+              <div className="px-2 py-1.5 text-sm font-semibold">Switch Account</div>
+              {accounts.map((account, index) => (
+                <DropdownMenuItem
+                  key={account}
+                  onClick={() => connectWallet(undefined, account)}
+                  className="cursor-pointer"
+                >
+                  Account {index + 1}: {formatAddress(account)}
+                </DropdownMenuItem>
+              ))}
+              <DropdownMenuSeparator />
+            </>
+          )}
+          <DropdownMenuItem onClick={forceDisconnectWallet} className="cursor-pointer text-red-500">
+            Disconnect Wallet
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
     );
   }
 
   return (
-    <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
         <Button className="bg-white text-black hover:bg-white/90">
           Connect Wallet
         </Button>
-      </DialogTrigger>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Connect Your Wallet</DialogTitle>
-          <DialogDescription>
-            Choose your preferred wallet to connect to our application. Make sure you're on the Arbitrum network.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col gap-4 py-4">
-          <Button
-            onClick={handleConnectMetaMask}
-            variant="outline"
-            className="w-full justify-start h-16"
-          >
-            <Wallet className="mr-4 h-6 w-6" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">MetaMask</span>
-              <span className="text-sm text-muted-foreground">Connect using browser wallet</span>
-            </div>
-          </Button>
-          <Button
-            onClick={handleConnectWalletConnect}
-            variant="outline"
-            className="w-full justify-start h-16"
-          >
-            <Wallet2 className="mr-4 h-6 w-6" />
-            <div className="flex flex-col items-start">
-              <span className="font-semibold">WalletConnect</span>
-              <span className="text-sm text-muted-foreground">Connect using WalletConnect</span>
-            </div>
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer">
+          <Wallet className="mr-2 h-4 w-4" />
+          MetaMask
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={handleConnectWalletConnect} className="cursor-pointer">
+          <Wallet2 className="mr-2 h-4 w-4" />
+          WalletConnect
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 };
 
