@@ -6,6 +6,12 @@ interface Window {
     removeAllListeners?: (event: string) => void;
     isWalletConnect?: boolean;
     isMetaMask?: boolean;
+    isCoinbaseWallet?: boolean;
+    providers?: Array<{
+      isMetaMask?: boolean;
+      isCoinbaseWallet?: boolean;
+      request?: (args: { method: string; params?: any[] }) => Promise<any>;
+    }>;
     disconnect?: () => Promise<void>;
   };
 }

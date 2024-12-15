@@ -14,7 +14,12 @@ export const detectWalletProviders = () => {
     
     // Check for Coinbase Wallet
     // Coinbase Wallet sets a specific provider property
-    if (window.ethereum.isCoinbaseWallet || (window.ethereum.providers && window.ethereum.providers.find(p => p.isCoinbaseWallet))) {
+    const isCoinbaseWallet = window.ethereum.isCoinbaseWallet;
+    const hasCoinbaseProvider = window.ethereum.providers?.some(
+      provider => provider.isCoinbaseWallet
+    );
+    
+    if (isCoinbaseWallet || hasCoinbaseProvider) {
       providers.isCoinbaseWallet = true;
     }
   }
