@@ -2,16 +2,13 @@ import { configureChains, createConfig } from 'wagmi';
 import { arbitrum } from 'wagmi/chains';
 import { EthereumClient, w3mConnectors, w3mProvider } from '@web3modal/ethereum';
 
-// WalletConnect Project ID
 const projectId = '0d63e4b93b8abc2ea0a58328d7e7c053';
 
-// Configure chains & providers with proper metadata
 const { chains, publicClient } = configureChains(
   [arbitrum],
   [w3mProvider({ projectId })]
 );
 
-// Set up wagmi config
 export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
@@ -21,10 +18,8 @@ export const wagmiConfig = createConfig({
   publicClient,
 });
 
-// Web3Modal Ethereum Client
 export const ethereumClient = new EthereumClient(wagmiConfig, chains);
 
-// Web3Modal Component Props
 export const web3modalProps = {
   projectId,
   ethereumClient,
@@ -35,8 +30,5 @@ export const web3modalProps = {
     description: 'Swap tokens on Arbitrum',
     url: window.location.origin,
     icons: ['https://avatars.githubusercontent.com/u/37784886']
-  },
-  standaloneChains: [arbitrum.id],
-  defaultChainId: arbitrum.id,
-  version: '2'
+  }
 };

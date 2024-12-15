@@ -46,21 +46,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     }
   };
 
-  const handleConnectWalletConnect = async () => {
-    try {
-      setIsConnecting(true);
-      setConnectionType("walletconnect");
-      console.log("Connecting WalletConnect...");
-      await connectWallet("walletconnect");
-      setDialogOpen(false);
-    } catch (error) {
-      console.error("WalletConnect connection error:", error);
-    } finally {
-      setIsConnecting(false);
-      setConnectionType(null);
-    }
-  };
-
   const handleSwitchAccount = async (account: string) => {
     console.log("Switching to account:", account);
     await connectWallet(undefined, account);
@@ -96,7 +81,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       </DialogTrigger>
       <ConnectDialog
         onConnectMetaMask={handleConnectMetaMask}
-        onConnectWalletConnect={handleConnectWalletConnect}
+        onConnectWalletConnect={() => {}}
         isConnecting={isConnecting}
         connectionType={connectionType}
       />
