@@ -13,7 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { Menu } from "lucide-react";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
@@ -45,22 +45,22 @@ const About = () => {
         <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                NFT Marketplace
-              </h1>
               <DropdownMenu>
-                <DropdownMenuTrigger className="inline-flex items-center px-3 py-1 text-sm text-white hover:text-gray-300">
-                  <ChevronDown className="h-4 w-4" />
+                <DropdownMenuTrigger className="p-2 hover:bg-white/10 rounded-md transition-colors">
+                  <Menu className="h-6 w-6 text-white" />
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-48 bg-white">
-                  <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer">
+                <DropdownMenuContent align="start" className="w-48 bg-white text-black border border-gray-200">
+                  <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                     Token Swap
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
+                  <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer hover:bg-gray-100">
                     NFT Marketplace
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
+              <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
+                NFT Marketplace
+              </h1>
             </div>
             <div className="flex items-center gap-4">
               <WalletConnect onConnect={handleConnect} />
@@ -86,7 +86,7 @@ const About = () => {
               <NFTCarousel connectedAccount={connectedAccount} />
             </ErrorBoundary>
 
-            {/* New Product Slider Section */}
+            {/* Product Slider Section */}
             <div className="space-y-8">
               <div className="text-center space-y-4">
                 <h2 className="text-3xl font-bold text-white">Featured Equipment</h2>
