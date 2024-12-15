@@ -35,14 +35,43 @@ export const useWalletCore = (
       // Force new account selection
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts",
-        params: [{ force: true }]
+        params: [{ force: true }] // Force new account selection
       });
       
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        await handleChainValidation();
+        const currentChainId = await window.ethereum.request({
+          method: 'eth_chainId'
+        });
+        
+        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: ARBITRUM_CHAIN_ID }],
+            });
+          } catch (switchError: any) {
+            console.error("Network switch error:", switchError);
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: ARBITRUM_CHAIN_ID,
+                  chainName: 'Arbitrum One',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                  blockExplorerUrls: ['https://arbiscan.io/']
+                }]
+              });
+            } else {
+              throw switchError;
+            }
+          }
+        }
+        
         setAccounts(accounts);
+        setChainId(ARBITRUM_CHAIN_ID);
         onConnect(true, accounts[0]);
         
         toast({
@@ -60,86 +89,11 @@ export const useWalletCore = (
     }
   };
 
-  const connectCoinbase = async () => {
-    // Check if Coinbase Wallet is available
-    if (!window.ethereum?.isCoinbaseWallet) {
-      window.open('https://www.coinbase.com/wallet', '_blank');
-      toast({
-        title: "Coinbase Wallet Not Found",
-        description: "Please install Coinbase Wallet to connect.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      console.log("Requesting Coinbase Wallet connection...");
-      
-      const accounts = await window.ethereum.request({
-        method: "eth_requestAccounts"
-      });
-      
-      console.log("Coinbase accounts:", accounts);
-      
-      if (accounts.length > 0) {
-        await handleChainValidation();
-        setAccounts(accounts);
-        onConnect(true, accounts[0]);
-        
-        toast({
-          title: "Wallet Connected",
-          description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
-        });
-      }
-    } catch (error: any) {
-      console.error("Coinbase Wallet connection error:", error);
-      toast({
-        title: "Connection Failed",
-        description: error.message || "Failed to connect to Coinbase Wallet",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleChainValidation = async () => {
-    const currentChainId = await window.ethereum.request({
-      method: 'eth_chainId'
-    });
-    
-    if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
-      try {
-        await window.ethereum.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: ARBITRUM_CHAIN_ID }],
-        });
-      } catch (switchError: any) {
-        console.error("Network switch error:", switchError);
-        if (switchError.code === 4902) {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{
-              chainId: ARBITRUM_CHAIN_ID,
-              chainName: 'Arbitrum One',
-              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-              blockExplorerUrls: ['https://arbiscan.io/']
-            }]
-          });
-        } else {
-          throw switchError;
-        }
-      }
-    }
-    
-    setChainId(ARBITRUM_CHAIN_ID);
-  };
-
   return {
     accounts,
     chainId,
     setAccounts,
     setChainId,
     connectMetaMask,
-    connectCoinbase,
   };
 };

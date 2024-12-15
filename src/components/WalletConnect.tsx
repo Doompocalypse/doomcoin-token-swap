@@ -42,11 +42,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     await connectWallet("metamask");
   };
 
-  const handleConnectCoinbase = async () => {
-    console.log("Connecting Coinbase Wallet...");
-    await connectWallet("coinbase");
-  };
-
   if (accounts && accounts.length > 0) {
     return (
       <DropdownMenu>
@@ -90,10 +85,6 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
         <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={handleConnectCoinbase} className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
-          <Wallet className="mr-2 h-4 w-4" />
-          Coinbase Wallet
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
