@@ -5,6 +5,14 @@ import Doomy from "@/components/Doomy";
 import VideoBackground from "@/components/VideoBackground";
 import { useState, Suspense } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
+import { useNavigate } from "react-router-dom";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { ChevronDown } from "lucide-react";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
@@ -28,6 +36,7 @@ const Index = () => {
   const [isConnected, setIsConnected] = useState(false);
   const [connectedAccount, setConnectedAccount] = useState<string>();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Connection status:", connected, "Account:", account);
@@ -43,9 +52,24 @@ const Index = () => {
           {/* Header */}
           <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-              <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                DoomCoin Token Swap
-              </h1>
+              <div className="flex items-center gap-4">
+                <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
+                  DoomCoin Token Swap
+                </h1>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="inline-flex items-center px-3 py-1 text-sm text-white hover:text-gray-300">
+                    <ChevronDown className="h-4 w-4" />
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="start" className="w-48 bg-white">
+                    <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer">
+                      Token Swap
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
+                      About
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
               <WalletConnect onConnect={handleConnect} />
             </div>
           </header>
