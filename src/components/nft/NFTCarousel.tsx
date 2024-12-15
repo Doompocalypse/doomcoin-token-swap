@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   Carousel,
   CarouselContent,
@@ -6,103 +6,15 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
 import NFTCard from './NFTCard';
-import useEmblaCarousel from 'embla-carousel-react';
-import Autoplay from 'embla-carousel-autoplay';
-import { useToast } from "@/components/ui/use-toast";
-
-interface NFT {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  video_url: string;
-}
+import { useCarouselConfig } from './CarouselConfig';
+import { useNFTData } from './useNFTData';
+import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
 
 const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
-  const { toast } = useToast();
-  
-  // Initialize autoplay plugin with configuration
-  const autoplayOptions = {
-    delay: 3000,
-    stopOnInteraction: false,
-    rootNode: (emblaRoot: any) => emblaRoot.parentElement,
-  };
-  
-  const [emblaRef] = useEmblaCarousel(
-    { 
-      loop: true, 
-      align: "start", 
-      slidesToScroll: 1,
-      dragFree: false,
-      containScroll: "trimSnaps",
-      skipSnaps: false,
-      duration: 50, // Animation duration in milliseconds (was previously 'speed')
-    }, 
-    [Autoplay(autoplayOptions)]
-  );
-
-  const { data: nfts } = useQuery({
-    queryKey: ['nfts'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('mock_nfts')
-        .select('*');
-      
-      if (error) throw error;
-      return data as NFT[];
-    }
-  });
-
-  const { data: purchasedNfts } = useQuery({
-    queryKey: ['purchased_nfts', connectedAccount],
-    queryFn: async () => {
-      if (!connectedAccount) return [];
-      const { data, error } = await supabase
-        .from('mock_purchases')
-        .select('nft_id')
-        .eq('buyer_address', connectedAccount);
-      
-      if (error) throw error;
-      return data.map(purchase => purchase.nft_id);
-    },
-    enabled: !!connectedAccount
-  });
-
-  const handlePurchase = async (nftId: string) => {
-    if (!connectedAccount) {
-      toast({
-        title: "Wallet Required",
-        description: "Please connect your wallet to purchase NFTs",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    try {
-      const { error } = await supabase
-        .from('mock_purchases')
-        .insert([
-          { nft_id: nftId, buyer_address: connectedAccount }
-        ]);
-
-      if (error) throw error;
-
-      toast({
-        title: "Purchase Successful",
-        description: "You have successfully purchased this NFT!",
-      });
-    } catch (error) {
-      console.error('Purchase error:', error);
-      toast({
-        title: "Purchase Failed",
-        description: "Failed to purchase NFT. Please try again.",
-        variant: "destructive",
-      });
-    }
-  };
+  const emblaRef = useCarouselConfig();
+  const { nfts, purchasedNfts } = useNFTData(connectedAccount);
+  const handlePurchase = useNFTPurchaseHandler(connectedAccount);
 
   if (!nfts) return null;
 
@@ -117,7 +29,7 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
           skipSnaps: false,
           dragFree: false,
           containScroll: "trimSnaps",
-          duration: 50, // Animation duration in milliseconds (was previously 'speed')
+          duration: 50,
         }}
       >
         <CarouselContent className="-ml-4">
