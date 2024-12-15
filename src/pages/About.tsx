@@ -72,7 +72,7 @@ const About = () => {
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
               <p className="text-gray-300 max-w-2xl mx-auto">
-                Discover and collect unique digital artworks. Purchase with DMC tokens on the Arbitrum One network.
+                Claim your badge now to breach the portal into the Doompocalypse. Unlock exclusive perks, bonus resources, and classified intel – Will you survive the revolution?
               </p>
             </div>
             <ErrorBoundary fallback={<ErrorFallback />}>
