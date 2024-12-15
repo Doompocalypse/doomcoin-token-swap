@@ -24,7 +24,6 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
 
     console.log('Setting up carousel rotation');
 
-    // Function to move to next slide
     const rotateSlide = () => {
       if (current === nfts.length - 1) {
         api.scrollTo(0);
@@ -36,25 +35,19 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
       console.log('Rotating to next slide:', current);
     };
 
-    // Set up the interval
     let intervalId = setInterval(rotateSlide, 3000);
     console.log('Initial interval set');
 
-    // Handle user interaction
     const handleInteraction = () => {
       console.log('User interaction detected');
       setCurrent(api.selectedScrollSnap());
-      // Clear the existing interval
       clearInterval(intervalId);
-      // Create a new interval
       intervalId = setInterval(rotateSlide, 3000);
       console.log('Interval reset after user interaction');
     };
 
-    // Add event listener for user interaction
     api.on('select', handleInteraction);
 
-    // Cleanup function
     return () => {
       console.log('Cleaning up carousel effects');
       clearInterval(intervalId);
@@ -74,10 +67,10 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
           loop: true,
         }}
       >
-        <CarouselContent>
+        <CarouselContent className="-ml-4">
           {nfts.map((nft) => (
-            <CarouselItem key={nft.id} className="pl-4 basis-1/2 md:basis-1/2 lg:basis-1/3">
-              <div className="p-1">
+            <CarouselItem key={nft.id} className="pl-4 basis-auto md:basis-1/2 lg:basis-1/3">
+              <div className="w-[350px]">
                 <NFTCard
                   {...nft}
                   videoUrl={nft.video_url}

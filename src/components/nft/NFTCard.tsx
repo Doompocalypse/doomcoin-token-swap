@@ -28,15 +28,14 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
     onPurchase(id);
   };
 
-  // Format price with commas for better readability
   const formattedPrice = new Intl.NumberFormat('en-US').format(price);
 
   return (
-    <Card className="w-[350px] bg-black/40 border-[#8E9196]/20 h-[420px] flex flex-col">
-      <div className="relative w-full aspect-[16/9] overflow-hidden rounded-t-lg">
+    <Card className="w-full bg-black/40 border-[#8E9196]/20 h-[420px] flex flex-col">
+      <div className="w-full h-[197px] overflow-hidden rounded-t-lg">
         <iframe
           src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
-          className="absolute inset-0 w-full h-full"
+          className="w-full h-full"
           allow="autoplay; fullscreen"
           frameBorder="0"
         />
