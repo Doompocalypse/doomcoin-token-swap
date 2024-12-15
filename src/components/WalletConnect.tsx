@@ -40,6 +40,8 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       console.log("Connecting MetaMask...");
       await connectWallet("metamask");
       setDialogOpen(false);
+    } catch (error) {
+      console.error("Failed to connect:", error);
     } finally {
       setIsConnecting(false);
       setConnectionType(null);
@@ -51,8 +53,8 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     await connectWallet(undefined, account);
   };
 
-  // Check if we have a connected account
-  const isWalletConnected = accounts && accounts.length > 0;
+  // Check if we have a connected account and valid chainId
+  const isWalletConnected = accounts && accounts.length > 0 && chainId;
 
   if (isWalletConnected) {
     return (
