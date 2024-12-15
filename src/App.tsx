@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { Suspense } from "react";
 import Index from "./pages/Index";
 import NFTMarketplace from "./pages/About";
+import TokenDeploymentTest from "./pages/TokenDeploymentTest";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<NFTMarketplace />} />
+            <Route path="/token-deployment-test" element={<TokenDeploymentTest />} />
           </Routes>
         </BrowserRouter>
       </Suspense>

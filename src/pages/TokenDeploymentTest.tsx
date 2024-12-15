@@ -27,7 +27,7 @@ const ErrorFallback = () => (
   </div>
 );
 
-const About = () => {
+const TokenDeploymentTest = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [connectedAccount, setConnectedAccount] = useState<string>();
@@ -62,7 +62,7 @@ const About = () => {
                 </DropdownMenuContent>
               </DropdownMenu>
               <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                NFT Marketplace
+                Token Deployment Test
               </h1>
             </div>
             <div className="flex items-center gap-4">
@@ -108,4 +108,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default TokenDeploymentTest;
