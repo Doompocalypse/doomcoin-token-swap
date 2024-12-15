@@ -51,7 +51,10 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     await connectWallet(undefined, account);
   };
 
-  if (accounts && accounts.length > 0) {
+  // Check if we have a connected account
+  const isWalletConnected = accounts && accounts.length > 0;
+
+  if (isWalletConnected) {
     return (
       <AccountDialog
         accounts={accounts}
