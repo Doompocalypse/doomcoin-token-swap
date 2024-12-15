@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { detectWalletProviders } from "@/utils/walletProviders";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -10,7 +11,9 @@ export const useWalletCore = (
   const { toast } = useToast();
 
   const connectMetaMask = async () => {
-    if (!window.ethereum?.isMetaMask) {
+    const providers = detectWalletProviders();
+    
+    if (!providers.isMetaMask) {
       toast({
         title: "MetaMask Not Found",
         description: "Please install MetaMask to connect.",
@@ -22,7 +25,6 @@ export const useWalletCore = (
     try {
       console.log("Requesting MetaMask connection...");
       
-      // Request accounts directly without trying to revoke permissions first
       const accounts = await window.ethereum.request({
         method: "eth_requestAccounts"
       });
@@ -30,37 +32,8 @@ export const useWalletCore = (
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        const currentChainId = await window.ethereum.request({
-          method: 'eth_chainId'
-        });
-        
-        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
-          try {
-            await window.ethereum.request({
-              method: 'wallet_switchEthereumChain',
-              params: [{ chainId: ARBITRUM_CHAIN_ID }],
-            });
-          } catch (switchError: any) {
-            console.error("Network switch error:", switchError);
-            if (switchError.code === 4902) {
-              await window.ethereum.request({
-                method: 'wallet_addEthereumChain',
-                params: [{
-                  chainId: ARBITRUM_CHAIN_ID,
-                  chainName: 'Arbitrum One',
-                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-                  rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-                  blockExplorerUrls: ['https://arbiscan.io/']
-                }]
-              });
-            } else {
-              throw switchError;
-            }
-          }
-        }
-        
+        await handleChainValidation();
         setAccounts(accounts);
-        setChainId(ARBITRUM_CHAIN_ID);
         onConnect(true, accounts[0]);
         
         toast({
@@ -78,11 +51,86 @@ export const useWalletCore = (
     }
   };
 
+  const connectCoinbase = async () => {
+    const providers = detectWalletProviders();
+    
+    if (!providers.isCoinbaseWallet) {
+      toast({
+        title: "Coinbase Wallet Not Found",
+        description: "Please install Coinbase Wallet to connect.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      console.log("Requesting Coinbase Wallet connection...");
+      
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts"
+      });
+      
+      console.log("Accounts after selection:", accounts);
+      
+      if (accounts.length > 0) {
+        await handleChainValidation();
+        setAccounts(accounts);
+        onConnect(true, accounts[0]);
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+        });
+      }
+    } catch (error: any) {
+      console.error("Coinbase Wallet connection error:", error);
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect to Coinbase Wallet",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleChainValidation = async () => {
+    const currentChainId = await window.ethereum.request({
+      method: 'eth_chainId'
+    });
+    
+    if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+      try {
+        await window.ethereum.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: ARBITRUM_CHAIN_ID }],
+        });
+      } catch (switchError: any) {
+        console.error("Network switch error:", switchError);
+        if (switchError.code === 4902) {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: ARBITRUM_CHAIN_ID,
+              chainName: 'Arbitrum One',
+              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+              blockExplorerUrls: ['https://arbiscan.io/']
+            }]
+          });
+        } else {
+          throw switchError;
+        }
+      }
+    }
+    
+    setChainId(ARBITRUM_CHAIN_ID);
+  };
+
   return {
     accounts,
     chainId,
     setAccounts,
     setChainId,
     connectMetaMask,
+    connectCoinbase,
   };
 };
