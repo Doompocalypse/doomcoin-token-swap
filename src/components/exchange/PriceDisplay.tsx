@@ -5,7 +5,7 @@ interface PriceDisplayProps {
 }
 
 const PriceDisplay = ({ ethPrice }: PriceDisplayProps) => (
-  <span className="text-xs text-[#8E9196]">
+  <span className="text-xs text-white">
     1 USD = 1 DMC
   </span>
 );
