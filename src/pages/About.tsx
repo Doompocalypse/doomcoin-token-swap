@@ -4,6 +4,7 @@ import VideoBackground from "@/components/VideoBackground";
 import NFTCarousel from "@/components/nft/NFTCarousel";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import CountdownTimer from "@/components/CountdownTimer";
+import ProductSlider from "@/components/products/ProductSlider";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -69,7 +70,7 @@ const About = () => {
 
         {/* Main Content */}
         <main className="pt-24 pb-12 px-4">
-          <div className="w-full max-w-5xl mx-auto space-y-8">
+          <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
@@ -84,6 +85,19 @@ const About = () => {
             <ErrorBoundary fallback={<ErrorFallback />}>
               <NFTCarousel connectedAccount={connectedAccount} />
             </ErrorBoundary>
+
+            {/* New Product Slider Section */}
+            <div className="space-y-8">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl font-bold text-white">Featured Equipment</h2>
+                <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
+                  Gear up with cutting-edge technology and equipment.
+                  <br className="hidden sm:block" />
+                  Each item has been field-tested and approved for combat readiness.
+                </p>
+              </div>
+              <ProductSlider />
+            </div>
           </div>
         </main>
       </div>
