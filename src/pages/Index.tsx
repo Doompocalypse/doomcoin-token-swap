@@ -39,22 +39,26 @@ const Index = () => {
     <ErrorBoundary fallback={<ErrorFallback error={new Error()} />}>
       <Suspense fallback={<LoadingFallback />}>
         <VideoBackground />
-        <div className="relative min-h-screen flex flex-col items-center justify-center px-4 py-12 md:px-8">
-          <div className="w-full max-w-4xl mx-auto space-y-12">
-            <div className="flex flex-col md:flex-row justify-between items-center gap-6 mb-8">
-              <h1 className="text-4xl md:text-5xl font-bold text-[#F1F1F1] text-center md:text-left tracking-tight">
+        <div className="relative min-h-screen">
+          {/* Header */}
+          <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
+            <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+              <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
                 DoomCoin Token Swap
               </h1>
               <WalletConnect onConnect={handleConnect} />
             </div>
+          </header>
 
-            <div className="w-full max-w-xl mx-auto">
+          {/* Main Content */}
+          <main className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
+            <div className="w-full max-w-2xl mx-auto">
               <TokenExchange 
                 isConnected={isConnected} 
                 connectedAccount={connectedAccount} 
               />
             </div>
-          </div>
+          </main>
           <Doomy />
         </div>
       </Suspense>

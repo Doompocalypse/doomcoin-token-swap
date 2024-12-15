@@ -131,15 +131,15 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
   };
 
   return (
-    <Card className="p-6 space-y-4 bg-transparent border-[#8E9196]/20">
-      <div className="space-y-4">
+    <Card className="p-8 space-y-6 bg-transparent border-[#8E9196]/20">
+      <div className="space-y-6">
         <AmountInput
           usdAmount={usdAmount}
           ethPrice={ethPrice}
           ethValue={ethValue}
           onAmountChange={setUsdAmount}
         />
-        <div className="text-sm text-white text-center bg-transparent p-2 rounded border border-[#8E9196]/20 space-y-2">
+        <div className="text-base text-white text-center bg-transparent p-4 rounded border border-[#8E9196]/20 space-y-3">
           <p>Please ensure you are connected to the Arbitrum One network before swapping tokens</p>
           {isMobile && (
             <p className="text-red-400">Token swapping is currently only available on desktop devices</p>

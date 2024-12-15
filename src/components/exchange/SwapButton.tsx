@@ -11,7 +11,7 @@ const SwapButton = ({ isConnected, disabled, onClick }: SwapButtonProps) => (
   <Button
     onClick={onClick}
     disabled={disabled}
-    className="w-full bg-white hover:bg-white/90 transition-opacity text-black font-medium py-6"
+    className="w-full bg-white hover:bg-white/90 transition-opacity text-black font-medium text-lg py-7"
   >
     {isConnected ? "Swap For DMC" : "Connect Wallet to Swap"}
   </Button>
