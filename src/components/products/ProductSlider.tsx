@@ -13,28 +13,28 @@ const products = [
     id: "1",
     name: "Quantum Combat Suit",
     description: "Advanced armor with integrated AI assistance and stealth capabilities.",
-    videoUrl: "https://player.vimeo.com/video/824804225",
+    videoUrl: "https://player.vimeo.com/video/1039284485",
     price: 299.99
   },
   {
     id: "2",
     name: "Neural Interface Kit",
     description: "Direct brain-computer interface for enhanced reaction times.",
-    videoUrl: "https://player.vimeo.com/video/824804166",
+    videoUrl: "https://player.vimeo.com/video/1039284485",
     price: 199.99
   },
   {
     id: "3",
     name: "Nano-Med Pack",
     description: "Emergency medical nanobots for rapid healing and recovery.",
-    videoUrl: "https://player.vimeo.com/video/824804088",
+    videoUrl: "https://player.vimeo.com/video/1039284485",
     price: 149.99
   },
   {
     id: "4",
     name: "Plasma Shield Generator",
     description: "Personal force field generator for ultimate protection.",
-    videoUrl: "https://player.vimeo.com/video/824803997",
+    videoUrl: "https://player.vimeo.com/video/1039284485",
     price: 399.99
   }
 ];
