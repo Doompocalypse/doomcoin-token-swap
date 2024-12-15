@@ -15,7 +15,6 @@ export const useCarouselConfig = () => {
       align: "start",
       dragFree: true,
       containScroll: "trimSnaps",
-      duration: 50
     }, 
     [Autoplay(autoplayOptions)]
   );
@@ -38,13 +37,12 @@ export const useCarouselConfig = () => {
 
   useEffect(() => {
     if (emblaApi) {
-      // Using the correct event types from Embla
-      emblaApi.on('pointerUp', onInteractionEnd);
       emblaApi.on('settle', onInteractionEnd);
+      emblaApi.on('pointerUp', onInteractionEnd);
       
       return () => {
-        emblaApi.off('pointerUp', onInteractionEnd);
         emblaApi.off('settle', onInteractionEnd);
+        emblaApi.off('pointerUp', onInteractionEnd);
       };
     }
   }, [emblaApi, onInteractionEnd]);
