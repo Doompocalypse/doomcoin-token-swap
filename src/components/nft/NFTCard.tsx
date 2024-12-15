@@ -32,14 +32,6 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
 
   return (
     <Card className="w-[350px] bg-black/40 border-[#8E9196]/20 h-[420px] flex flex-col">
-      <div className="w-full h-[250px] overflow-hidden rounded-t-lg">
-        <iframe
-          src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
-          className="w-full h-full"
-          allow="autoplay; fullscreen"
-          frameBorder="0"
-        />
-      </div>
       <div className="p-6 flex flex-col flex-grow">
         <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
         <div className="flex-grow overflow-y-auto mb-4">
