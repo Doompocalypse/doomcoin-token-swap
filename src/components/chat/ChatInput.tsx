@@ -21,7 +21,7 @@ const ChatInput = ({ input, onChange, onSend, onKeyPress }: ChatInputProps) => (
       />
       <Button 
         onClick={onSend} 
-        className="bg-gradient-to-r from-cyan-500 to-purple-600 hover:opacity-90 transition-colors rounded-full px-3"
+        className="bg-white hover:bg-white/90 text-black transition-colors rounded-full px-3"
       >
         <Send className="h-4 w-4" />
       </Button>
