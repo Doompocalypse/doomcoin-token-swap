@@ -9,7 +9,7 @@ interface CarouselRotationProps {
 
 export const useCarouselRotation = ({ 
   itemsLength, 
-  intervalDuration = 3000, 
+  intervalDuration = 10000, // Changed from 3000 to 10000ms (10 seconds)
   name = 'carousel' 
 }: CarouselRotationProps) => {
   const [api, setApi] = useState<CarouselApi | null>(null);
