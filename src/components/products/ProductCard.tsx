@@ -1,23 +1,18 @@
 import { Card } from "@/components/ui/card";
+import VideoPlayer from "./VideoPlayer";
 
 interface ProductCardProps {
   id: string;
   name: string;
   description: string;
-  imageUrl: string;
+  videoUrl: string;
   price: number;
 }
 
-const ProductCard = ({ name, description, imageUrl, price }: ProductCardProps) => {
+const ProductCard = ({ name, description, videoUrl, price }: ProductCardProps) => {
   return (
     <Card className="w-full max-w-[600px] mx-auto bg-black/40 border-[#8E9196]/20">
-      <div className="aspect-video w-full overflow-hidden rounded-t-lg">
-        <img
-          src={imageUrl}
-          alt={name}
-          className="w-full h-full object-cover"
-        />
-      </div>
+      <VideoPlayer videoUrl={videoUrl} />
       <div className="p-6">
         <h3 className="text-2xl font-bold text-white mb-2">{name}</h3>
         <p className="text-gray-300 mb-4">{description}</p>
