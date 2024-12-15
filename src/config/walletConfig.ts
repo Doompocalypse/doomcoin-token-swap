@@ -9,8 +9,19 @@ const { chains, publicClient } = configureChains(
   [w3mProvider({ projectId })]
 );
 
+// Clear any existing wallet connection data on initialization
+if (typeof window !== 'undefined') {
+  const walletKeys = Object.keys(window.localStorage).filter(key => 
+    key.toLowerCase().includes('wagmi') || 
+    key.toLowerCase().includes('wc@') ||
+    key.toLowerCase().includes('walletconnect')
+  );
+  walletKeys.forEach(key => window.localStorage.removeItem(key));
+  console.log("Cleared existing wallet connection data");
+}
+
 export const wagmiConfig = createConfig({
-  autoConnect: false,
+  autoConnect: false, // Ensure autoConnect is false
   connectors: w3mConnectors({ 
     projectId, 
     chains
