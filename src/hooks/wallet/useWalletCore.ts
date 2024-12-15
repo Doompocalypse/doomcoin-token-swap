@@ -10,14 +10,21 @@ export const useWalletCore = (
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
-  const { currentChain } = useNetworkSwitch();
+  const { ensureArbitrumNetwork } = useNetworkSwitch();
   const { connectMetaMask } = useMetaMaskConnection();
   const { connectWalletConnect } = useWalletConnectConnection();
 
-  const handleSuccessfulConnection = (newAccounts: string[]) => {
+  const handleSuccessfulConnection = async (newAccounts: string[]) => {
     console.log("Handling successful connection with accounts:", newAccounts);
+    
+    // Get current chain ID directly from ethereum provider
+    let currentChainId;
+    if (window.ethereum) {
+      currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+    }
+    
     setAccounts(newAccounts);
-    setChainId(currentChain?.id.toString(16));
+    setChainId(currentChainId);
     onConnect(true, newAccounts[0]);
     
     toast({
