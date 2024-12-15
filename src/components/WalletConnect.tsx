@@ -50,7 +50,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
             {formatAddress(accounts[0])}{getNetworkName()}
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-56">
+        <DropdownMenuContent align="end" className="w-56 bg-white border-none">
           {accounts.length > 1 && (
             <>
               <div className="px-2 py-1.5 text-sm font-semibold">Switch Account</div>
@@ -81,7 +81,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           Connect Wallet
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56">
+      <DropdownMenuContent align="end" className="w-56 bg-white border-none">
         <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
