@@ -82,33 +82,26 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   }
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button className="bg-white text-black hover:bg-white/90">
-          Connect Wallet
+    <div className="flex gap-2">
+      {providers.isMetaMask && (
+        <Button 
+          onClick={handleConnectMetaMask} 
+          className="bg-white text-black hover:bg-white/90"
+        >
+          <Wallet className="mr-2 h-4 w-4" />
+          MetaMask
         </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 bg-white border-none">
-        {providers.isMetaMask && (
-          <DropdownMenuItem 
-            onClick={handleConnectMetaMask} 
-            className="cursor-pointer bg-white text-black hover:bg-white/90 border-none"
-          >
-            <Wallet className="mr-2 h-4 w-4" />
-            MetaMask
-          </DropdownMenuItem>
-        )}
-        {providers.isCoinbaseWallet && (
-          <DropdownMenuItem 
-            onClick={handleConnectCoinbase} 
-            className="cursor-pointer bg-white text-black hover:bg-white/90 border-none"
-          >
-            <Wallet className="mr-2 h-4 w-4" />
-            Coinbase Wallet
-          </DropdownMenuItem>
-        )}
-      </DropdownMenuContent>
-    </DropdownMenu>
+      )}
+      {providers.isCoinbaseWallet && (
+        <Button 
+          onClick={handleConnectCoinbase} 
+          className="bg-white text-black hover:bg-white/90"
+        >
+          <Wallet className="mr-2 h-4 w-4" />
+          Coinbase
+        </Button>
+      )}
+    </div>
   );
 };
 
