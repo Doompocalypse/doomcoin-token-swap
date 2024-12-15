@@ -71,8 +71,12 @@ const About = () => {
           <div className="w-full max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-4">
               <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
-              <p className="text-gray-300 max-w-2xl mx-auto">
-                Claim your badge now to breach the portal into the Doompocalypse. Unlock exclusive perks, bonus resources, and classified intel – Will you survive the revolution?
+              <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
+                Claim your badge now to breach the portal into the Doompocalypse.
+                <br className="hidden sm:block" />
+                Unlock exclusive perks, bonus resources, and classified intel –
+                <br className="hidden sm:block" />
+                Will you survive the revolution?
               </p>
             </div>
             <ErrorBoundary fallback={<ErrorFallback />}>
