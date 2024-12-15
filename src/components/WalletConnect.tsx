@@ -60,23 +60,23 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
             {formatAddress(accounts[0])}{getNetworkName()}
           </Button>
         </DialogTrigger>
-        <DialogContent className="sm:max-w-md bg-black/20 backdrop-blur-sm border border-white/10">
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-white">Connected Account</DialogTitle>
-            <DialogDescription className="text-gray-200">
+            <DialogTitle>Connected Account</DialogTitle>
+            <DialogDescription>
               You are connected with account {formatAddress(accounts[0])}
             </DialogDescription>
           </DialogHeader>
           <div className="flex flex-col gap-4 py-4">
             {accounts.length > 1 && (
               <div className="flex flex-col gap-2">
-                <div className="font-semibold text-white">Switch Account</div>
+                <div className="font-semibold">Switch Account</div>
                 {accounts.map((account, index) => (
                   <Button
                     key={account}
                     variant="outline"
                     onClick={() => connectWallet(undefined, account)}
-                    className="w-full justify-start bg-white/10 text-white hover:bg-white/20"
+                    className="w-full justify-start"
                   >
                     Account {index + 1}: {formatAddress(account)}
                   </Button>
@@ -103,10 +103,10 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           Connect Wallet
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-md bg-black/20 backdrop-blur-sm border border-white/10">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle className="text-white">Connect Your Wallet</DialogTitle>
-          <DialogDescription className="text-gray-200">
+          <DialogTitle>Connect Your Wallet</DialogTitle>
+          <DialogDescription>
             Choose your preferred wallet to connect to our application. Make sure you're on the Arbitrum network.
           </DialogDescription>
         </DialogHeader>
@@ -114,23 +114,23 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
           <Button
             onClick={handleConnectMetaMask}
             variant="outline"
-            className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
+            className="w-full justify-start h-16"
           >
             <Wallet className="mr-4 h-6 w-6" />
             <div className="flex flex-col items-start">
               <span className="font-semibold">MetaMask</span>
-              <span className="text-sm text-gray-300">Connect using browser wallet</span>
+              <span className="text-sm text-muted-foreground">Connect using browser wallet</span>
             </div>
           </Button>
           <Button
             onClick={handleConnectWalletConnect}
             variant="outline"
-            className="w-full justify-start h-16 bg-white/10 text-white hover:bg-white/20"
+            className="w-full justify-start h-16"
           >
             <Wallet2 className="mr-4 h-6 w-6" />
             <div className="flex flex-col items-start">
               <span className="font-semibold">WalletConnect</span>
-              <span className="text-sm text-gray-300">Connect using WalletConnect</span>
+              <span className="text-sm text-muted-foreground">Connect using WalletConnect</span>
             </div>
           </Button>
         </div>
