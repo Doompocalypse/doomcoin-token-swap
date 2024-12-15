@@ -62,7 +62,7 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
   if (!nfts) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4">
+    <div className="w-full max-w-5xl mx-auto px-4 relative">
       <Carousel
         className="w-full"
         setApi={setApi}
@@ -85,8 +85,12 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="left-4" />
-        <CarouselNext className="right-4" />
+        <div className="absolute -left-12 top-1/2 -translate-y-1/2">
+          <CarouselPrevious className="relative left-0" />
+        </div>
+        <div className="absolute -right-12 top-1/2 -translate-y-1/2">
+          <CarouselNext className="relative right-0" />
+        </div>
       </Carousel>
     </div>
   );
