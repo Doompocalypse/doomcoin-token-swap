@@ -53,9 +53,6 @@ const Index = () => {
           <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
               <div className="flex items-center gap-4">
-                <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                  DoomCoin Token Swap
-                </h1>
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-2 hover:bg-white/10 rounded-md transition-colors">
                     <Menu className="h-6 w-6 text-white" />
@@ -69,6 +66,9 @@ const Index = () => {
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
+                <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
+                  DoomCoin Token Swap
+                </h1>
               </div>
               <WalletConnect onConnect={handleConnect} />
             </div>
