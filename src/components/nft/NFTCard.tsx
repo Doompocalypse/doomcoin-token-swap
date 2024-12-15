@@ -51,6 +51,7 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
 
   const formattedOriginalPrice = new Intl.NumberFormat('en-US').format(originalPrice);
   const formattedDiscountedPrice = new Intl.NumberFormat('en-US').format(discountedPrice);
+  // Split description into paragraphs and filter out empty ones
   const paragraphs = description?.split('\n').filter(p => p.trim()) || [];
 
   return (
@@ -70,7 +71,10 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
         <div className="flex-1 min-h-0">
           <ScrollArea className="h-[120px] pr-4">
             {paragraphs.map((paragraph, index) => (
-              <p key={index} className="text-gray-300 text-sm mb-4 last:mb-0">
+              <p 
+                key={index} 
+                className="text-gray-300 text-sm mb-6 last:mb-0"
+              >
                 {paragraph}
               </p>
             ))}
