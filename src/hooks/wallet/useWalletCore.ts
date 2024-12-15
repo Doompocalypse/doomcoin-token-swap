@@ -3,6 +3,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMetaMaskConnection } from "./useMetaMaskConnection";
 import { useWalletConnectConnection } from "./useWalletConnectConnection";
 import { useNetworkSwitch } from "./useNetworkSwitch";
+import { useInitialConnection } from "./useInitialConnection";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -13,6 +14,9 @@ export const useWalletCore = (
   const { ensureArbitrumNetwork } = useNetworkSwitch();
   const { connectMetaMask } = useMetaMaskConnection();
   const { connectWalletConnect } = useWalletConnectConnection();
+
+  // Use the initial connection hook to prevent auto-connects
+  useInitialConnection(setAccounts, setChainId, onConnect);
 
   const handleSuccessfulConnection = async (newAccounts: string[]) => {
     console.log("Handling successful connection with accounts:", newAccounts);
