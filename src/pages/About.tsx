@@ -70,7 +70,7 @@ const About = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-8">
             <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold text-white">Featured NFTs</h2>
+              <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
               <p className="text-gray-300 max-w-2xl mx-auto">
                 Discover and collect unique digital artworks. Purchase with DMC tokens on the Arbitrum One network.
               </p>
