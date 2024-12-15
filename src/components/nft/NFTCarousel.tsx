@@ -70,14 +70,12 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
         <CarouselContent className="-ml-4">
           {nfts.map((nft) => (
             <CarouselItem key={nft.id} className="pl-4 basis-auto md:basis-1/2 lg:basis-1/3">
-              <div className="w-[350px]">
-                <NFTCard
-                  {...nft}
-                  videoUrl={nft.video_url}
-                  onPurchase={handlePurchase}
-                  isPurchased={purchasedNfts?.includes(nft.id) ?? false}
-                />
-              </div>
+              <NFTCard
+                {...nft}
+                videoUrl={nft.video_url}
+                onPurchase={handlePurchase}
+                isPurchased={purchasedNfts?.includes(nft.id) ?? false}
+              />
             </CarouselItem>
           ))}
         </CarouselContent>
