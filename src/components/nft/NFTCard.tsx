@@ -28,6 +28,9 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
     onPurchase(id);
   };
 
+  // Format price with commas for better readability
+  const formattedPrice = new Intl.NumberFormat('en-US').format(price);
+
   return (
     <Card className="w-full max-w-sm mx-auto bg-black/40 border-[#8E9196]/20">
       <div className="relative aspect-video w-full overflow-hidden rounded-t-lg">
@@ -40,9 +43,9 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
       </div>
       <div className="p-6 space-y-4">
         <h3 className="text-xl font-bold text-white">{name}</h3>
-        <p className="text-gray-300 text-sm">{description}</p>
+        <p className="text-gray-300 text-sm max-h-32 overflow-y-auto">{description}</p>
         <div className="flex justify-between items-center">
-          <span className="text-white font-bold">{price} DMC</span>
+          <span className="text-white font-bold">${formattedPrice} DMC</span>
           <Button 
             onClick={handlePurchase}
             disabled={isPurchased}
