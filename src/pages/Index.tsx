@@ -12,7 +12,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown } from "lucide-react";
+import { Menu } from "lucide-react";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
@@ -57,15 +57,15 @@ const Index = () => {
                   DoomCoin Token Swap
                 </h1>
                 <DropdownMenu>
-                  <DropdownMenuTrigger className="inline-flex items-center px-3 py-1 text-sm text-white hover:text-gray-300">
-                    <ChevronDown className="h-4 w-4" />
+                  <DropdownMenuTrigger className="p-2 hover:bg-white/10 rounded-md transition-colors">
+                    <Menu className="h-6 w-6 text-white" />
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="start" className="w-48 bg-white">
-                    <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer">
+                  <DropdownMenuContent align="start" className="w-48 bg-white text-black border border-gray-200">
+                    <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                       Token Swap
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer">
-                      About
+                    <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer hover:bg-gray-100">
+                      NFT Marketplace
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
