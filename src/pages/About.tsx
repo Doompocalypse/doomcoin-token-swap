@@ -26,13 +26,23 @@ const ErrorFallback = () => (
   </div>
 );
 
+interface TimeLeft {
+  days: number;
+  hours: number;
+  minutes: number;
+  seconds: number;
+  totalSeconds: number;
+  maxSeconds: number;
+}
+
 const CountdownTimer = () => {
-  const [timeLeft, setTimeLeft] = useState({
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>({
     days: 0,
     hours: 0,
     minutes: 0,
     seconds: 0,
     totalSeconds: 0,
+    maxSeconds: 0,
   });
 
   useEffect(() => {
@@ -48,6 +58,7 @@ const CountdownTimer = () => {
           minutes: 0,
           seconds: 0,
           totalSeconds: 0,
+          maxSeconds: 0,
         };
       }
 
