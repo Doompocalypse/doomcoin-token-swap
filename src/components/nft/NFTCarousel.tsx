@@ -23,9 +23,18 @@ interface NFT {
 
 const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
   const { toast } = useToast();
-  const [emblaRef] = useEmblaCarousel({ loop: true, align: "start", slidesToScroll: 2 }, [
-    Autoplay({ delay: 3000, stopOnInteraction: false })
-  ]);
+  
+  // Initialize autoplay plugin with configuration
+  const autoplayOptions = {
+    delay: 3000,
+    stopOnInteraction: false,
+    rootNode: (emblaRoot: any) => emblaRoot.parentElement,
+  };
+  
+  const [emblaRef] = useEmblaCarousel(
+    { loop: true, align: "start", slidesToScroll: 2 }, 
+    [Autoplay(autoplayOptions)]
+  );
 
   const { data: nfts } = useQuery({
     queryKey: ['nfts'],
