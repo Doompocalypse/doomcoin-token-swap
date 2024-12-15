@@ -1,9 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import { memo } from 'react';
 import { Card } from "@/components/ui/card";
-import { formatDistanceToNowStrict } from 'date-fns';
-import VideoPlayer from './VideoPlayer';
-import Description from './Description';
-import PriceSection from './PriceSection';
+import Description from "./Description";
+import PriceSection from "./PriceSection";
+import VideoPlayer from "./VideoPlayer";
 
 interface NFTCardProps {
   id: string;
@@ -11,54 +10,49 @@ interface NFTCardProps {
   description: string | null;
   price: number;
   videoUrl: string;
-  onPurchase: (id: string) => void;
   isPurchased: boolean;
+  onPurchase: (id: string) => void;
 }
 
-const NFTCard = ({ 
+const NFTCard = memo(({ 
   id, 
   name, 
   description, 
   price, 
   videoUrl, 
-  onPurchase, 
-  isPurchased 
+  isPurchased, 
+  onPurchase 
 }: NFTCardProps) => {
-  const [timeLeft, setTimeLeft] = useState('');
-  const saleEndDate = new Date('2025-01-30T00:00:00');
-  const originalPrice = price * 2;
+  console.log(`Rendering NFTCard: ${name}`);
+  
+  const handlePurchase = () => {
+    onPurchase(id);
+  };
 
-  useEffect(() => {
-    const updateTimer = () => {
-      const now = new Date();
-      if (now >= saleEndDate) {
-        setTimeLeft('Sale Ended');
-        return;
-      }
-      setTimeLeft(formatDistanceToNowStrict(saleEndDate, { addSuffix: true }));
-    };
-
-    updateTimer();
-    const interval = setInterval(updateTimer, 1000);
-    return () => clearInterval(interval);
-  }, []);
+  // Calculate discounted price (20% off)
+  const discountedPrice = Math.floor(price * 0.8);
+  
+  // Mock time left (24 hours from now)
+  const timeLeft = "in 24 hours";
 
   return (
-    <Card className="w-[350px] h-[480px] bg-black/40 border-[#8E9196]/20 flex flex-col">
+    <Card className="w-full max-w-[400px] mx-auto bg-black/40 border-[#8E9196]/20">
       <VideoPlayer videoUrl={videoUrl} />
-      <div className="flex flex-col flex-1 p-4">
-        <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
+      <div className="p-6">
+        <h3 className="text-2xl font-bold text-white mb-4">{name}</h3>
         <Description description={description} />
-        <PriceSection 
-          originalPrice={originalPrice}
-          discountedPrice={price}
+        <PriceSection
+          originalPrice={price}
+          discountedPrice={discountedPrice}
           timeLeft={timeLeft}
           isPurchased={isPurchased}
-          onPurchase={() => onPurchase(id)}
+          onPurchase={handlePurchase}
         />
       </div>
     </Card>
   );
-};
+});
+
+NFTCard.displayName = 'NFTCard';
 
 export default NFTCard;

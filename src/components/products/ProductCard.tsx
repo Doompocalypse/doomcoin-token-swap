@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { Card } from "@/components/ui/card";
 import VideoPlayer from "./VideoPlayer";
 
@@ -9,7 +10,9 @@ interface ProductCardProps {
   price: number;
 }
 
-const ProductCard = ({ name, description, videoUrl, price }: ProductCardProps) => {
+const ProductCard = memo(({ name, description, videoUrl, price }: ProductCardProps) => {
+  console.log(`Rendering ProductCard: ${name}`);
+  
   return (
     <Card className="w-full max-w-[600px] mx-auto bg-black/40 border-[#8E9196]/20">
       <VideoPlayer videoUrl={videoUrl} />
@@ -22,6 +25,8 @@ const ProductCard = ({ name, description, videoUrl, price }: ProductCardProps) =
       </div>
     </Card>
   );
-};
+});
+
+ProductCard.displayName = 'ProductCard';
 
 export default ProductCard;
