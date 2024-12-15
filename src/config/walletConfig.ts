@@ -16,10 +16,7 @@ export const wagmiConfig = createConfig({
   autoConnect: false,
   connectors: w3mConnectors({ 
     projectId, 
-    chains,
-    version: '2',
-    projectName: 'DoomCoin Token Swap',
-    relayUrl: 'wss://relay.walletconnect.org',
+    chains
   }),
   publicClient,
 });

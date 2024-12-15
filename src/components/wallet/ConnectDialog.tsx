@@ -1,4 +1,4 @@
-import { Wallet, Wallet2 } from "lucide-react";
+import { Wallet, Wallet2, CreditCard, Smartphone } from "lucide-react";
 import DialogLayout from "./dialog/DialogLayout";
 import WalletButton from "./buttons/WalletButton";
 
@@ -31,9 +31,25 @@ const ConnectDialog = ({
         onClick={onConnectWalletConnect}
         isConnecting={isConnecting}
         isActive={connectionType === "walletconnect"}
+        icon={CreditCard}
+        title="Coinbase Wallet"
+        description="Connect using Coinbase Wallet"
+      />
+      <WalletButton
+        onClick={onConnectWalletConnect}
+        isConnecting={isConnecting}
+        isActive={connectionType === "walletconnect"}
+        icon={Smartphone}
+        title="Trust Wallet"
+        description="Connect using Trust Wallet"
+      />
+      <WalletButton
+        onClick={onConnectWalletConnect}
+        isConnecting={isConnecting}
+        isActive={connectionType === "walletconnect"}
         icon={Wallet2}
-        title="WalletConnect"
-        description="Connect using WalletConnect"
+        title="Rainbow"
+        description="Connect using Rainbow Wallet"
       />
     </DialogLayout>
   );
