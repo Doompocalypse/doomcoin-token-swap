@@ -52,9 +52,9 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const formattedOriginalPrice = new Intl.NumberFormat('en-US').format(originalPrice);
   const formattedDiscountedPrice = new Intl.NumberFormat('en-US').format(discountedPrice);
   
-  // Replace /n/n with actual line breaks and split into paragraphs
-  const cleanDescription = description?.replace(/\/n\/n/g, '\n\n') || '';
-  const paragraphs = cleanDescription.split('\n\n').filter(p => p.trim());
+  // First replace /n/n with line breaks, then replace \n\n with line breaks to handle both cases
+  const cleanDescription = description?.replace(/\/n\/n/g, '\n').replace(/\\n\\n/g, '\n') || '';
+  const paragraphs = cleanDescription.split('\n').filter(p => p.trim());
 
   return (
     <Card className="w-[350px] h-[480px] bg-black/40 border-[#8E9196]/20 flex flex-col">
