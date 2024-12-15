@@ -1,9 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { useMetaMaskConnection } from "./useMetaMaskConnection";
-import { useWalletConnectConnection } from "./useWalletConnectConnection";
-import { useNetworkSwitch } from "./useNetworkSwitch";
-import { useInitialConnection } from "./useInitialConnection";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -11,53 +8,84 @@ export const useWalletCore = (
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
-  const { ensureArbitrumNetwork } = useNetworkSwitch();
-  const { connectMetaMask } = useMetaMaskConnection();
-  const { connectWalletConnect } = useWalletConnectConnection();
 
-  // Use the initial connection hook to prevent auto-connects
-  useInitialConnection(setAccounts, setChainId, onConnect);
-
-  const handleSuccessfulConnection = async (newAccounts: string[]) => {
-    console.log("Handling successful connection with accounts:", newAccounts);
-    
-    // Get current chain ID directly from ethereum provider
-    let currentChainId;
-    if (window.ethereum) {
-      currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
+  const connectMetaMask = async () => {
+    if (!window.ethereum?.isMetaMask) {
+      toast({
+        title: "MetaMask Not Found",
+        description: "Please install MetaMask to connect.",
+        variant: "destructive",
+      });
+      return;
     }
-    
-    setAccounts(newAccounts);
-    setChainId(currentChainId);
-    onConnect(true, newAccounts[0]);
-    
-    toast({
-      title: "Wallet Connected",
-      description: `Connected to account: ${newAccounts[0].slice(0, 6)}...${newAccounts[0].slice(-4)}`,
-    });
-  };
 
-  const handleMetaMaskConnection = async () => {
     try {
-      console.log("Initiating MetaMask connection...");
-      const newAccounts = await connectMetaMask();
-      handleSuccessfulConnection(newAccounts);
-    } catch (error) {
-      console.error("Failed to connect MetaMask:", error);
-      setAccounts([]);
-      onConnect(false);
-    }
-  };
-
-  const handleWalletConnectConnection = async () => {
-    try {
-      console.log("Initiating WalletConnect connection...");
-      const newAccounts = await connectWalletConnect();
-      handleSuccessfulConnection(newAccounts);
-    } catch (error) {
-      console.error("Failed to connect WalletConnect:", error);
-      setAccounts([]);
-      onConnect(false);
+      console.log("Requesting fresh MetaMask connection...");
+      
+      // First, clear any existing permissions
+      try {
+        await window.ethereum.request({
+          method: "wallet_revokePermissions",
+          params: [{ eth_accounts: {} }]
+        });
+      } catch (error) {
+        console.log("No permissions to revoke:", error);
+      }
+      
+      // Force new account selection
+      const accounts = await window.ethereum.request({
+        method: "eth_requestAccounts",
+        params: [{ force: true }] // Force new account selection
+      });
+      
+      console.log("Accounts after selection:", accounts);
+      
+      if (accounts.length > 0) {
+        const currentChainId = await window.ethereum.request({
+          method: 'eth_chainId'
+        });
+        
+        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+          try {
+            await window.ethereum.request({
+              method: 'wallet_switchEthereumChain',
+              params: [{ chainId: ARBITRUM_CHAIN_ID }],
+            });
+          } catch (switchError: any) {
+            console.error("Network switch error:", switchError);
+            if (switchError.code === 4902) {
+              await window.ethereum.request({
+                method: 'wallet_addEthereumChain',
+                params: [{
+                  chainId: ARBITRUM_CHAIN_ID,
+                  chainName: 'Arbitrum One',
+                  nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+                  rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+                  blockExplorerUrls: ['https://arbiscan.io/']
+                }]
+              });
+            } else {
+              throw switchError;
+            }
+          }
+        }
+        
+        setAccounts(accounts);
+        setChainId(ARBITRUM_CHAIN_ID);
+        onConnect(true, accounts[0]);
+        
+        toast({
+          title: "Wallet Connected",
+          description: `Connected to account: ${accounts[0].slice(0, 6)}...${accounts[0].slice(-4)}`,
+        });
+      }
+    } catch (error: any) {
+      console.error("MetaMask connection error:", error);
+      toast({
+        title: "Connection Failed",
+        description: error.message || "Failed to connect to MetaMask",
+        variant: "destructive",
+      });
     }
   };
 
@@ -66,7 +94,6 @@ export const useWalletCore = (
     chainId,
     setAccounts,
     setChainId,
-    connectMetaMask: handleMetaMaskConnection,
-    connectWalletConnect: handleWalletConnectConnection,
+    connectMetaMask,
   };
 };
