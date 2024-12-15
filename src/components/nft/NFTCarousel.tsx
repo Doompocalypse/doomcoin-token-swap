@@ -39,7 +39,7 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
       dragFree: false,
       containScroll: "trimSnaps",
       skipSnaps: false,
-      speed: 10, // Slower transition speed for smoother animation
+      duration: 50, // Animation duration in milliseconds (was previously 'speed')
     }, 
     [Autoplay(autoplayOptions)]
   );
@@ -117,7 +117,7 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
           skipSnaps: false,
           dragFree: false,
           containScroll: "trimSnaps",
-          speed: 10,
+          duration: 50, // Animation duration in milliseconds (was previously 'speed')
         }}
       >
         <CarouselContent className="-ml-4">
