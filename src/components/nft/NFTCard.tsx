@@ -19,8 +19,8 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const { toast } = useToast();
   const [timeLeft, setTimeLeft] = useState('');
   const saleEndDate = new Date('2025-01-30T00:00:00');
-  const originalPrice = price * 2; // Double the original price
-  const discountedPrice = price; // Current price is already the discounted price
+  const originalPrice = price * 2;
+  const discountedPrice = price;
 
   useEffect(() => {
     const updateTimer = () => {
@@ -49,16 +49,13 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
     onPurchase(id);
   };
 
-  // Format prices with commas
   const formattedOriginalPrice = new Intl.NumberFormat('en-US').format(originalPrice);
   const formattedDiscountedPrice = new Intl.NumberFormat('en-US').format(discountedPrice);
-
-  // Split description into paragraphs
   const paragraphs = description?.split('\n').filter(p => p.trim()) || [];
 
   return (
     <Card className="w-[350px] h-[500px] bg-black/40 border-[#8E9196]/20 flex flex-col">
-      <div className="pt-4">
+      <div className="p-4 pb-0">
         <div className="aspect-video w-full">
           <iframe
             src={`${videoUrl}?background=1&autoplay=1&loop=1&byline=0&title=0&muted=1`}
@@ -68,17 +65,19 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
           />
         </div>
       </div>
-      <div className="p-6 flex flex-col flex-1">
+      <div className="flex flex-col flex-1 p-6">
         <h3 className="text-xl font-bold text-white mb-2">{name}</h3>
-        <ScrollArea className="flex-1 mb-4">
-          {paragraphs.map((paragraph, index) => (
-            <p key={index} className="text-gray-300 text-sm mb-2">
-              {paragraph}
-            </p>
-          ))}
-        </ScrollArea>
-        <div className="flex flex-col gap-2">
-          <div className="text-sm text-yellow-400">Sale ends {timeLeft}</div>
+        <div className="flex-1 overflow-hidden">
+          <ScrollArea className="h-[200px] pr-4">
+            {paragraphs.map((paragraph, index) => (
+              <p key={index} className="text-gray-300 text-sm mb-2">
+                {paragraph}
+              </p>
+            ))}
+          </ScrollArea>
+        </div>
+        <div className="pt-4 mt-auto border-t border-gray-700">
+          <div className="text-sm text-yellow-400 mb-2">Sale ends {timeLeft}</div>
           <div className="flex justify-between items-center">
             <div className="flex flex-col">
               <span className="text-gray-400 line-through text-sm">${formattedOriginalPrice} DMC</span>
