@@ -20,7 +20,7 @@ const AmountInput = ({ usdAmount, ethPrice, ethValue, onAmountChange }: AmountIn
       placeholder="0.0"
       value={usdAmount}
       onChange={(e) => onAmountChange(e.target.value)}
-      className="bg-transparent border-[#8E9196]/20 focus:border-[#8E9196] text-xl text-white p-4"
+      className="bg-transparent border-[#8E9196]/20 focus:border-[#8E9196] text-xl text-white p-4 placeholder:text-white/50"
     />
     <p className="mt-3 text-base text-white">≈ {ethValue} ETH</p>
   </div>
