@@ -34,7 +34,7 @@ const About = () => {
           <div className="container mx-auto px-4 py-4 flex justify-between items-center">
             <div className="flex items-center gap-4">
               <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                About DoomCoin
+                NFT Marketplace
               </h1>
               <DropdownMenu>
                 <DropdownMenuTrigger className="inline-flex items-center px-3 py-1 text-sm text-white hover:text-gray-300">
