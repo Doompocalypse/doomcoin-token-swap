@@ -1,4 +1,4 @@
-import useEmblaCarousel from 'embla-carousel-react';
+import useEmblaCarousel, { EmblaCarouselType } from 'embla-carousel-react';
 import Autoplay from 'embla-carousel-autoplay';
 import { useCallback, useEffect } from 'react';
 
@@ -38,12 +38,13 @@ export const useCarouselConfig = () => {
 
   useEffect(() => {
     if (emblaApi) {
+      // Using the correct event types from Embla
       emblaApi.on('pointerUp', onInteractionEnd);
-      emblaApi.on('dragEnd', onInteractionEnd);
+      emblaApi.on('settle', onInteractionEnd);
       
       return () => {
         emblaApi.off('pointerUp', onInteractionEnd);
-        emblaApi.off('dragEnd', onInteractionEnd);
+        emblaApi.off('settle', onInteractionEnd);
       };
     }
   }, [emblaApi, onInteractionEnd]);
