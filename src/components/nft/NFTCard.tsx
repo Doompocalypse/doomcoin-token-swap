@@ -52,9 +52,20 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
   const formattedOriginalPrice = new Intl.NumberFormat('en-US').format(originalPrice);
   const formattedDiscountedPrice = new Intl.NumberFormat('en-US').format(discountedPrice);
   
-  // First replace /n/n with line breaks, then replace \n\n with line breaks to handle both cases
-  const cleanDescription = description?.replace(/\/n\/n/g, '\n').replace(/\\n\\n/g, '\n') || '';
-  const paragraphs = cleanDescription.split('\n').filter(p => p.trim());
+  // Format the description by properly handling bullet points and line breaks
+  const formatDescription = (text: string | null): string[] => {
+    if (!text) return [];
+    
+    // Replace escaped newlines with actual newlines
+    const cleanText = text
+      .replace(/\\n/g, '\n')
+      .replace(/\/n/g, '\n');
+    
+    // Split into paragraphs and filter out empty lines
+    return cleanText.split('\n').filter(line => line.trim());
+  };
+
+  const paragraphs = formatDescription(description);
 
   return (
     <Card className="w-[350px] h-[480px] bg-black/40 border-[#8E9196]/20 flex flex-col">
@@ -75,7 +86,9 @@ const NFTCard = ({ id, name, description, price, videoUrl, onPurchase, isPurchas
             {paragraphs.map((paragraph, index) => (
               <p 
                 key={index} 
-                className="text-gray-300 text-sm mb-6 last:mb-0"
+                className={`text-gray-300 text-sm ${
+                  paragraph.startsWith('•') ? 'pl-4' : ''
+                } ${index < paragraphs.length - 1 ? 'mb-2' : ''}`}
               >
                 {paragraph}
               </p>
