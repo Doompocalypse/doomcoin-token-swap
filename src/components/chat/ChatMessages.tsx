@@ -43,7 +43,6 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
         );
       }
       
-      // Split the text by newlines and add proper spacing
       return segment.split('\n').map((line, lineIndex) => (
         <div key={`${index}-${lineIndex}`} className={`${lineIndex > 0 ? 'mt-3' : ''}`}>
           {line}
@@ -62,8 +61,8 @@ const ChatMessages = ({ messages }: ChatMessagesProps) => {
           <div
             className={`max-w-[90%] rounded-2xl px-4 py-3 whitespace-pre-line leading-relaxed ${
               message.isBot
-                ? "bg-white/5 text-[#F1F1F1] shadow-lg space-y-2"
-                : "bg-gradient-to-r from-cyan-500 to-purple-600 text-white shadow-lg"
+                ? "bg-white/5 backdrop-blur-sm text-[#F1F1F1] shadow-lg space-y-2"
+                : "bg-gradient-to-r from-cyan-500/80 to-purple-600/80 backdrop-blur-sm text-white shadow-lg"
             }`}
           >
             {message.isBot ? renderMessageWithLinks(message.text) : message.text}
