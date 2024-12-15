@@ -82,7 +82,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56">
-        <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer bg-white text-black hover:bg-white/90">
+        <DropdownMenuItem onClick={handleConnectMetaMask} className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
         </DropdownMenuItem>
