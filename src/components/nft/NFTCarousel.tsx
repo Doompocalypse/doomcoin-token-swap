@@ -16,6 +16,9 @@ const NFTCarousel = ({ connectedAccount }: { connectedAccount?: string }) => {
   const [api, setApi] = useState<any>(null);
   const [current, setCurrent] = useState(0);
 
+  console.log('NFTCarousel render - nfts:', nfts);
+  console.log('NFTCarousel render - purchasedNfts:', purchasedNfts);
+
   useEffect(() => {
     if (!api || !nfts) return;
 

@@ -2,6 +2,7 @@ import { useToast } from "@/components/ui/use-toast";
 import WalletConnect from "@/components/WalletConnect";
 import VideoBackground from "@/components/VideoBackground";
 import NFTCarousel from "@/components/nft/NFTCarousel";
+import ErrorBoundary from "@/components/ErrorBoundary";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -15,6 +16,12 @@ import { ChevronDown } from "lucide-react";
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
     <div className="text-white text-lg">Loading application...</div>
+  </div>
+);
+
+const ErrorFallback = () => (
+  <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
+    <div className="text-white text-lg">Something went wrong loading the NFTs. Please try refreshing the page.</div>
   </div>
 );
 
@@ -68,7 +75,9 @@ const About = () => {
                 Discover and collect unique digital artworks. Purchase with DMC tokens on the Arbitrum One network.
               </p>
             </div>
-            <NFTCarousel connectedAccount={connectedAccount} />
+            <ErrorBoundary fallback={<ErrorFallback />}>
+              <NFTCarousel connectedAccount={connectedAccount} />
+            </ErrorBoundary>
           </div>
         </main>
       </div>
