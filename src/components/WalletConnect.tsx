@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import ConnectDialog from "./wallet/ConnectDialog";
@@ -16,6 +16,17 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionType, setConnectionType] = useState<"metamask" | null>(null);
+
+  // Effect to handle initial connection state
+  useEffect(() => {
+    if (accounts && accounts.length > 0 && chainId) {
+      console.log("Wallet already connected:", { accounts, chainId });
+      onConnect(true, accounts[0]);
+    } else {
+      console.log("No wallet connected:", { accounts, chainId });
+      onConnect(false);
+    }
+  }, [accounts, chainId, onConnect]);
 
   const getNetworkName = () => {
     if (!chainId) return "";
@@ -54,7 +65,15 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
   };
 
   // Check if we have a connected account and valid chainId
-  const isWalletConnected = accounts && accounts.length > 0 && chainId;
+  const isWalletConnected = Boolean(accounts?.length && chainId);
+
+  console.log("Wallet connection state:", { 
+    isWalletConnected, 
+    accounts, 
+    chainId,
+    connectionType,
+    isConnecting 
+  });
 
   if (isWalletConnected) {
     return (
