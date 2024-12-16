@@ -27,11 +27,11 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         console.error("\nError deploying contract:", error);
         
         if (error.code === 'INSUFFICIENT_FUNDS') {
-            throw new Error("Insufficient funds to deploy contract. Please ensure you have enough ETH.");
+            throw new Error("Insufficient funds to deploy contract");
         }
         
         if (error.code === -32000) {
-            throw new Error("Gas estimation failed. Please try deploying again with the current gas settings.");
+            throw new Error("Gas estimation failed. Please try deploying again.");
         }
 
         if (error.message.includes("constructor")) {

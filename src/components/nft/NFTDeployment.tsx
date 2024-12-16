@@ -23,7 +23,6 @@ const NFTDeployment = () => {
         }
 
         try {
-            // First request wallet connection
             console.log("Requesting wallet connection...");
             await window.ethereum.request({
                 method: "eth_requestAccounts"
@@ -32,17 +31,23 @@ const NFTDeployment = () => {
             setIsDeploying(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             
-            // Ensure we're on the correct network before proceeding
+            // Ensure we're on Arbitrum One
             const network = await provider.getNetwork();
             console.log("Connected to network:", network.name);
             
-            const signer = provider.getSigner();
+            if (network.chainId !== 42161) { // Arbitrum One chainId
+                toast({
+                    title: "Wrong Network",
+                    description: "Please switch to Arbitrum One network",
+                    variant: "destructive",
+                });
+                return;
+            }
             
-            // Get the connected account
+            const signer = provider.getSigner();
             const address = await signer.getAddress();
             console.log("Connected with address:", address);
             
-            // Initialize contract deployment
             console.log("Initializing contract deployment...");
             const contract = await deployCleopatraNFT(signer);
             
@@ -51,7 +56,7 @@ const NFTDeployment = () => {
             
             toast({
                 title: "Success",
-                description: `Contract deployed at ${contract.address}`,
+                description: `NFT Collection deployed at ${contract.address}`,
             });
         } catch (error) {
             console.error("Deployment error:", error);
