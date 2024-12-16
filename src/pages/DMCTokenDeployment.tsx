@@ -5,11 +5,23 @@ import { ethers } from "ethers";
 import WalletConnect from "@/components/WalletConnect";
 import { deployDMCToken } from "@/scripts/deployDMCToken";
 import VideoBackground from "@/components/VideoBackground";
+import { Copy } from "lucide-react";
 
 const DMCTokenDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
     const [contractAddress, setContractAddress] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const { toast } = useToast();
+
+    const copyError = () => {
+        if (errorMessage) {
+            navigator.clipboard.writeText(errorMessage);
+            toast({
+                title: "Copied",
+                description: "Error message copied to clipboard",
+            });
+        }
+    };
 
     const handleDeploy = async () => {
         if (!window.ethereum) {
@@ -49,9 +61,11 @@ const DMCTokenDeployment = () => {
             
         } catch (error) {
             console.error("Deployment error:", error);
+            const errorMsg = error instanceof Error ? error.message : "Failed to deploy DMC token";
+            setErrorMessage(errorMsg);
             toast({
                 title: "Error",
-                description: error instanceof Error ? error.message : "Failed to deploy DMC token",
+                description: errorMsg,
                 variant: "destructive",
             });
         } finally {
@@ -87,6 +101,23 @@ const DMCTokenDeployment = () => {
                             <p className="text-sm text-green-300 mt-2">
                                 Save this address for future use!
                             </p>
+                        </div>
+                    )}
+                    {errorMessage && (
+                        <div className="mt-4 p-4 bg-red-900/20 rounded-lg">
+                            <div className="flex justify-between items-start gap-2">
+                                <p className="text-red-400 break-all select-text">
+                                    {errorMessage}
+                                </p>
+                                <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    onClick={copyError}
+                                    className="shrink-0"
+                                >
+                                    <Copy className="h-4 w-4" />
+                                </Button>
+                            </div>
                         </div>
                     )}
                 </div>
