@@ -54,7 +54,7 @@ export function handleDeploymentReceipt(receipt: ethers.ContractReceipt) {
         });
 
         // Check for specific failure conditions
-        if (receipt.gasUsed.eq(receipt.gasLimit)) {
+        if (receipt.gasUsed.eq(receipt.cumulativeGasUsed)) {
             throw new Error("Contract deployment failed - Out of gas. Try increasing gas limit.");
         }
         throw new Error("Contract deployment failed - transaction reverted");

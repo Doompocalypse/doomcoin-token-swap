@@ -28,9 +28,9 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     
     const normalizedChainId = chainId.toString().toLowerCase();
     
-    if (normalizedChainId === ARBITRUM_CHAIN_ID.toLowerCase()) {
-      console.log("✅ Connected to Arbitrum One");
-      return " (Arbitrum)";
+    if (normalizedChainId === "0xaa36a7".toLowerCase()) {
+      console.log("✅ Connected to Sepolia");
+      return " (Sepolia)";
     }
     
     console.warn("Connected to unsupported network:", normalizedChainId);
