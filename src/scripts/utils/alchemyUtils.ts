@@ -1,5 +1,29 @@
-import { Alchemy, Network } from "@alch/alchemy-sdk";
+import { Alchemy, Network, AlchemySettings } from "@alch/alchemy-sdk";
 import { supabase } from "@/integrations/supabase/client";
+
+const MAX_RETRIES = 3;
+const RETRY_DELAY = 1000; // 1 second
+
+const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+const verifyConnection = async (alchemy: Alchemy): Promise<boolean> => {
+    try {
+        const network = await alchemy.core.getNetwork();
+        console.log("Connected to Alchemy network:", network.name);
+        
+        if (network.name !== "sepolia") {
+            throw new Error(`Connected to wrong network: ${network.name}. Expected: sepolia`);
+        }
+        
+        const blockNumber = await alchemy.core.getBlockNumber();
+        console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
+        
+        return true;
+    } catch (error) {
+        console.error("Failed to verify Alchemy connection:", error);
+        return false;
+    }
+};
 
 export const initializeAlchemy = async () => {
     console.log("Initializing Alchemy SDK...");
@@ -22,35 +46,30 @@ export const initializeAlchemy = async () => {
 
         console.log("Successfully retrieved Alchemy API key");
 
-        // Initialize Alchemy with explicit network configuration
-        const settings = {
+        const settings: AlchemySettings = {
             apiKey: alchemyApiKey,
             network: Network.ETH_SEPOLIA,
-            maxRetries: 5,
+            maxRetries: MAX_RETRIES,
             requestTimeout: 30000 // 30 seconds
         };
 
-        const alchemy = new Alchemy(settings);
-
-        // Verify the connection immediately
-        try {
-            const blockNumber = await alchemy.core.getBlockNumber();
-            console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
+        let retryCount = 0;
+        while (retryCount < MAX_RETRIES) {
+            const alchemy = new Alchemy(settings);
+            const isConnected = await verifyConnection(alchemy);
             
-            const network = await alchemy.core.getNetwork();
-            console.log("Connected to network:", network.name);
-            
-            if (network.name !== "sepolia") {
-                throw new Error(`Connected to wrong network: ${network.name}. Expected: sepolia`);
+            if (isConnected) {
+                return alchemy;
             }
             
-            return alchemy;
-        } catch (error: any) {
-            console.error("Failed to verify Alchemy connection:", error);
-            throw new Error(
-                "Failed to verify Alchemy connection. Please ensure your API key has access to Sepolia network."
-            );
+            retryCount++;
+            if (retryCount < MAX_RETRIES) {
+                console.log(`Retrying Alchemy connection (attempt ${retryCount + 1}/${MAX_RETRIES})...`);
+                await delay(RETRY_DELAY);
+            }
         }
+        
+        throw new Error("Failed to establish Alchemy connection after multiple attempts");
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
         throw error;
