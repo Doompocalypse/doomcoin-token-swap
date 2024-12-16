@@ -27,10 +27,8 @@ export const initializeAlchemy = async () => {
             apiKey: alchemyApiKey,
             network: Network.ETH_SEPOLIA,
             maxRetries: 5,
-            requestTimeout: 30000, // 30 seconds
+            requestTimeout: 30000 // 30 seconds
         };
-
-        console.log("Creating Alchemy instance with network:", Network.ETH_SEPOLIA);
 
         const alchemy = new Alchemy(settings);
 
@@ -39,9 +37,12 @@ export const initializeAlchemy = async () => {
             const blockNumber = await alchemy.core.getBlockNumber();
             console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
             
-            // Additional verification of core functionality
             const network = await alchemy.core.getNetwork();
             console.log("Connected to network:", network.name);
+            
+            if (network.name !== "sepolia") {
+                throw new Error(`Connected to wrong network: ${network.name}. Expected: sepolia`);
+            }
             
             return alchemy;
         } catch (error: any) {
