@@ -2,13 +2,11 @@ import { ethers } from "ethers";
 import CleopatraNFTContract from "../contracts/CleopatraNecklaceNFT.json";
 
 export const deployCleopatraNFT = async (signer: ethers.Signer) => {
-    console.log("Starting deployment of Cleopatra's Necklace NFT contract...");
-    
     // Use testnet DMC address for now
     const DOOM_COIN_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
     
     try {
-        // Verify DMC token contract exists
+        // First verify DMC token contract exists
         const provider = signer.provider;
         if (!provider) {
             throw new Error("No provider available");
@@ -19,10 +17,11 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         if (code === "0x") {
             throw new Error("DMC token contract not found at the specified address");
         }
+        console.log("✅ DMC token contract verified");
 
         // Log deployment parameters
         const deployerAddress = await signer.getAddress();
-        console.log("Deployment Parameters:");
+        console.log("\nDeployment Parameters:");
         console.log("- DMC Token Address:", DOOM_COIN_ADDRESS);
         console.log("- Deployer Address:", deployerAddress);
         
@@ -34,11 +33,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Deployer has no ETH balance");
         }
 
-        // Get current gas price and estimate deployment cost
-        const gasPrice = await provider.getGasPrice();
-        console.log("\nGas Parameters:");
-        console.log("- Current base gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
-
         // Create contract factory with deployment bytecode
         console.log("\nPreparing contract deployment...");
         const factory = new ethers.ContractFactory(
@@ -47,23 +41,14 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             signer
         );
 
-        // Estimate gas for deployment
-        console.log("Estimating gas for deployment...");
+        // Get deployment transaction data first
+        console.log("Creating deployment transaction...");
         const deploymentData = factory.getDeployTransaction(DOOM_COIN_ADDRESS);
-        const gasEstimate = await provider.estimateGas(deploymentData);
-        console.log("- Estimated gas needed:", gasEstimate.toString());
-        
-        // Calculate safe gas limit (50% buffer for safety)
-        const safeGasLimit = gasEstimate.mul(150).div(100);
-        console.log("- Safe gas limit (with 50% buffer):", safeGasLimit.toString());
-        
-        // Deploy with dynamic gas parameters
+        console.log("Deployment data created successfully");
+
+        // Deploy with standard gas parameters
         console.log("\nDeploying contract...");
-        const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: safeGasLimit,
-            maxFeePerGas: gasPrice.mul(2), // Double the base gas price
-            maxPriorityFeePerGas: ethers.utils.parseUnits("1", "gwei") // 1 gwei priority fee
-        });
+        const contract = await factory.deploy(DOOM_COIN_ADDRESS);
         
         console.log("Deployment transaction sent!");
         console.log("Transaction hash:", contract.deployTransaction.hash);
@@ -90,15 +75,21 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         
         return contract;
     } catch (error: any) {
-        console.error("\nError deploying contract:", error.message);
+        console.error("\nError deploying contract:", error);
         
-        // Enhanced error reporting
         if (error.code === 'INSUFFICIENT_FUNDS') {
             throw new Error("Insufficient funds to deploy contract. Please ensure you have enough ETH.");
         }
         
         if (error.code === -32000) {
             throw new Error("Gas estimation failed. Please try again with a different gas limit.");
+        }
+
+        // Check if error is related to contract initialization
+        if (error.message.includes("constructor")) {
+            console.error("Contract initialization error. Check constructor parameters:", {
+                DMCAddress: DOOM_COIN_ADDRESS
+            });
         }
         
         // Check if error contains transaction details
