@@ -2,6 +2,9 @@ import { SupportedChains } from "@/types/wallet";
 
 export const SEPOLIA_CHAIN_ID = "0xaa36a7"; // Sepolia Chain ID
 
+// Get Infura project ID from environment
+const INFURA_PROJECT_ID = "0d63e4b93b8abc2ea0a58328d7e7c053";
+
 export const SUPPORTED_CHAINS: SupportedChains = {
   "0xaa36a7": {
     chainId: "0xaa36a7",
@@ -11,7 +14,7 @@ export const SUPPORTED_CHAINS: SupportedChains = {
       symbol: "ETH",
       decimals: 18,
     },
-    rpcUrls: ["https://sepolia.infura.io/v3/"],
+    rpcUrls: [`https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`],
     blockExplorerUrls: ["https://sepolia.etherscan.io/"],
   },
 };

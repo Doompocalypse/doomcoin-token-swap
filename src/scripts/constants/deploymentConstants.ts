@@ -20,4 +20,5 @@ export const GAS_CONFIG = {
     }
 };
 
-export const SEPOLIA_RPC_URL = "https://sepolia.infura.io/v3/";
+const INFURA_PROJECT_ID = "0d63e4b93b8abc2ea0a58328d7e7c053";
+export const SEPOLIA_RPC_URL = `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`;
