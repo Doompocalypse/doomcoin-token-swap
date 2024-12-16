@@ -6,20 +6,20 @@ export const initializeAlchemy = async () => {
     
     try {
         console.log("Fetching Alchemy API key from Supabase...");
-        const { data, error: secretError } = await supabase
+        const { data, error } = await supabase
             .from('app_settings')
             .select('value')
             .eq('key', 'ALCHEMY_API_KEY')
             .single();
 
-        if (secretError) {
-            console.error("Failed to fetch Alchemy API key from Supabase:", secretError);
-            throw new Error(`Failed to fetch Alchemy API key: ${secretError.message}`);
+        if (error) {
+            console.error("Failed to fetch Alchemy API key:", error);
+            throw new Error(`Failed to fetch Alchemy API key: ${error.message}`);
         }
 
-        if (!data || !data.value || data.value.trim() === '') {
-            console.error("No valid Alchemy API key found in app_settings");
-            throw new Error("No valid Alchemy API key found in app_settings. Please ensure you've added a non-empty API key.");
+        if (!data) {
+            console.error("No Alchemy API key found in app_settings");
+            throw new Error("No Alchemy API key found in app_settings");
         }
 
         const alchemyApiKey = data.value;
@@ -32,12 +32,10 @@ export const initializeAlchemy = async () => {
 
         const alchemy = new Alchemy(settings);
 
-        // Test the connection with your specific block query
+        // Test the connection
         try {
             console.log("Testing Alchemy connection...");
             await alchemy.core.getBlockNumber();
-            // You can uncomment this to test your specific block query
-            // await alchemy.core.getBlock(15221026).then(console.log);
             console.log("✅ Successfully connected to Alchemy");
             return alchemy;
         } catch (error) {
@@ -46,7 +44,6 @@ export const initializeAlchemy = async () => {
         }
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
-        // Re-throw the error with the original message to preserve the error context
         throw error;
     }
 };
