@@ -24,20 +24,12 @@ export const initializeAlchemy = async () => {
 
         const alchemyApiKey = data.value;
         console.log("Successfully retrieved Alchemy API key");
-        
-        // Initialize Alchemy with explicit network configuration
-        const settings = {
+
+        // Initialize Alchemy with Sepolia network
+        const alchemy = new Alchemy({
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA, // Explicitly set as ETH_SEPOLIA
-            maxRetries: 5
-        };
-
-        console.log("Creating Alchemy instance with settings:", {
-            network: "ETH_SEPOLIA", // Log the actual network name for debugging
-            maxRetries: settings.maxRetries
+            network: Network.ETH_SEPOLIA
         });
-
-        const alchemy = new Alchemy(settings);
 
         // Test the connection
         try {
@@ -46,8 +38,8 @@ export const initializeAlchemy = async () => {
             console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
             return alchemy;
         } catch (error: any) {
-            console.error("Failed to connect to Alchemy:", error);
-            throw new Error(`Failed to connect to Alchemy: ${error.message}`);
+            console.error("Failed to test Alchemy connection:", error);
+            throw new Error(`Failed to test Alchemy connection: ${error.message}`);
         }
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
