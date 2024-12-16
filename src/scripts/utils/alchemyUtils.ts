@@ -17,7 +17,7 @@ export const initializeAlchemy = async () => {
             throw new Error(`Failed to fetch Alchemy API key: ${error.message}`);
         }
 
-        if (!data) {
+        if (!data?.value) {
             console.error("No Alchemy API key found in app_settings");
             throw new Error("No Alchemy API key found in app_settings");
         }
@@ -25,22 +25,29 @@ export const initializeAlchemy = async () => {
         const alchemyApiKey = data.value;
         console.log("Successfully retrieved Alchemy API key");
         
+        // Initialize Alchemy with explicit network configuration
         const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA // Changed to Sepolia testnet
+            network: Network.ETH_SEPOLIA,
+            maxRetries: 5
         };
+
+        console.log("Creating Alchemy instance with settings:", {
+            network: settings.network,
+            maxRetries: settings.maxRetries
+        });
 
         const alchemy = new Alchemy(settings);
 
         // Test the connection
         try {
             console.log("Testing Alchemy connection...");
-            await alchemy.core.getBlockNumber();
-            console.log("✅ Successfully connected to Alchemy");
+            const blockNumber = await alchemy.core.getBlockNumber();
+            console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
             return alchemy;
-        } catch (error) {
+        } catch (error: any) {
             console.error("Failed to connect to Alchemy:", error);
-            throw new Error("Failed to connect to Alchemy. Please check if your API key is valid.");
+            throw new Error(`Failed to connect to Alchemy: ${error.message}`);
         }
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
@@ -61,6 +68,6 @@ export const fetchContractTemplate = async (alchemy: Alchemy) => {
         return response;
     } catch (error: any) {
         console.error("Error fetching contract template:", error);
-        throw new Error("Failed to fetch contract template. Please try again.");
+        throw new Error(`Failed to fetch contract template: ${error.message}`);
     }
 };
