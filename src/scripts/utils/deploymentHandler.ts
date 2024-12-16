@@ -9,11 +9,21 @@ async function attemptDeploy(factory: ethers.ContractFactory, config: any) {
         maxPriorityFeePerGas: config.maxPriorityFeePerGas
     });
 
-    return factory.deploy(DOOM_COIN_ADDRESS, {
-        gasLimit: config.gasLimit,
-        maxFeePerGas: ethers.utils.parseUnits(config.maxFeePerGas, "gwei"),
-        maxPriorityFeePerGas: ethers.utils.parseUnits(config.maxPriorityFeePerGas, "gwei")
-    });
+    console.log("Using DMC Token address:", DOOM_COIN_ADDRESS);
+
+    try {
+        return await factory.deploy(DOOM_COIN_ADDRESS, {
+            gasLimit: config.gasLimit,
+            maxFeePerGas: ethers.utils.parseUnits(config.maxFeePerGas, "gwei"),
+            maxPriorityFeePerGas: ethers.utils.parseUnits(config.maxPriorityFeePerGas, "gwei")
+        });
+    } catch (error: any) {
+        console.error("Deployment attempt failed:", error.message);
+        if (error.message.includes("insufficient funds")) {
+            throw new Error("Insufficient funds for deployment. Please make sure you have enough ETH.");
+        }
+        throw error;
+    }
 }
 
 export async function createAndDeployContract(signer: ethers.Signer) {
@@ -34,17 +44,26 @@ export async function createAndDeployContract(signer: ethers.Signer) {
         console.log("\nTrying initial deployment...");
         return await attemptDeploy(factory, GAS_CONFIG.initial);
     } catch (error: any) {
-        console.log("Initial deployment failed, trying with higher gas (retry 1)...");
+        console.log("Initial deployment failed:", error.message);
+        console.log("Trying with higher gas (retry 1)...");
         try {
             return await attemptDeploy(factory, GAS_CONFIG.retry1);
         } catch (error: any) {
-            console.log("Retry 1 failed, attempting final retry with maximum gas...");
+            console.log("Retry 1 failed:", error.message);
+            console.log("Attempting final retry with maximum gas...");
             return await attemptDeploy(factory, GAS_CONFIG.retry2);
         }
     }
 }
 
 export function handleDeploymentReceipt(receipt: ethers.ContractReceipt) {
+    console.log("\nTransaction receipt received:", {
+        status: receipt.status,
+        gasUsed: receipt.gasUsed.toString(),
+        blockNumber: receipt.blockNumber,
+        transactionHash: receipt.transactionHash
+    });
+
     if (receipt.status === 0) {
         console.error("\nDeployment Failed! Transaction details:", {
             gasUsed: receipt.gasUsed.toString(),
@@ -53,11 +72,10 @@ export function handleDeploymentReceipt(receipt: ethers.ContractReceipt) {
             transactionHash: receipt.transactionHash
         });
 
-        // Check for specific failure conditions
         if (receipt.gasUsed.eq(receipt.cumulativeGasUsed)) {
             throw new Error("Contract deployment failed - Out of gas. Try increasing gas limit.");
         }
-        throw new Error("Contract deployment failed - transaction reverted");
+        throw new Error("Contract deployment failed - transaction reverted. Check the DMC token address and deployment parameters.");
     }
 
     console.log("\nDeployment successful!");

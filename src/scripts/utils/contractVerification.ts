@@ -3,18 +3,17 @@ import { DOOM_COIN_ADDRESS, SEPOLIA_RPC_URL } from "../constants/deploymentConst
 
 export async function verifyDMCToken(provider: ethers.providers.Provider) {
     console.log("Verifying DMC token contract...");
-    
-    // Try both the connected provider and a direct Sepolia RPC connection
-    const backupProvider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
+    console.log("DMC Token Address:", DOOM_COIN_ADDRESS);
     
     try {
         const code = await provider.getCode(DOOM_COIN_ADDRESS);
+        console.log("Contract code length:", code.length);
+        
         if (code === "0x") {
-            // Try backup provider
-            const backupCode = await backupProvider.getCode(DOOM_COIN_ADDRESS);
-            if (backupCode === "0x") {
-                throw new Error("DMC token contract not found at the specified address");
-            }
+            console.log("No contract code found at address, checking network...");
+            const network = await provider.getNetwork();
+            console.log("Current network:", network.name, "chainId:", network.chainId);
+            throw new Error("DMC token contract not found at the specified address");
         }
         console.log("✅ DMC token contract verified");
     } catch (error) {
@@ -38,4 +37,9 @@ export async function logDeploymentParams(signer: ethers.Signer) {
     console.log("- Chain ID:", network?.chainId);
     console.log("- DMC Token Address:", DOOM_COIN_ADDRESS);
     console.log("- Deployer Address:", deployerAddress);
+    
+    // Additional network verification
+    if (network?.chainId !== 11155111) { // Sepolia chainId
+        console.warn("⚠️ Warning: Not deploying to Sepolia network!");
+    }
 }
