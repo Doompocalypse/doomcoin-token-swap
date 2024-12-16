@@ -17,14 +17,19 @@ export const useNetworkSwitch = () => {
         secret_name: 'INFURA_PROJECT_ID'
       });
 
-      if (secretError || !infuraProjectId) {
+      if (secretError) {
         console.error("Error fetching Infura Project ID:", secretError);
+        throw new Error("Failed to fetch network configuration");
+      }
+
+      if (!infuraProjectId) {
+        console.error("No Infura Project ID found");
         toast({
           title: "Configuration Error",
-          description: "Failed to fetch network configuration. Please try again.",
+          description: "Infura Project ID is not set. Please set it in the project settings.",
           variant: "destructive"
         });
-        throw new Error("Failed to fetch Infura Project ID");
+        throw new Error("Infura Project ID is not configured");
       }
 
       console.log("Retrieved Infura configuration");
@@ -68,7 +73,7 @@ export const useNetworkSwitch = () => {
           }
         }
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in switchToSepolia:", error);
       throw error;
     }
