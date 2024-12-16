@@ -47,8 +47,16 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
 
             console.log("Starting token deployment...");
             const contract = await deployDMCToken(signer);
-            console.log("Token deployed at:", contract.address);
             
+            // Wait for the transaction to be mined and get the receipt
+            console.log("Waiting for transaction confirmation...");
+            const receipt = await contract.deployTransaction.wait();
+            
+            if (receipt.status === 0) {
+                throw new Error("Contract deployment failed during execution. This might be due to insufficient gas or contract initialization error.");
+            }
+            
+            console.log("Token deployed at:", contract.address);
             onSuccess(contract.address);
             
             toast({
@@ -59,12 +67,24 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
         } catch (error: any) {
             console.error("Error deploying DMC token:", error);
             
-            // Handle user rejection specifically
+            // Handle user rejection
             if (error.code === "ACTION_REJECTED") {
                 const message = "Transaction was rejected in MetaMask. Please try again and confirm the transaction.";
                 onError(message);
                 toast({
                     title: "Transaction Rejected",
+                    description: message,
+                    variant: "destructive",
+                });
+                return;
+            }
+            
+            // Handle failed transactions
+            if (error.code === "CALL_EXCEPTION") {
+                const message = "Transaction failed during execution. This might be due to insufficient gas or contract initialization error. Please try again with higher gas limit.";
+                onError(message);
+                toast({
+                    title: "Transaction Failed",
                     description: message,
                     variant: "destructive",
                 });
