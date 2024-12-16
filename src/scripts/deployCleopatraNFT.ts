@@ -34,12 +34,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Deployer has no ETH balance");
         }
 
-        // Get current gas price and estimate deployment cost
-        const gasPrice = await provider.getGasPrice();
-        console.log("\nGas Parameters:");
-        console.log("- Current base gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
-
-        // Create contract factory with deployment bytecode
+        // Create contract factory
         console.log("\nPreparing contract deployment...");
         const factory = new ethers.ContractFactory(
             CleopatraNFTContract.abi,
@@ -47,20 +42,15 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             signer
         );
 
-        // Estimate gas for deployment
-        console.log("Estimating gas for deployment...");
-        const deploymentData = factory.getDeployTransaction(DOOM_COIN_ADDRESS);
-        const gasEstimate = await provider.estimateGas(deploymentData);
-        console.log("- Estimated gas needed:", gasEstimate.toString());
-        
-        // Calculate safe gas limit (20% buffer)
-        const safeGasLimit = gasEstimate.mul(120).div(100);
-        console.log("- Safe gas limit (with 20% buffer):", safeGasLimit.toString());
-        
-        // Deploy with dynamic gas parameters
-        console.log("\nDeploying contract...");
+        // Get current gas price
+        const gasPrice = await provider.getGasPrice();
+        console.log("\nGas Parameters:");
+        console.log("- Current base gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
+
+        // Deploy with fixed gas limit and dynamic gas price
+        console.log("Deploying contract...");
         const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: safeGasLimit,
+            gasLimit: 3000000, // Fixed gas limit that should cover deployment
             maxFeePerGas: gasPrice.mul(2), // Double the base gas price
             maxPriorityFeePerGas: ethers.utils.parseUnits("1", "gwei") // 1 gwei priority fee
         });
@@ -72,12 +62,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         const receipt = await contract.deployTransaction.wait();
         
         if (receipt.status === 0) {
-            console.error("\nDeployment Failed! Transaction details:", {
-                gasUsed: receipt.gasUsed.toString(),
-                effectiveGasPrice: ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"),
-                blockNumber: receipt.blockNumber,
-                transactionHash: receipt.transactionHash
-            });
             throw new Error("Contract deployment failed - transaction reverted");
         }
         
@@ -85,8 +69,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         console.log("Contract deployed to:", contract.address);
         console.log("Block number:", receipt.blockNumber);
         console.log("Gas used:", receipt.gasUsed.toString());
-        console.log("Effective gas price:", ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"), "gwei");
-        console.log("Total cost:", ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)), "ETH");
         
         return contract;
     } catch (error: any) {
@@ -101,27 +83,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Gas estimation failed. Please try again with a different gas limit.");
         }
         
-        // Check if error contains transaction details
-        if (error.transaction) {
-            console.error("Failed transaction details:", {
-                from: error.transaction.from,
-                to: error.transaction.to,
-                data: error.transaction.data?.slice(0, 100) + "...", // Log first 100 chars of data
-                gasLimit: error.transaction.gasLimit?.toString(),
-                value: error.transaction.value?.toString()
-            });
-        }
-        
-        // Check if error contains receipt
-        if (error.receipt) {
-            console.error("Transaction receipt:", {
-                status: error.receipt.status,
-                gasUsed: error.receipt.gasUsed?.toString(),
-                blockNumber: error.receipt.blockNumber,
-                transactionHash: error.receipt.transactionHash
-            });
-        }
-        
-        throw new Error(`Contract deployment failed: ${error.message}`);
+        throw error;
     }
 };
