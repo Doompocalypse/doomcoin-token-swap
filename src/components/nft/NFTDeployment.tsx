@@ -12,10 +12,12 @@ const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
     const [contractAddress, setContractAddress] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [transactionHash, setTransactionHash] = useState<string>("");
     const { toast } = useToast();
 
     const handleDeploy = async () => {
         setErrorMessage("");
+        setTransactionHash("");
         if (!window.ethereum) {
             toast({
                 title: "Error",
@@ -34,7 +36,10 @@ const NFTDeployment = () => {
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             
             const network = await provider.getNetwork();
-            console.log("Connected to network:", network.name);
+            console.log("Connected to network:", {
+                name: network.name,
+                chainId: network.chainId
+            });
             
             const isValidNetwork = network.chainId === 421613 || 
                                  network.chainId === parseInt(SEPOLIA_CHAIN_ID, 16);
@@ -52,6 +57,17 @@ const NFTDeployment = () => {
             setIsDeploying(true);
             console.log("Initializing contract deployment...");
             const contract = await deployCleopatraNFT(signer);
+            
+            console.log("Contract deployment initiated with transaction hash:", contract.deployTransaction.hash);
+            setTransactionHash(contract.deployTransaction.hash);
+            
+            toast({
+                title: "Deployment Started",
+                description: "Please wait while your transaction is being processed...",
+            });
+
+            console.log("Waiting for transaction confirmation...");
+            await contract.deployed();
             
             console.log("Contract deployment successful");
             setContractAddress(contract.address);
@@ -78,6 +94,16 @@ const NFTDeployment = () => {
         <div className="space-y-6 p-6 bg-black/40 rounded-lg">
             <CollectionInfo />
             <GasEstimator onEstimateComplete={() => {}} />
+            {transactionHash && (
+                <div className="p-4 bg-blue-900/20 rounded-lg">
+                    <p className="text-blue-400 break-all">
+                        Transaction Hash: {transactionHash}
+                    </p>
+                    <p className="text-sm text-blue-300 mt-2">
+                        Your transaction is being processed. This may take a few minutes...
+                    </p>
+                </div>
+            )}
             <Button
                 onClick={handleDeploy}
                 disabled={isDeploying}
