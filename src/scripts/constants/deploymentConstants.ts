@@ -20,5 +20,6 @@ export const GAS_CONFIG = {
     }
 };
 
-const INFURA_PROJECT_ID = "0d63e4b93b8abc2ea0a58328d7e7c053";
+// Get Infura project ID from environment
+export const INFURA_PROJECT_ID = ""; // This will be replaced with the secret from Supabase
 export const SEPOLIA_RPC_URL = `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`;

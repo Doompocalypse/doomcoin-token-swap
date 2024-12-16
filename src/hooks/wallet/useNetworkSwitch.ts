@@ -27,7 +27,7 @@ export const useNetworkSwitch = () => {
               chainId: SEPOLIA_CHAIN_ID,
               chainName: 'Sepolia',
               nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-              rpcUrls: ['https://sepolia.infura.io/v3/'],
+              rpcUrls: [`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`],
               blockExplorerUrls: ['https://sepolia.etherscan.io/']
             }]
           });
