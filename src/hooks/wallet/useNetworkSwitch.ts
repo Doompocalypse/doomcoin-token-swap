@@ -11,14 +11,16 @@ export const useNetworkSwitch = () => {
     console.log("Target Sepolia chain ID:", SEPOLIA_CHAIN_ID);
 
     // Get the Infura Project ID from Supabase
-    const { data: { secret: infuraProjectId } } = await supabase.rpc('get_secret', {
+    const { data, error } = await supabase.rpc('get_secret', {
       secret_name: 'INFURA_PROJECT_ID'
     });
 
-    if (!infuraProjectId) {
-      console.error("No Infura Project ID found");
-      throw new Error("Infura Project ID not configured");
+    if (error || !data) {
+      console.error("Error fetching Infura Project ID:", error);
+      throw new Error("Failed to fetch Infura Project ID");
     }
+
+    const infuraProjectId = data as string;
     
     if (currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
       try {
