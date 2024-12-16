@@ -1,5 +1,6 @@
 import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { supabase } from "@/integrations/supabase/client";
+import { Database } from "@/types/supabase";
 
 export const useNetworkSwitch = () => {
   const switchToSepolia = async (provider: any) => {
@@ -11,7 +12,7 @@ export const useNetworkSwitch = () => {
     console.log("Target Sepolia chain ID:", SEPOLIA_CHAIN_ID);
 
     // Get the Infura Project ID from Supabase
-    const { data, error } = await supabase.rpc('get_secret', {
+    const { data, error } = await supabase.rpc<string>('get_secret', {
       secret_name: 'INFURA_PROJECT_ID'
     });
 
@@ -20,7 +21,7 @@ export const useNetworkSwitch = () => {
       throw new Error("Failed to fetch Infura Project ID");
     }
 
-    const infuraProjectId = data as string;
+    const infuraProjectId = data;
     
     if (currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
       try {
