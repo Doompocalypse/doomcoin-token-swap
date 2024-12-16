@@ -13,7 +13,10 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
     const { toast } = useToast();
 
     const handleDeploy = async () => {
+        console.log("Starting deployment process in useDeployment hook...");
+        
         if (!window.ethereum) {
+            console.error("MetaMask not detected");
             toast({
                 title: "Error",
                 description: "Please install MetaMask to deploy the contract",
@@ -23,6 +26,7 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
         }
 
         try {
+            console.log("Setting deployment state...");
             setIsDeploying(true);
             
             const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -32,6 +36,7 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
             console.log("Connected to network:", network);
             
             if (network.chainId !== 11155111) { // Sepolia
+                console.error("Wrong network detected:", network.chainId);
                 toast({
                     title: "Wrong Network",
                     description: "Please switch to Sepolia network",

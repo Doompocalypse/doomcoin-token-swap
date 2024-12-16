@@ -9,10 +9,19 @@ interface DeploymentFormProps {
 const DeploymentForm = ({ onSuccess, onError }: DeploymentFormProps) => {
     const { isDeploying, handleDeploy } = useDeployment({ onSuccess, onError });
 
+    const handleDeployClick = async () => {
+        console.log("Deploy button clicked, starting deployment process...");
+        try {
+            await handleDeploy();
+        } catch (error) {
+            console.error("Deployment failed in form component:", error);
+        }
+    };
+
     return (
         <DeploymentButton 
             isDeploying={isDeploying} 
-            onClick={handleDeploy}
+            onClick={handleDeployClick}
         />
     );
 };
