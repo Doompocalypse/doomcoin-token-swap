@@ -1,4 +1,4 @@
-import { Alchemy, Network } from "@alch/alchemy-sdk";
+import { Alchemy, Network, AlchemySettings } from "@alch/alchemy-sdk";
 import { supabase } from "@/integrations/supabase/client";
 
 export const initializeAlchemy = async () => {
@@ -6,36 +6,45 @@ export const initializeAlchemy = async () => {
     
     try {
         console.log("Fetching Alchemy API key from Supabase...");
-        const { data, error } = await supabase
-            .from('app_settings')
-            .select('value')
-            .eq('key', 'ALCHEMY_API_KEY')
-            .single();
+        const { data, error } = await supabase.rpc('get_secret', {
+            secret_name: 'ALCHEMY_API_KEY'
+        });
 
         if (error) {
             console.error("Failed to fetch Alchemy API key:", error);
             throw new Error(`Failed to fetch Alchemy API key: ${error.message}`);
         }
 
-        if (!data?.value) {
-            console.error("No Alchemy API key found in app_settings");
-            throw new Error("No Alchemy API key found in app_settings");
+        if (!data) {
+            console.error("No Alchemy API key found");
+            throw new Error("No Alchemy API key found");
         }
 
-        const alchemyApiKey = data.value;
+        const alchemyApiKey = data;
         console.log("Successfully retrieved Alchemy API key");
 
-        // Create Alchemy instance with explicit configuration
-        const settings = {
+        // Define explicit settings for Alchemy SDK
+        const settings: AlchemySettings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA
+            network: Network.ETH_SEPOLIA,
+            maxRetries: 3
         };
 
-        console.log("Creating Alchemy instance with network:", Network.ETH_SEPOLIA);
+        console.log("Initializing Alchemy with settings:", {
+            network: settings.network,
+            maxRetries: settings.maxRetries
+        });
+
         const alchemy = new Alchemy(settings);
 
-        if (!alchemy || !alchemy.core) {
-            throw new Error("Failed to initialize Alchemy SDK properly");
+        // Verify the Alchemy instance is properly initialized
+        if (!alchemy) {
+            throw new Error("Failed to create Alchemy instance");
+        }
+
+        // Verify core functionality is available
+        if (!alchemy.core) {
+            throw new Error("Alchemy core functionality not available");
         }
 
         // Test the connection with proper error handling
@@ -46,7 +55,7 @@ export const initializeAlchemy = async () => {
             return alchemy;
         } catch (error: any) {
             console.error("Failed to test Alchemy connection:", error);
-            throw new Error(`Failed to test Alchemy connection: ${error.message}`);
+            throw new Error(`Alchemy connection test failed: ${error.message}`);
         }
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
@@ -57,14 +66,14 @@ export const initializeAlchemy = async () => {
 export const fetchContractTemplate = async (alchemy: Alchemy) => {
     console.log("Fetching contract template...");
     try {
-        if (!alchemy || !alchemy.core) {
-            throw new Error("Invalid Alchemy instance");
+        if (!alchemy?.core) {
+            throw new Error("Invalid Alchemy instance - core functionality not available");
         }
 
         const response = await alchemy.core.getContract("0x6B175474E89094C44Da98b954EedeAC495271d0F");
         
         if (!response || !response.address) {
-            throw new Error("Failed to fetch contract template");
+            throw new Error("Failed to fetch contract template - invalid response");
         }
         
         console.log("Successfully fetched contract template");
