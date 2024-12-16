@@ -19,14 +19,19 @@ export const useNetworkSwitch = () => {
 
       if (secretError) {
         console.error("Error fetching Infura Project ID:", secretError);
+        toast({
+          title: "Network Error",
+          description: "Failed to fetch network configuration. Please try again.",
+          variant: "destructive"
+        });
         throw new Error("Failed to fetch network configuration");
       }
 
-      if (!infuraProjectId) {
+      if (!infuraProjectId || infuraProjectId.trim() === '') {
         console.error("No Infura Project ID found");
         toast({
-          title: "Configuration Error",
-          description: "Infura Project ID is not set. Please set it in the project settings.",
+          title: "Configuration Required",
+          description: "Please set your Infura Project ID in the project settings before connecting.",
           variant: "destructive"
         });
         throw new Error("Infura Project ID is not configured");
@@ -47,11 +52,6 @@ export const useNetworkSwitch = () => {
           if (switchError.code === 4902) {
             console.log("Adding Sepolia network...");
             
-            // Ensure we have the Infura Project ID before adding the network
-            if (!infuraProjectId) {
-              throw new Error("Infura Project ID is required to add Sepolia network");
-            }
-
             await provider.request({
               method: 'wallet_addEthereumChain',
               params: [{
