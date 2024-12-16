@@ -25,13 +25,20 @@ export const initializeAlchemy = async () => {
         const alchemyApiKey = data.value;
         console.log("Successfully retrieved Alchemy API key");
 
-        // Initialize Alchemy with Sepolia network
-        const alchemy = new Alchemy({
+        // Create Alchemy instance with explicit configuration
+        const settings = {
             apiKey: alchemyApiKey,
             network: Network.ETH_SEPOLIA
-        });
+        };
 
-        // Test the connection
+        console.log("Creating Alchemy instance with network:", Network.ETH_SEPOLIA);
+        const alchemy = new Alchemy(settings);
+
+        if (!alchemy || !alchemy.core) {
+            throw new Error("Failed to initialize Alchemy SDK properly");
+        }
+
+        // Test the connection with proper error handling
         try {
             console.log("Testing Alchemy connection...");
             const blockNumber = await alchemy.core.getBlockNumber();
@@ -50,6 +57,10 @@ export const initializeAlchemy = async () => {
 export const fetchContractTemplate = async (alchemy: Alchemy) => {
     console.log("Fetching contract template...");
     try {
+        if (!alchemy || !alchemy.core) {
+            throw new Error("Invalid Alchemy instance");
+        }
+
         const response = await alchemy.core.getContract("0x6B175474E89094C44Da98b954EedeAC495271d0F");
         
         if (!response || !response.address) {
