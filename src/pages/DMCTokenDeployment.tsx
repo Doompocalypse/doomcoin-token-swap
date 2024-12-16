@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import WalletConnect from "@/components/WalletConnect";
 import { deployDMCToken } from "@/scripts/deployDMCToken";
@@ -35,6 +35,7 @@ const DMCTokenDeployment = () => {
 
         try {
             setIsDeploying(true);
+            setErrorMessage("");
             
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
@@ -59,9 +60,9 @@ const DMCTokenDeployment = () => {
                 description: `DMC Token deployed at ${contract.address}`,
             });
             
-        } catch (error) {
-            console.error("Deployment error:", error);
-            const errorMsg = error instanceof Error ? error.message : "Failed to deploy DMC token";
+        } catch (error: any) {
+            console.error("Error deploying DMC token:", error);
+            const errorMsg = error?.message || "Failed to deploy DMC token";
             setErrorMessage(errorMsg);
             toast({
                 title: "Error",
