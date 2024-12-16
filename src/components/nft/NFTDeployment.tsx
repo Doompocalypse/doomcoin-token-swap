@@ -28,13 +28,22 @@ const NFTDeployment = () => {
 
             setIsDeploying(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
+            
+            // Ensure we're on the correct network before proceeding
+            const network = await provider.getNetwork();
+            console.log("Connected to network:", network.name);
+            
             const signer = provider.getSigner();
             
             // Get the connected account
             const address = await signer.getAddress();
             console.log("Connected with address:", address);
             
+            // Initialize contract deployment
+            console.log("Initializing contract deployment...");
             const contract = await deployCleopatraNFT(signer);
+            
+            console.log("Contract deployment successful");
             setContractAddress(contract.address);
             
             toast({
