@@ -6,20 +6,23 @@ export const initializeAlchemy = async () => {
     
     try {
         console.log("Fetching Alchemy API key from Supabase...");
-        const { data: alchemyApiKey, error: secretError } = await supabase.rpc('get_secret', {
-            secret_name: 'ALCHEMY_API_KEY'
-        });
+        const { data, error: secretError } = await supabase
+            .from('app_settings')
+            .select('value')
+            .eq('key', 'ALCHEMY_API_KEY')
+            .single();
 
         if (secretError) {
             console.error("Failed to fetch Alchemy API key from Supabase:", secretError);
             throw new Error(`Failed to fetch Alchemy API key: ${secretError.message}`);
         }
 
-        if (!alchemyApiKey || alchemyApiKey.trim() === '') {
-            console.error("No valid Alchemy API key found in Supabase secrets");
-            throw new Error("No valid Alchemy API key found in Supabase secrets. Please ensure you've added a non-empty API key.");
+        if (!data || !data.value || data.value.trim() === '') {
+            console.error("No valid Alchemy API key found in app_settings");
+            throw new Error("No valid Alchemy API key found in app_settings. Please ensure you've added a non-empty API key.");
         }
 
+        const alchemyApiKey = data.value;
         console.log("Successfully retrieved Alchemy API key");
         
         const alchemy = new Alchemy({
