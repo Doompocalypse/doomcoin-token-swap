@@ -14,9 +14,14 @@ interface TokenExchangeProps {
   connectedAccount?: string;
 }
 
+interface TransactionResult {
+  txHash: string;
+}
+
 const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) => {
   const [usdAmount, setUsdAmount] = useState("");
   const [ethValue, setEthValue] = useState("0.00");
+  const [currentTxHash, setCurrentTxHash] = useState<string>("");
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -113,12 +118,20 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
       console.log("Requested USD amount:", usdAmount);
       console.log("Equivalent ETH amount:", ethValue);
       
-      const { txHash } = await handleTokenExchange(connectedAccount, ethValue, usdAmount);
+      const result = await handleTokenExchange(connectedAccount, ethValue, usdAmount) as TransactionResult;
       
-      console.log("Transaction hash:", txHash);
+      console.log("Transaction hash:", result.txHash);
+      setCurrentTxHash(result.txHash);
+      
       toast({
-        title: "Exchange Initiated",
-        description: `Your ETH has been sent. ${usdAmount} DMC tokens will be transferred to your wallet automatically.`,
+        title: "ETH Transfer Initiated",
+        description: `Your ETH transfer is being processed. Transaction hash: ${result.txHash.slice(0, 6)}...${result.txHash.slice(-4)}`,
+      });
+
+      // Second toast for DMC tokens
+      toast({
+        title: "DMC Transfer Pending",
+        description: `Once your ETH transfer is confirmed, ${usdAmount} DMC tokens will be sent to your wallet automatically.`,
       });
     } catch (error) {
       console.error("Exchange error:", error);
@@ -143,6 +156,11 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           <p>Please ensure you are connected to the Arbitrum One network before swapping tokens</p>
           {isMobile && (
             <p className="text-red-400">Token swapping is currently only available on desktop devices</p>
+          )}
+          {currentTxHash && (
+            <p className="text-sm text-gray-400 break-all">
+              Current Transaction: {currentTxHash}
+            </p>
           )}
         </div>
         <SwapButton
