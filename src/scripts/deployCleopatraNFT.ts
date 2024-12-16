@@ -34,6 +34,10 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Deployer has no ETH balance");
         }
 
+        // Get current gas price
+        const gasPrice = await provider.getGasPrice();
+        console.log("Current gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
+
         // Create contract factory
         console.log("\nCreating contract factory...");
         const factory = new ethers.ContractFactory(
@@ -42,18 +46,25 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             signer
         );
         
-        // Deploy with optimized parameters
+        // Deploy with lower gas parameters
         console.log("Deploying contract...");
         const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: 3000000,
-            maxFeePerGas: ethers.utils.parseUnits("50", "gwei"),
-            maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei")
+            gasLimit: 1500000, // Lower gas limit
+            maxFeePerGas: ethers.utils.parseUnits("20", "gwei"), // Lower max fee
+            maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei") // Lower priority fee
         });
         
         console.log("Waiting for deployment transaction...");
+        console.log("Transaction hash:", contract.deployTransaction.hash);
+        
         const receipt = await contract.deployTransaction.wait();
         
         if (receipt.status === 0) {
+            console.error("Transaction details:", {
+                gasUsed: receipt.gasUsed.toString(),
+                effectiveGasPrice: ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"),
+                blockNumber: receipt.blockNumber,
+            });
             throw new Error("Contract deployment failed - transaction reverted");
         }
         
@@ -61,6 +72,8 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         console.log("Contract deployed to:", contract.address);
         console.log("Transaction hash:", receipt.transactionHash);
         console.log("Gas used:", receipt.gasUsed.toString());
+        console.log("Effective gas price:", ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"), "gwei");
+        console.log("Total cost:", ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)), "ETH");
         
         return contract;
     } catch (error: any) {
