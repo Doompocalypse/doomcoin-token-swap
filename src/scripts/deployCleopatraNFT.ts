@@ -33,7 +33,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Deployer has no ETH balance");
         }
 
-        // Create contract factory with deployment bytecode
+        // Create contract factory
         console.log("\nPreparing contract deployment...");
         const factory = new ethers.ContractFactory(
             CleopatraNFTContract.abi,
@@ -41,14 +41,19 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             signer
         );
 
-        // Set explicit gas limit
-        const gasLimit = 3000000; // Set a reasonable gas limit
-        console.log("Using explicit gas limit:", gasLimit);
+        // Get network info for better error context
+        const network = await provider.getNetwork();
+        console.log("Deploying on network:", {
+            name: network.name,
+            chainId: network.chainId
+        });
 
-        // Deploy with explicit gas limit
+        // Deploy with optimized parameters
         console.log("\nDeploying contract...");
         const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: gasLimit
+            gasLimit: 3000000,
+            maxFeePerGas: ethers.utils.parseUnits("50", "gwei"),
+            maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei")
         });
         
         console.log("Deployment transaction sent!");
@@ -83,7 +88,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         }
         
         if (error.code === -32000) {
-            throw new Error("Gas estimation failed. Try deploying again - we've set an explicit gas limit.");
+            throw new Error("Gas estimation failed. Please try deploying again with the current gas settings.");
         }
 
         // Check if error is related to contract initialization
