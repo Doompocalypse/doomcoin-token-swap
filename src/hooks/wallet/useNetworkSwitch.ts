@@ -1,4 +1,5 @@
 import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
+import { supabase } from "@/integrations/supabase/client";
 
 export const useNetworkSwitch = () => {
   const switchToSepolia = async (provider: any) => {
@@ -8,6 +9,16 @@ export const useNetworkSwitch = () => {
     
     console.log("Current chain ID:", currentChainId);
     console.log("Target Sepolia chain ID:", SEPOLIA_CHAIN_ID);
+
+    // Get the Infura Project ID from Supabase
+    const { data: { secret: infuraProjectId } } = await supabase.rpc('get_secret', {
+      secret_name: 'INFURA_PROJECT_ID'
+    });
+
+    if (!infuraProjectId) {
+      console.error("No Infura Project ID found");
+      throw new Error("Infura Project ID not configured");
+    }
     
     if (currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
       try {
@@ -27,7 +38,7 @@ export const useNetworkSwitch = () => {
               chainId: SEPOLIA_CHAIN_ID,
               chainName: 'Sepolia',
               nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-              rpcUrls: [`https://sepolia.infura.io/v3/${process.env.INFURA_PROJECT_ID}`],
+              rpcUrls: [`https://sepolia.infura.io/v3/${infuraProjectId}`],
               blockExplorerUrls: ['https://sepolia.etherscan.io/']
             }]
           });

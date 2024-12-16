@@ -1,19 +1,31 @@
 import { SupportedChains } from "@/types/wallet";
+import { supabase } from "@/integrations/supabase/client";
 
 export const SEPOLIA_CHAIN_ID = "0xaa36a7"; // Sepolia Chain ID
 
-export const SUPPORTED_CHAINS: SupportedChains = {
-  "0xaa36a7": {
-    chainId: "0xaa36a7",
-    chainName: "Sepolia",
-    nativeCurrency: {
-      name: "ETH",
-      symbol: "ETH",
-      decimals: 18,
+export const getSupportedChains = async (): Promise<SupportedChains> => {
+  const { data: { secret: infuraProjectId } } = await supabase.rpc('get_secret', {
+    secret_name: 'INFURA_PROJECT_ID'
+  });
+
+  if (!infuraProjectId) {
+    console.error("No Infura Project ID found");
+    throw new Error("Infura Project ID not configured");
+  }
+
+  return {
+    "0xaa36a7": {
+      chainId: "0xaa36a7",
+      chainName: "Sepolia",
+      nativeCurrency: {
+        name: "ETH",
+        symbol: "ETH",
+        decimals: 18,
+      },
+      rpcUrls: [`https://sepolia.infura.io/v3/${infuraProjectId}`],
+      blockExplorerUrls: ["https://sepolia.etherscan.io/"],
     },
-    rpcUrls: ["https://sepolia.infura.io/v3/"],
-    blockExplorerUrls: ["https://sepolia.etherscan.io/"],
-  },
+  };
 };
 
 export const switchToSepolia = async () => {
@@ -32,9 +44,10 @@ export const switchToSepolia = async () => {
     if (switchError.code === 4902) {
       try {
         console.log("Adding Sepolia network to wallet...");
+        const supportedChains = await getSupportedChains();
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
-          params: [SUPPORTED_CHAINS[SEPOLIA_CHAIN_ID]],
+          params: [supportedChains[SEPOLIA_CHAIN_ID]],
         });
         console.log("Successfully added Sepolia network");
         return true;
