@@ -27,11 +27,6 @@ export async function verifyDeployerBalance(signer: ethers.Signer) {
     const balance = await signer.getBalance();
     const balanceInEth = ethers.utils.formatEther(balance);
     console.log("- Deployer Balance:", balanceInEth, "ETH");
-    
-    // Ensure minimum balance for deployment (0.1 ETH)
-    if (balance.lt(ethers.utils.parseEther("0.1"))) {
-        throw new Error(`Insufficient balance for deployment. Current balance: ${balanceInEth} ETH. Minimum required: 0.1 ETH`);
-    }
 }
 
 export async function logDeploymentParams(signer: ethers.Signer) {
