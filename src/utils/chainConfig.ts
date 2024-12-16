@@ -5,16 +5,14 @@ import { Database } from "@/integrations/supabase/types";
 export const SEPOLIA_CHAIN_ID = "0xaa36a7"; // Sepolia Chain ID
 
 export const getSupportedChains = async (): Promise<SupportedChains> => {
-  const { data, error } = await supabase.rpc<string, Database>('get_secret', {
+  const { data: infuraProjectId, error } = await supabase.rpc('get_secret', {
     secret_name: 'INFURA_PROJECT_ID'
   });
 
-  if (error || !data) {
+  if (error || !infuraProjectId) {
     console.error("Error fetching Infura Project ID:", error);
     throw new Error("Failed to fetch Infura Project ID");
   }
-
-  const infuraProjectId = data;
 
   return {
     "0xaa36a7": {
