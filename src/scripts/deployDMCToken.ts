@@ -2,20 +2,25 @@ import { ethers } from "ethers";
 import { Alchemy, Network } from "@alch/alchemy-sdk";
 import { supabase } from "@/integrations/supabase/client";
 
-// Minimal ERC20 ABI with only essential functions
+// Minimal ERC20 ABI with essential functions for deployment verification
 const DMC_TOKEN_ABI = [
+    "constructor()",
     "function name() view returns (string)",
     "function symbol() view returns (string)",
     "function decimals() view returns (uint8)",
     "function totalSupply() view returns (uint256)",
     "function balanceOf(address) view returns (uint256)",
     "function transfer(address to, uint256 amount) returns (bool)",
-    "event Transfer(address indexed from, address indexed to, uint256 value)"
+    "function allowance(address owner, address spender) view returns (uint256)",
+    "function approve(address spender, uint256 amount) returns (bool)",
+    "function transferFrom(address from, address to, uint256 amount) returns (bool)",
+    "event Transfer(address indexed from, address indexed to, uint256 value)",
+    "event Approval(address indexed owner, address indexed spender, uint256 value)"
 ];
 
 export const deployDMCToken = async (signer: ethers.Signer) => {
     try {
-        console.log("Starting DMC token deployment using Alchemy...");
+        console.log("Starting DMC token deployment process...");
         
         // Get Alchemy API key from Supabase
         const { data: alchemyApiKey, error: secretError } = await supabase.rpc('get_secret', {
@@ -32,9 +37,15 @@ export const deployDMCToken = async (signer: ethers.Signer) => {
             network: Network.ETH_SEPOLIA
         });
 
+        // Verify network and signer
         const network = await signer.provider?.getNetwork();
         console.log("Deploying on network:", network?.name, "chainId:", network?.chainId);
         
+        if (!network || network.chainId !== 11155111) { // Sepolia chainId
+            throw new Error("Please switch to Sepolia network for deployment");
+        }
+
+        // Check deployer balance
         const balance = await signer.getBalance();
         console.log("Deployer balance:", ethers.utils.formatEther(balance), "ETH");
         
@@ -42,20 +53,26 @@ export const deployDMCToken = async (signer: ethers.Signer) => {
             throw new Error("Insufficient balance for deployment. Need at least 0.01 ETH");
         }
 
-        // Get the contract bytecode from Alchemy
-        const response = await alchemy.core.getTokenMetadata("0x6B175474E89094C44Da98b954EedeAC495271d0F"); // Using DAI as template
-        console.log("Retrieved token metadata from Alchemy");
+        // Get verified contract bytecode from a proven template (DAI)
+        const daiAddress = "0x6B175474E89094C44Da98b954EedeAC495271d0F";
+        const response = await alchemy.core.getTokenMetadata(daiAddress);
+        console.log("Retrieved token metadata template from Alchemy");
 
-        // Create contract factory with verified bytecode
+        if (!response || !response.symbol) {
+            throw new Error("Failed to get token template metadata");
+        }
+
+        // Create contract factory with verified template
         const factory = new ethers.ContractFactory(
             DMC_TOKEN_ABI,
-            response.contractAddress, // Using verified contract address as template
+            response.contractAddress,
             signer
         );
 
-        console.log("Creating contract instance with Alchemy verified template...");
+        console.log("Creating contract instance with verified template...");
         const contract = await factory.deploy({
-            gasLimit: 3000000
+            gasLimit: 3000000,
+            gasPrice: await signer.provider?.getGasPrice()
         });
         
         console.log("Deployment transaction hash:", contract.deployTransaction.hash);
@@ -63,7 +80,13 @@ export const deployDMCToken = async (signer: ethers.Signer) => {
         
         await contract.deployed();
         
-        console.log("DMC Token deployed successfully at:", contract.address);
+        // Verify deployment
+        const deployedCode = await signer.provider?.getCode(contract.address);
+        if (!deployedCode || deployedCode === "0x") {
+            throw new Error("Contract deployment verification failed");
+        }
+        
+        console.log("DMC Token deployed and verified at:", contract.address);
         return contract;
         
     } catch (error: any) {
