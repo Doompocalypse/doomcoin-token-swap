@@ -34,43 +34,56 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("Deployer has no ETH balance");
         }
 
-        // Get current gas price
+        // Get current gas price and estimate deployment cost
         const gasPrice = await provider.getGasPrice();
-        console.log("Current gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
+        console.log("\nGas Parameters:");
+        console.log("- Current base gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
 
-        // Create contract factory
-        console.log("\nCreating contract factory...");
+        // Create contract factory with deployment bytecode
+        console.log("\nPreparing contract deployment...");
         const factory = new ethers.ContractFactory(
             CleopatraNFTContract.abi,
             CleopatraNFTContract.bytecode,
             signer
         );
+
+        // Estimate gas for deployment
+        console.log("Estimating gas for deployment...");
+        const deploymentData = factory.getDeployTransaction(DOOM_COIN_ADDRESS);
+        const gasEstimate = await provider.estimateGas(deploymentData);
+        console.log("- Estimated gas needed:", gasEstimate.toString());
         
-        // Deploy with lower gas parameters
-        console.log("Deploying contract...");
+        // Calculate safe gas limit (20% buffer)
+        const safeGasLimit = gasEstimate.mul(120).div(100);
+        console.log("- Safe gas limit (with 20% buffer):", safeGasLimit.toString());
+        
+        // Deploy with dynamic gas parameters
+        console.log("\nDeploying contract...");
         const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: 1500000, // Lower gas limit
-            maxFeePerGas: ethers.utils.parseUnits("20", "gwei"), // Lower max fee
-            maxPriorityFeePerGas: ethers.utils.parseUnits("1.5", "gwei") // Lower priority fee
+            gasLimit: safeGasLimit,
+            maxFeePerGas: gasPrice.mul(2), // Double the base gas price
+            maxPriorityFeePerGas: ethers.utils.parseUnits("1", "gwei") // 1 gwei priority fee
         });
         
-        console.log("Waiting for deployment transaction...");
+        console.log("Deployment transaction sent!");
         console.log("Transaction hash:", contract.deployTransaction.hash);
         
+        console.log("\nWaiting for deployment confirmation...");
         const receipt = await contract.deployTransaction.wait();
         
         if (receipt.status === 0) {
-            console.error("Transaction details:", {
+            console.error("\nDeployment Failed! Transaction details:", {
                 gasUsed: receipt.gasUsed.toString(),
                 effectiveGasPrice: ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"),
                 blockNumber: receipt.blockNumber,
+                transactionHash: receipt.transactionHash
             });
             throw new Error("Contract deployment failed - transaction reverted");
         }
         
         console.log("\nDeployment successful!");
         console.log("Contract deployed to:", contract.address);
-        console.log("Transaction hash:", receipt.transactionHash);
+        console.log("Block number:", receipt.blockNumber);
         console.log("Gas used:", receipt.gasUsed.toString());
         console.log("Effective gas price:", ethers.utils.formatUnits(receipt.effectiveGasPrice, "gwei"), "gwei");
         console.log("Total cost:", ethers.utils.formatEther(receipt.gasUsed.mul(receipt.effectiveGasPrice)), "ETH");
