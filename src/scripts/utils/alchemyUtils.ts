@@ -10,24 +10,34 @@ export const initializeAlchemy = async () => {
         });
 
         if (secretError) {
-            console.error("Failed to get Alchemy API key:", secretError);
-            throw new Error("Failed to get Alchemy API key from Supabase. Error: " + secretError.message);
+            console.error("Failed to fetch Alchemy API key from Supabase:", secretError);
+            throw new Error(`Failed to fetch Alchemy API key: ${secretError.message}`);
         }
 
         if (!alchemyApiKey) {
-            console.error("Alchemy API key not found in Supabase secrets");
-            throw new Error("Alchemy API key not found. Please add it to your Supabase secrets using the form above.");
+            console.error("No Alchemy API key found in response");
+            throw new Error("Alchemy API key not found in Supabase secrets");
         }
 
         console.log("Successfully retrieved Alchemy API key");
         
-        return new Alchemy({
+        const alchemy = new Alchemy({
             apiKey: alchemyApiKey,
             network: Network.ETH_SEPOLIA
         });
+
+        // Test the connection
+        try {
+            await alchemy.core.getBlockNumber();
+            console.log("Successfully connected to Alchemy");
+            return alchemy;
+        } catch (error) {
+            console.error("Failed to connect to Alchemy:", error);
+            throw new Error("Failed to connect to Alchemy. Please check if your API key is valid.");
+        }
     } catch (error: any) {
         console.error("Error initializing Alchemy:", error);
-        throw new Error("Failed to get Alchemy API key. Please make sure it's set in Supabase secrets.");
+        throw error;
     }
 };
 
