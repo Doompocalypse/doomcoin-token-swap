@@ -1,6 +1,6 @@
 import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { supabase } from "@/integrations/supabase/client";
-import { Database } from "@/types/supabase";
+import { Database } from "@/integrations/supabase/types";
 
 export const useNetworkSwitch = () => {
   const switchToSepolia = async (provider: any) => {
@@ -12,7 +12,7 @@ export const useNetworkSwitch = () => {
     console.log("Target Sepolia chain ID:", SEPOLIA_CHAIN_ID);
 
     // Get the Infura Project ID from Supabase
-    const { data, error } = await supabase.rpc<string>('get_secret', {
+    const { data, error } = await supabase.rpc<string, Database>('get_secret', {
       secret_name: 'INFURA_PROJECT_ID'
     });
 
