@@ -1,5 +1,5 @@
 // DMC Token contract address on Sepolia (updated to latest deployed version)
-export const DOOM_COIN_ADDRESS = "0x7F67a7ec5bde1Fa506efDE61F0Fb9650672d2d27";
+export const DOOM_COIN_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 
 // Gas configuration for Sepolia with retry options
 export const GAS_CONFIG = {
