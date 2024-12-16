@@ -20,9 +20,19 @@ const NFTDeployment = () => {
         }
 
         try {
+            // First request wallet connection
+            console.log("Requesting wallet connection...");
+            await window.ethereum.request({
+                method: "eth_requestAccounts"
+            });
+
             setIsDeploying(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             const signer = provider.getSigner();
+            
+            // Get the connected account
+            const address = await signer.getAddress();
+            console.log("Connected with address:", address);
             
             const contract = await deployCleopatraNFT(signer);
             setContractAddress(contract.address);
@@ -35,7 +45,7 @@ const NFTDeployment = () => {
             console.error("Deployment error:", error);
             toast({
                 title: "Error",
-                description: "Failed to deploy contract. Check console for details.",
+                description: error instanceof Error ? error.message : "Failed to deploy contract. Check console for details.",
                 variant: "destructive",
             });
         } finally {
