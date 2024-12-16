@@ -27,7 +27,7 @@ export const initializeAlchemy = async () => {
         
         const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA // We're using Sepolia for testing
+            network: Network.ETH_SEPOLIA // Changed to Sepolia testnet
         };
 
         const alchemy = new Alchemy(settings);
