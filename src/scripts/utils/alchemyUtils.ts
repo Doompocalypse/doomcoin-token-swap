@@ -8,12 +8,17 @@ const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 const verifyConnection = async (alchemy: Alchemy): Promise<boolean> => {
     try {
-        // First verify we can get the latest block number
+        // First verify the SDK instance is properly initialized
+        if (!alchemy.core) {
+            throw new Error("Alchemy SDK not properly initialized");
+        }
+
+        // Get the block number to verify RPC connection
         const blockNumber = await alchemy.core.getBlockNumber();
         console.log("Current block number:", blockNumber);
         
-        // Then verify we're on Sepolia network
-        const network = await alchemy.config.getNetwork();
+        // Verify network configuration
+        const network = alchemy.config.getNetwork();
         console.log("Connected to Alchemy network:", network.name);
         
         if (network.name !== Network.ETH_SEPOLIA) {
@@ -42,29 +47,34 @@ export const initializeAlchemy = async () => {
             throw new Error(`Failed to fetch Alchemy API key: ${error.message}`);
         }
 
-        if (!alchemyApiKey) {
+        if (!alchemyApiKey || alchemyApiKey.trim() === '') {
             console.error("No Alchemy API key found");
             throw new Error("No Alchemy API key found in Supabase secrets");
         }
 
         console.log("Successfully retrieved Alchemy API key");
 
+        // Initialize with required settings
         const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA
+            network: Network.ETH_SEPOLIA,
+            maxRetries: 5
         };
 
         let retryCount = 0;
         while (retryCount < MAX_RETRIES) {
             try {
+                // Create new Alchemy instance
                 const alchemy = new Alchemy(settings);
+                
+                // Verify the connection
                 const isConnected = await verifyConnection(alchemy);
                 
                 if (isConnected) {
                     return alchemy;
                 }
             } catch (error) {
-                console.error("Error initializing Alchemy:", error);
+                console.error(`Attempt ${retryCount + 1} failed:`, error);
             }
             
             retryCount++;
