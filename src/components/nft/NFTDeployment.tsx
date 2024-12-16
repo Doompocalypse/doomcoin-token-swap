@@ -3,13 +3,16 @@ import { useToast } from "@/components/ui/use-toast";
 import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { useState } from "react";
 import { ethers } from "ethers";
+import { Copy } from "lucide-react";
 
 const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
     const [contractAddress, setContractAddress] = useState<string>("");
+    const [errorMessage, setErrorMessage] = useState<string>("");
     const { toast } = useToast();
 
     const handleDeploy = async () => {
+        setErrorMessage(""); // Clear previous error
         if (!window.ethereum) {
             toast({
                 title: "Error",
@@ -52,14 +55,24 @@ const NFTDeployment = () => {
             });
         } catch (error) {
             console.error("Deployment error:", error);
+            const errorMsg = error instanceof Error ? error.message : "Failed to deploy contract. Check console for details.";
+            setErrorMessage(errorMsg);
             toast({
                 title: "Error",
-                description: error instanceof Error ? error.message : "Failed to deploy contract. Check console for details.",
+                description: errorMsg,
                 variant: "destructive",
             });
         } finally {
             setIsDeploying(false);
         }
+    };
+
+    const copyError = () => {
+        navigator.clipboard.writeText(errorMessage);
+        toast({
+            title: "Copied",
+            description: "Error message copied to clipboard",
+        });
     };
 
     return (
@@ -90,6 +103,24 @@ const NFTDeployment = () => {
                     <p className="text-green-400 break-all">
                         Contract deployed successfully at: {contractAddress}
                     </p>
+                </div>
+            )}
+
+            {errorMessage && (
+                <div className="mt-4 p-4 bg-red-900/20 rounded-lg">
+                    <div className="flex justify-between items-start gap-2">
+                        <p className="text-red-400 break-all select-text">
+                            {errorMessage}
+                        </p>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={copyError}
+                            className="shrink-0"
+                        >
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                    </div>
                 </div>
             )}
         </div>
