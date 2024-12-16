@@ -17,32 +17,38 @@ export const initializeAlchemy = async () => {
 
         if (!alchemyApiKey) {
             console.error("No Alchemy API key found");
-            throw new Error("No Alchemy API key found");
+            throw new Error("No Alchemy API key found in Supabase secrets");
         }
 
         console.log("Successfully retrieved Alchemy API key");
 
-        // Create Alchemy instance with explicit network configuration
+        // Initialize Alchemy with explicit network configuration
         const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA
+            network: Network.ETH_SEPOLIA,
+            maxRetries: 5,
+            requestTimeout: 30000, // 30 seconds
         };
 
-        console.log("Creating Alchemy instance with settings:", {
-            network: Network.ETH_SEPOLIA
-        });
+        console.log("Creating Alchemy instance with network:", Network.ETH_SEPOLIA);
 
-        // Initialize Alchemy with settings
         const alchemy = new Alchemy(settings);
 
-        // Test connection immediately to verify setup
+        // Verify the connection immediately
         try {
             const blockNumber = await alchemy.core.getBlockNumber();
             console.log("✅ Successfully connected to Alchemy. Current block number:", blockNumber);
+            
+            // Additional verification of core functionality
+            const network = await alchemy.core.getNetwork();
+            console.log("Connected to network:", network.name);
+            
             return alchemy;
         } catch (error: any) {
-            console.error("Failed to test Alchemy connection:", error);
-            throw new Error("Failed to connect to Alchemy network. Please check your API key and network settings.");
+            console.error("Failed to verify Alchemy connection:", error);
+            throw new Error(
+                "Failed to verify Alchemy connection. Please ensure your API key has access to Sepolia network."
+            );
         }
     } catch (error: any) {
         console.error("Error in initializeAlchemy:", error);
