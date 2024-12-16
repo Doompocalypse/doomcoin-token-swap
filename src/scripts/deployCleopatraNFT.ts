@@ -41,14 +41,15 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             signer
         );
 
-        // Get deployment transaction data first
-        console.log("Creating deployment transaction...");
-        const deploymentData = factory.getDeployTransaction(DOOM_COIN_ADDRESS);
-        console.log("Deployment data created successfully");
+        // Set explicit gas limit
+        const gasLimit = 3000000; // Set a reasonable gas limit
+        console.log("Using explicit gas limit:", gasLimit);
 
-        // Deploy with standard gas parameters
+        // Deploy with explicit gas limit
         console.log("\nDeploying contract...");
-        const contract = await factory.deploy(DOOM_COIN_ADDRESS);
+        const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
+            gasLimit: gasLimit
+        });
         
         console.log("Deployment transaction sent!");
         console.log("Transaction hash:", contract.deployTransaction.hash);
@@ -82,7 +83,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         }
         
         if (error.code === -32000) {
-            throw new Error("Gas estimation failed. Please try again with a different gas limit.");
+            throw new Error("Gas estimation failed. Try deploying again - we've set an explicit gas limit.");
         }
 
         // Check if error is related to contract initialization
