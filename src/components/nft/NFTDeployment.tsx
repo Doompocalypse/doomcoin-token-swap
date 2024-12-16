@@ -4,6 +4,7 @@ import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { useState } from "react";
 import { ethers } from "ethers";
 import { Copy } from "lucide-react";
+import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
 const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
@@ -31,14 +32,18 @@ const NFTDeployment = () => {
             setIsDeploying(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             
-            // Ensure we're on Arbitrum One
+            // Get network info
             const network = await provider.getNetwork();
             console.log("Connected to network:", network.name);
             
-            if (network.chainId !== 42161) { // Arbitrum One chainId
+            // Allow both Sepolia and Arbitrum One
+            const isValidNetwork = network.chainId === 421613 || // Arbitrum One
+                                 network.chainId === parseInt(SEPOLIA_CHAIN_ID, 16); // Sepolia
+            
+            if (!isValidNetwork) {
                 toast({
                     title: "Wrong Network",
-                    description: "Please switch to Arbitrum One network",
+                    description: "Please switch to either Sepolia (for testing) or Arbitrum One network",
                     variant: "destructive",
                 });
                 return;
@@ -56,7 +61,7 @@ const NFTDeployment = () => {
             
             toast({
                 title: "Success",
-                description: `NFT Collection deployed at ${contract.address}`,
+                description: `NFT Collection deployed at ${contract.address} on ${network.name}`,
             });
         } catch (error) {
             console.error("Deployment error:", error);
@@ -85,7 +90,7 @@ const NFTDeployment = () => {
             <div className="space-y-2">
                 <h3 className="text-2xl font-bold text-white">Deploy Cleopatra's Necklace NFT Collection</h3>
                 <p className="text-gray-400">
-                    Deploy a new NFT collection on Arbitrum with the following specifications:
+                    Deploy a new NFT collection on Sepolia (test) or Arbitrum One with the following specifications:
                 </p>
                 <ul className="list-disc list-inside text-gray-400 space-y-1">
                     <li>6 unique Cleopatra's Necklace NFTs</li>

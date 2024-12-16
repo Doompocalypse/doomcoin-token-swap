@@ -27,7 +27,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         console.error("\nError deploying contract:", error);
         
         if (error.code === 'INSUFFICIENT_FUNDS') {
-            throw new Error("Insufficient funds to deploy contract");
+            throw new Error("Insufficient DMC tokens to deploy contract");
         }
         
         if (error.code === -32000) {
