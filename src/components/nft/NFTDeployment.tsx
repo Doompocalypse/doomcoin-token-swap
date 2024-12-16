@@ -10,7 +10,29 @@ const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
     const [contractAddress, setContractAddress] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
+    const [estimatedGas, setEstimatedGas] = useState<string>("");
     const { toast } = useToast();
+
+    const estimateGasPrice = async (provider: ethers.providers.Web3Provider) => {
+        try {
+            const feeData = await provider.getFeeData();
+            const gasPrice = feeData.gasPrice;
+            if (!gasPrice) throw new Error("Could not get gas price");
+            
+            // Estimate deployment gas (approximate)
+            const estimatedGasUnits = 3000000; // Base estimate for NFT contract deployment
+            const totalGasCost = gasPrice.mul(estimatedGasUnits);
+            
+            // Convert to ETH for display
+            const gasCostInEth = ethers.utils.formatEther(totalGasCost);
+            setEstimatedGas(gasCostInEth);
+            
+            return totalGasCost;
+        } catch (error) {
+            console.error("Error estimating gas:", error);
+            throw error;
+        }
+    };
 
     const handleDeploy = async () => {
         setErrorMessage(""); // Clear previous error
@@ -29,7 +51,6 @@ const NFTDeployment = () => {
                 method: "eth_requestAccounts"
             });
 
-            setIsDeploying(true);
             const provider = new ethers.providers.Web3Provider(window.ethereum);
             
             // Get network info
@@ -48,11 +69,19 @@ const NFTDeployment = () => {
                 });
                 return;
             }
-            
+
+            // Check balance before deployment
             const signer = provider.getSigner();
             const address = await signer.getAddress();
-            console.log("Connected with address:", address);
-            
+            const balance = await provider.getBalance(address);
+            const estimatedCost = await estimateGasPrice(provider);
+
+            if (balance.lt(estimatedCost)) {
+                const required = ethers.utils.formatEther(estimatedCost);
+                throw new Error(`Insufficient gas. You need approximately ${required} ETH for gas fees. Please add funds to your wallet.`);
+            }
+
+            setIsDeploying(true);
             console.log("Initializing contract deployment...");
             const contract = await deployCleopatraNFT(signer);
             
@@ -99,6 +128,14 @@ const NFTDeployment = () => {
                     <li>Exclusive DMC payment support</li>
                 </ul>
             </div>
+            
+            {estimatedGas && (
+                <div className="p-4 bg-blue-900/20 rounded-lg">
+                    <p className="text-blue-400">
+                        Estimated gas cost: {estimatedGas} ETH
+                    </p>
+                </div>
+            )}
             
             <Button
                 onClick={handleDeploy}
