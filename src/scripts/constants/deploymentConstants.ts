@@ -1,12 +1,12 @@
 // DMC Token contract address on Sepolia (updated to latest deployed version)
-export const DOOM_COIN_ADDRESS = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
+export const DOOM_COIN_ADDRESS = "0x7F67a7ec5bde1Fa506efDE61F0Fb9650672d2d27";
 
 // Gas configuration for Sepolia with retry options
 export const GAS_CONFIG = {
     initial: {
-        gasLimit: 3000000, // Increased from 1,500,000
-        maxFeePerGas: "20", // Increased for better chances of inclusion
-        maxPriorityFeePerGas: "2" // in gwei
+        gasLimit: 3000000,
+        maxFeePerGas: "20",
+        maxPriorityFeePerGas: "2"
     },
     retry1: {
         gasLimit: 4000000,
