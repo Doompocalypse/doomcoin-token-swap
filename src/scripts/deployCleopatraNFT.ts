@@ -4,37 +4,67 @@ import CleopatraNFTContract from "../contracts/CleopatraNecklaceNFT.json";
 export const deployCleopatraNFT = async (signer: ethers.Signer) => {
     console.log("Starting deployment of Cleopatra's Necklace NFT contract...");
     
+    // Use testnet DMC address for now
     const DOOM_COIN_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
     
     try {
+        // Verify DMC token contract exists
+        const provider = signer.provider;
+        if (!provider) {
+            throw new Error("No provider available");
+        }
+
+        console.log("Verifying DMC token contract...");
+        const code = await provider.getCode(DOOM_COIN_ADDRESS);
+        if (code === "0x") {
+            throw new Error("DMC token contract not found at the specified address");
+        }
+
         // Log deployment parameters
-        console.log("DMC Token Address:", DOOM_COIN_ADDRESS);
-        console.log("Deployer Address:", await signer.getAddress());
+        const deployerAddress = await signer.getAddress();
+        console.log("Deployment Parameters:");
+        console.log("- DMC Token Address:", DOOM_COIN_ADDRESS);
+        console.log("- Deployer Address:", deployerAddress);
         
         // Verify signer has enough balance
         const balance = await signer.getBalance();
-        console.log("Deployer Balance:", ethers.utils.formatEther(balance), "ETH");
+        console.log("- Deployer Balance:", ethers.utils.formatEther(balance), "ETH");
         
-        // Create contract factory with gas limit
+        if (balance.eq(0)) {
+            throw new Error("Deployer has no ETH balance");
+        }
+
+        // Create contract factory
+        console.log("\nCreating contract factory...");
         const factory = new ethers.ContractFactory(
             CleopatraNFTContract.abi,
             CleopatraNFTContract.bytecode,
             signer
         );
         
-        // Deploy with specific gas limit and wait for deployment
+        // Deploy with optimized parameters
         console.log("Deploying contract...");
         const contract = await factory.deploy(DOOM_COIN_ADDRESS, {
-            gasLimit: 3000000 // Set a reasonable gas limit
+            gasLimit: 3000000,
+            maxFeePerGas: ethers.utils.parseUnits("50", "gwei"),
+            maxPriorityFeePerGas: ethers.utils.parseUnits("2", "gwei")
         });
         
         console.log("Waiting for deployment transaction...");
-        await contract.deployed();
+        const receipt = await contract.deployTransaction.wait();
         
+        if (receipt.status === 0) {
+            throw new Error("Contract deployment failed - transaction reverted");
+        }
+        
+        console.log("\nDeployment successful!");
         console.log("Contract deployed to:", contract.address);
+        console.log("Transaction hash:", receipt.transactionHash);
+        console.log("Gas used:", receipt.gasUsed.toString());
+        
         return contract;
     } catch (error: any) {
-        console.error("Error deploying contract:", error);
+        console.error("\nError deploying contract:", error.message);
         
         // Enhanced error reporting
         if (error.code === 'INSUFFICIENT_FUNDS') {
@@ -66,6 +96,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             });
         }
         
-        throw error;
+        throw new Error(`Contract deployment failed: ${error.message}`);
     }
 };
