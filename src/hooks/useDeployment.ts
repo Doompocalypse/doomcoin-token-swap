@@ -58,6 +58,20 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
             
         } catch (error: any) {
             console.error("Error deploying DMC token:", error);
+            
+            // Handle user rejection specifically
+            if (error.code === "ACTION_REJECTED") {
+                const message = "Transaction was rejected in MetaMask. Please try again and confirm the transaction.";
+                onError(message);
+                toast({
+                    title: "Transaction Rejected",
+                    description: message,
+                    variant: "destructive",
+                });
+                return;
+            }
+            
+            // Handle other errors
             const errorMsg = error?.message || "Failed to deploy DMC token";
             onError(errorMsg);
             toast({
