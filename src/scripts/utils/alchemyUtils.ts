@@ -25,15 +25,19 @@ export const initializeAlchemy = async () => {
         const alchemyApiKey = data.value;
         console.log("Successfully retrieved Alchemy API key");
         
-        const alchemy = new Alchemy({
+        const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA
-        });
+            network: Network.ETH_SEPOLIA // We're using Sepolia for testing
+        };
 
-        // Test the connection
+        const alchemy = new Alchemy(settings);
+
+        // Test the connection with your specific block query
         try {
             console.log("Testing Alchemy connection...");
             await alchemy.core.getBlockNumber();
+            // You can uncomment this to test your specific block query
+            // await alchemy.core.getBlock(15221026).then(console.log);
             console.log("✅ Successfully connected to Alchemy");
             return alchemy;
         } catch (error) {
