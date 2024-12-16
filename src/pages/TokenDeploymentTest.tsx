@@ -1,10 +1,8 @@
 import { useToast } from "@/components/ui/use-toast";
 import WalletConnect from "@/components/WalletConnect";
 import VideoBackground from "@/components/VideoBackground";
-import NFTCarousel from "@/components/nft/NFTCarousel";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import CountdownTimer from "@/components/CountdownTimer";
-import ProductSlider from "@/components/products/ProductSlider";
+import NFTDeployment from "@/components/nft/NFTDeployment";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,12 +16,6 @@ import { Menu } from "lucide-react";
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
     <div className="text-white text-lg">Loading application...</div>
-  </div>
-);
-
-const ErrorFallback = () => (
-  <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
-    <div className="text-white text-lg">Something went wrong loading the NFTs. Please try refreshing the page.</div>
   </div>
 );
 
@@ -73,34 +65,10 @@ const TokenDeploymentTest = () => {
 
         {/* Main Content */}
         <main className="pt-24 pb-12 px-4">
-          <div className="w-full max-w-5xl mx-auto space-y-16">
-            <CountdownTimer />
-            <div className="text-center space-y-4">
-              <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
-              <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
-                Claim your badge now to breach the portal into the Doompocalypse.
-                <br className="hidden sm:block" />
-                Unlock exclusive perks, bonus resources, and classified intel –
-                <br className="hidden sm:block" />
-                Will you survive the revolution?
-              </p>
-            </div>
-            <ErrorBoundary fallback={<ErrorFallback />}>
-              <NFTCarousel connectedAccount={connectedAccount} />
+          <div className="w-full max-w-3xl mx-auto space-y-8">
+            <ErrorBoundary fallback={<div>Error loading NFT deployment interface</div>}>
+              <NFTDeployment />
             </ErrorBoundary>
-
-            {/* Product Slider Section */}
-            <div className="space-y-8">
-              <div className="text-center space-y-4">
-                <h2 className="text-3xl font-bold text-white">Featured Equipment</h2>
-                <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
-                  Gear up with cutting-edge technology and equipment.
-                  <br className="hidden sm:block" />
-                  Each item has been field-tested and approved for combat readiness.
-                </p>
-              </div>
-              <ProductSlider />
-            </div>
           </div>
         </main>
       </div>
