@@ -52,7 +52,10 @@ const DMCTokenDeployment = () => {
                 return;
             }
 
+            console.log("Starting token deployment...");
             const contract = await deployDMCToken(signer);
+            console.log("Token deployed at:", contract.address);
+            
             setContractAddress(contract.address);
             
             toast({
