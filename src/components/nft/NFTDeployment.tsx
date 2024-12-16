@@ -2,6 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { useState } from "react";
+import { ethers } from "ethers";
 
 const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);

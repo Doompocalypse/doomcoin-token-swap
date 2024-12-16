@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import CleopatraNecklaceNFT from "../contracts/CleopatraNecklaceNFT.sol";
+import CleopatraNFTContract from "../contracts/CleopatraNecklaceNFT.json";
 
 export const deployCleopatraNFT = async (signer: ethers.Signer) => {
     console.log("Starting deployment of Cleopatra's Necklace NFT contract...");
@@ -8,8 +8,8 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
     
     try {
         const factory = new ethers.ContractFactory(
-            CleopatraNecklaceNFT.abi,
-            CleopatraNecklaceNFT.bytecode,
+            CleopatraNFTContract.abi,
+            CleopatraNFTContract.bytecode,
             signer
         );
         
