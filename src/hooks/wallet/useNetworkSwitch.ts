@@ -1,16 +1,16 @@
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useNetworkSwitch = () => {
-  const switchToArbitrum = async (provider: any) => {
+  const switchToSepolia = async (provider: any) => {
     const currentChainId = await provider.request({
       method: 'eth_chainId'
     });
     
-    if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+    if (currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
       try {
         await provider.request({
           method: 'wallet_switchEthereumChain',
-          params: [{ chainId: ARBITRUM_CHAIN_ID }],
+          params: [{ chainId: SEPOLIA_CHAIN_ID }],
         });
       } catch (switchError: any) {
         console.error("Network switch error:", switchError);
@@ -18,11 +18,11 @@ export const useNetworkSwitch = () => {
           await provider.request({
             method: 'wallet_addEthereumChain',
             params: [{
-              chainId: ARBITRUM_CHAIN_ID,
-              chainName: 'Arbitrum One',
+              chainId: SEPOLIA_CHAIN_ID,
+              chainName: 'Sepolia',
               nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
-              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
-              blockExplorerUrls: ['https://arbiscan.io/']
+              rpcUrls: ['https://sepolia.infura.io/rpc'],
+              blockExplorerUrls: ['https://sepolia.etherscan.io/']
             }]
           });
         } else {
@@ -32,5 +32,5 @@ export const useNetworkSwitch = () => {
     }
   };
 
-  return { switchToArbitrum };
+  return { switchToSepolia };
 };

@@ -1,5 +1,5 @@
 import { useEffect, useCallback, useRef } from "react";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletEvents = (
   onConnect: (connected: boolean, account?: string) => void,
@@ -32,9 +32,9 @@ export const useWalletEvents = (
     console.log("Chain ID updated:", newChainId);
     setChainIdRef.current(newChainId);
     
-    // If the new chain is not Arbitrum One, disconnect
-    if (newChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
-      console.log("Switched away from Arbitrum One, disconnecting");
+    // If the new chain is not Sepolia, disconnect
+    if (newChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
+      console.log("Switched away from Sepolia, disconnecting");
       setAccountsRef.current([]);
       onConnectRef.current(false);
     }

@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import {
   DropdownMenu,
   DropdownMenuContent,

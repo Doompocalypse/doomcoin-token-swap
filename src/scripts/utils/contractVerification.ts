@@ -1,11 +1,11 @@
 import { ethers } from "ethers";
-import { DOOM_COIN_ADDRESS, ARBITRUM_RPC_URL } from "../constants/deploymentConstants";
+import { DOOM_COIN_ADDRESS, SEPOLIA_RPC_URL } from "../constants/deploymentConstants";
 
 export async function verifyDMCToken(provider: ethers.providers.Provider) {
     console.log("Verifying DMC token contract...");
     
-    // Try both the connected provider and a direct Arbitrum RPC connection
-    const backupProvider = new ethers.providers.JsonRpcProvider(ARBITRUM_RPC_URL);
+    // Try both the connected provider and a direct Sepolia RPC connection
+    const backupProvider = new ethers.providers.JsonRpcProvider(SEPOLIA_RPC_URL);
     
     try {
         const code = await provider.getCode(DOOM_COIN_ADDRESS);

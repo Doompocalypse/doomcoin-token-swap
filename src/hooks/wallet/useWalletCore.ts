@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { useMetaMaskProvider } from "./useMetaMaskProvider";
 import { useNetworkSwitch } from "./useNetworkSwitch";
 import { useWalletPermissions } from "./useWalletPermissions";
@@ -13,7 +13,7 @@ export const useWalletCore = (
   const { toast } = useToast();
   
   const { getMetaMaskProvider, validateProvider } = useMetaMaskProvider();
-  const { switchToArbitrum } = useNetworkSwitch();
+  const { switchToSepolia } = useNetworkSwitch();
   const { clearExistingPermissions, requestAccounts } = useWalletPermissions();
 
   const connectMetaMask = async () => {
@@ -34,10 +34,10 @@ export const useWalletCore = (
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        await switchToArbitrum(provider);
+        await switchToSepolia(provider);
         
         setAccounts(accounts);
-        setChainId(ARBITRUM_CHAIN_ID);
+        setChainId(SEPOLIA_CHAIN_ID);
         onConnect(true, accounts[0]);
         
         toast({
