@@ -28,12 +28,12 @@ export const initializeAlchemy = async () => {
         // Initialize Alchemy with explicit network configuration
         const settings = {
             apiKey: alchemyApiKey,
-            network: Network.ETH_SEPOLIA,
+            network: Network.ETH_SEPOLIA, // Explicitly set as ETH_SEPOLIA
             maxRetries: 5
         };
 
         console.log("Creating Alchemy instance with settings:", {
-            network: settings.network,
+            network: "ETH_SEPOLIA", // Log the actual network name for debugging
             maxRetries: settings.maxRetries
         });
 
