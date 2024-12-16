@@ -17,27 +17,39 @@ export const useNetworkSwitch = () => {
         secret_name: 'INFURA_PROJECT_ID'
       });
 
+      console.log("Attempting to fetch Infura Project ID...");
+
       if (secretError) {
         console.error("Error fetching Infura Project ID:", secretError);
         toast({
-          title: "Network Error",
-          description: "Failed to fetch network configuration. Please try again.",
+          title: "Network Configuration Error",
+          description: "Could not fetch network configuration. Please try again or contact support.",
           variant: "destructive"
         });
-        throw new Error("Failed to fetch network configuration");
+        throw new Error(`Failed to fetch network configuration: ${secretError.message}`);
       }
 
-      if (!infuraProjectId || infuraProjectId.trim() === '') {
-        console.error("No Infura Project ID found");
+      if (!infuraProjectId) {
+        console.error("No Infura Project ID found in database");
         toast({
-          title: "Configuration Required",
-          description: "Please set your Infura Project ID in the project settings before connecting.",
+          title: "Missing Configuration",
+          description: "Infura Project ID is not set. Please configure it in the project settings.",
           variant: "destructive"
         });
-        throw new Error("Infura Project ID is not configured");
+        throw new Error("Infura Project ID is not set in the database");
       }
 
-      console.log("Retrieved Infura configuration");
+      if (infuraProjectId.trim() === '') {
+        console.error("Infura Project ID is empty");
+        toast({
+          title: "Invalid Configuration",
+          description: "Infura Project ID cannot be empty. Please check your configuration.",
+          variant: "destructive"
+        });
+        throw new Error("Infura Project ID is empty");
+      }
+
+      console.log("Successfully retrieved Infura configuration");
       
       if (currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
         try {
@@ -47,10 +59,16 @@ export const useNetworkSwitch = () => {
             params: [{ chainId: SEPOLIA_CHAIN_ID }],
           });
           console.log("Successfully switched to Sepolia");
+          
+          toast({
+            title: "Network Changed",
+            description: "Successfully connected to Sepolia network",
+          });
         } catch (switchError: any) {
           console.error("Network switch error:", switchError);
+          
           if (switchError.code === 4902) {
-            console.log("Adding Sepolia network...");
+            console.log("Sepolia network not found, attempting to add it...");
             
             await provider.request({
               method: 'wallet_addEthereumChain',
@@ -62,7 +80,12 @@ export const useNetworkSwitch = () => {
                 blockExplorerUrls: ['https://sepolia.etherscan.io/']
               }]
             });
+            
             console.log("Sepolia network added successfully");
+            toast({
+              title: "Network Added",
+              description: "Sepolia network has been added to your wallet",
+            });
           } else {
             toast({
               title: "Network Switch Failed",
@@ -72,6 +95,8 @@ export const useNetworkSwitch = () => {
             throw switchError;
           }
         }
+      } else {
+        console.log("Already on Sepolia network");
       }
     } catch (error: any) {
       console.error("Error in switchToSepolia:", error);
