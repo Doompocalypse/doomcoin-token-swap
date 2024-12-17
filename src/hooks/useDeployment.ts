@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
-import { deployDMCToken } from "@/scripts/deployDMCToken";
+import { deployContract, verifyDeployment } from "@/scripts/deployDMCToken";
 
 interface UseDeploymentProps {
     onSuccess: (address: string) => void;
@@ -46,7 +46,7 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
             }
 
             console.log("Starting token deployment...");
-            const contract = await deployDMCToken(signer);
+            const contract = await deployContract(signer);
             
             // Wait for the transaction to be mined and get the receipt
             console.log("Waiting for transaction confirmation...");
@@ -55,6 +55,9 @@ export const useDeployment = ({ onSuccess, onError }: UseDeploymentProps) => {
             if (receipt.status === 0) {
                 throw new Error("Contract deployment failed during execution. This might be due to insufficient gas or contract initialization error.");
             }
+
+            // Verify the deployment
+            await verifyDeployment(contract, signer);
             
             console.log("Token deployed at:", contract.address);
             onSuccess(contract.address);
