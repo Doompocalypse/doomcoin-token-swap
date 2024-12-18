@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { ethers } from "ethers";
 import { useToast } from "@/components/ui/use-toast";
 import { handlePendingTransaction } from "@/utils/pendingTransactionHandler";
-import { useDeploymentContext } from "../context/DeploymentContext";
+import { useDeploymentContext } from "../deployment/DeploymentProvider";
 
 export const useTransactionMonitor = () => {
   const { toast } = useToast();
