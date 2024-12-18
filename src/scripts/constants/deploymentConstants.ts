@@ -22,6 +22,6 @@ export const GAS_CONFIG = {
     }
 };
 
-// Get Infura project ID from environment
-export const INFURA_PROJECT_ID = process.env.INFURA_PROJECT_ID || "";
+// Get Infura project ID from environment variables
+export const INFURA_PROJECT_ID = import.meta.env.VITE_INFURA_PROJECT_ID || "";
 export const SEPOLIA_RPC_URL = `https://sepolia.infura.io/v3/${INFURA_PROJECT_ID}`;
