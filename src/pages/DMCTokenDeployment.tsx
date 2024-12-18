@@ -71,7 +71,10 @@ const DMCTokenDeployment = () => {
                 <div className="max-w-6xl mx-auto space-y-8">
                     {isConnected && connectedAccount ? (
                         <>
-                            <NFTDeployment isMobile={isMobile} />
+                            <NFTDeployment 
+                                isMobile={isMobile} 
+                                onContractDeployed={handleContractDeployed}
+                            />
                             <NFTCollection 
                                 contractAddress={contractAddress} 
                                 walletAddress={connectedAccount} 

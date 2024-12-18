@@ -13,7 +13,12 @@ import { useTransactionMonitor } from "./hooks/useTransactionMonitor";
 const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
 const STORAGE_KEY = "nft_deployment_status";
 
-const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
+interface NFTDeploymentContentProps {
+  isMobile: boolean;
+  onContractDeployed?: (address: string) => void;
+}
+
+const NFTDeploymentContent = ({ isMobile, onContractDeployed }: NFTDeploymentContentProps) => {
   const { toast } = useToast();
   const { monitorTransaction } = useTransactionMonitor();
   const {
@@ -28,17 +33,18 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
     setEstimatedGasCost,
   } = useDeploymentContext();
 
-  // Save deployment status to local storage
+  // Save deployment status to local storage and notify parent
   useEffect(() => {
-    if (contractAddress || transactionHash) {
-      console.log("Saving deployment status to local storage:", { contractAddress, transactionHash });
+    if (contractAddress) {
+      console.log("Contract address updated:", contractAddress);
       localStorage.setItem(STORAGE_KEY, JSON.stringify({
         contractAddress,
         transactionHash,
         timestamp: Date.now()
       }));
+      onContractDeployed?.(contractAddress);
     }
-  }, [contractAddress, transactionHash]);
+  }, [contractAddress, transactionHash, onContractDeployed]);
 
   // Check for existing deployment
   useEffect(() => {
@@ -63,6 +69,7 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
               setIsAlreadyDeployed(true);
               setContractAddress(savedAddress);
               setTransactionHash(savedHash);
+              onContractDeployed?.(savedAddress);
               return;
             }
           }
@@ -80,6 +87,7 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
             setIsAlreadyDeployed(true);
             setContractAddress(receipt.contractAddress);
             setTransactionHash(KNOWN_DEPLOYMENT);
+            onContractDeployed?.(receipt.contractAddress);
             toast({
               title: "Contract Already Deployed",
               description: "The NFT contract has already been deployed successfully.",
@@ -92,9 +100,8 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
     };
 
     checkExistingDeployment();
-  }, [toast, setIsAlreadyDeployed, setContractAddress, setTransactionHash]);
+  }, [toast, setIsAlreadyDeployed, setContractAddress, setTransactionHash, onContractDeployed]);
 
-  // Check for pending transactions
   useEffect(() => {
     const checkPendingTransactions = async () => {
       if (!window.ethereum) return;
@@ -149,10 +156,15 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
   );
 };
 
-const NFTDeployment = ({ isMobile }: { isMobile: boolean }) => {
+interface NFTDeploymentProps {
+  isMobile: boolean;
+  onContractDeployed?: (address: string) => void;
+}
+
+const NFTDeployment = ({ isMobile, onContractDeployed }: NFTDeploymentProps) => {
   return (
     <DeploymentProvider>
-      <NFTDeploymentContent isMobile={isMobile} />
+      <NFTDeploymentContent isMobile={isMobile} onContractDeployed={onContractDeployed} />
     </DeploymentProvider>
   );
 };
