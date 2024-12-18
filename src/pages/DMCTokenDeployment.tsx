@@ -29,11 +29,6 @@ const DMCTokenDeployment = () => {
         setConnectedAccount(account);
     };
 
-    const handleContractDeployed = (address: string) => {
-        console.log("Contract deployed at:", address);
-        setContractAddress(address);
-    };
-
     return (
         <div className="relative min-h-screen">
             <VideoBackground />
@@ -71,7 +66,7 @@ const DMCTokenDeployment = () => {
                 <div className="max-w-6xl mx-auto space-y-8">
                     {isConnected && connectedAccount ? (
                         <>
-                            <NFTDeployment isMobile={isMobile} onContractDeployed={handleContractDeployed} />
+                            <NFTDeployment isMobile={isMobile} />
                             <NFTCollection contractAddress={contractAddress} walletAddress={connectedAccount} />
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
