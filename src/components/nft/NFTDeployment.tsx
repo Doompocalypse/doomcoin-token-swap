@@ -1,302 +1,125 @@
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { ethers } from "ethers";
-import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
+import { useToast } from "@/components/ui/use-toast";
+import { isContractDeployed, verifyContractBytecode } from "@/utils/contractVerification";
 import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
-import { isContractDeployed, verifyContractBytecode } from "@/utils/contractVerification";
-import { handlePendingTransaction } from "@/utils/pendingTransactionHandler";
+import { DeploymentProvider, useDeploymentContext } from "./context/DeploymentContext";
+import PendingTransactionHandler from "./components/PendingTransactionHandler";
+import DeploymentForm from "./components/DeploymentForm";
+import { useTransactionMonitor } from "./hooks/useTransactionMonitor";
 
 const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
 
-const NFTDeployment = () => {
-    const [isDeploying, setIsDeploying] = useState(false);
-    const [contractAddress, setContractAddress] = useState<string>("");
-    const [errorMessage, setErrorMessage] = useState<string>("");
-    const [transactionHash, setTransactionHash] = useState<string>("");
-    const [estimatedGasCost, setEstimatedGasCost] = useState<ethers.BigNumber>();
-    const [pendingTx, setPendingTx] = useState<string>("");
-    const [isAlreadyDeployed, setIsAlreadyDeployed] = useState(false);
-    const { toast } = useToast();
+const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
+  const { toast } = useToast();
+  const { monitorTransaction } = useTransactionMonitor();
+  const {
+    contractAddress,
+    errorMessage,
+    transactionHash,
+    setIsAlreadyDeployed,
+    setContractAddress,
+    setTransactionHash,
+    setPendingTx,
+    estimatedGasCost,
+    setEstimatedGasCost,
+  } = useDeploymentContext();
 
-    // Check for existing deployment
-    useEffect(() => {
-        const checkExistingDeployment = async () => {
-            if (!window.ethereum) return;
-            
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const receipt = await provider.getTransactionReceipt(KNOWN_DEPLOYMENT);
-                
-                if (receipt && receipt.contractAddress) {
-                    console.log("Found existing deployment at:", receipt.contractAddress);
-                    const isDeployed = await isContractDeployed(provider, receipt.contractAddress);
-                    const isValid = await verifyContractBytecode(receipt.contractAddress, provider);
-                    
-                    if (isDeployed && isValid) {
-                        setIsAlreadyDeployed(true);
-                        setContractAddress(receipt.contractAddress);
-                        setTransactionHash(KNOWN_DEPLOYMENT);
-                        toast({
-                            title: "Contract Already Deployed",
-                            description: "The NFT contract has already been deployed successfully.",
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Error checking existing deployment:", error);
-            }
-        };
-
-        checkExistingDeployment();
-    }, [toast]);
-
-    // Check for pending transactions
-    useEffect(() => {
-        const checkPendingTransactions = async () => {
-            if (!window.ethereum) return;
-            
-            try {
-                const provider = new ethers.providers.Web3Provider(window.ethereum);
-                const accounts = await provider.listAccounts();
-                
-                if (accounts.length === 0) return;
-                
-                const nonce = await provider.getTransactionCount(accounts[0], "pending");
-                const latestNonce = await provider.getTransactionCount(accounts[0], "latest");
-                
-                if (nonce > latestNonce) {
-                    console.log("Pending transaction detected");
-                    const pendingTxs = await provider.send("eth_getBlockByNumber", ["pending", true]);
-                    const userPendingTx = pendingTxs.transactions.find(
-                        (tx: any) => tx.from.toLowerCase() === accounts[0].toLowerCase()
-                    );
-                    
-                    if (userPendingTx) {
-                        console.log("Found pending transaction:", userPendingTx.hash);
-                        setPendingTx(userPendingTx.hash);
-                        setTransactionHash(userPendingTx.hash);
-                        
-                        // Monitor the pending transaction
-                        handlePendingTransaction(userPendingTx.hash, provider, {
-                            onSuccess: () => {
-                                setPendingTx("");
-                                setTransactionHash("");
-                                toast({
-                                    title: "Transaction Completed",
-                                    description: "The pending transaction has been confirmed.",
-                                });
-                            },
-                            onError: (error) => {
-                                console.error("Transaction failed:", error);
-                                setErrorMessage("Transaction failed: " + error.message);
-                                toast({
-                                    title: "Transaction Failed",
-                                    description: "The pending transaction has failed. You can try canceling it.",
-                                    variant: "destructive",
-                                });
-                            }
-                        });
-                    }
-                }
-            } catch (error) {
-                console.error("Error checking pending transactions:", error);
-            }
-        };
-
-        checkPendingTransactions();
+  // Check for existing deployment
+  useEffect(() => {
+    const checkExistingDeployment = async () => {
+      if (!window.ethereum) return;
+      
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const receipt = await provider.getTransactionReceipt(KNOWN_DEPLOYMENT);
         
-        // Set up interval to check pending transactions
-        const interval = setInterval(checkPendingTransactions, 30000); // Check every 30 seconds
-        
-        return () => clearInterval(interval);
-    }, [toast]);
-
-    const cancelPendingTransaction = async () => {
-        if (!window.ethereum || !pendingTx) return;
-        
-        try {
-            console.log("Attempting to cancel transaction:", pendingTx);
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            const signer = provider.getSigner();
-            
-            // Send a 0 ETH transaction to yourself with the same nonce but higher gas price
-            const tx = await signer.sendTransaction({
-                to: await signer.getAddress(),
-                value: 0,
-                nonce: await provider.getTransactionCount(await signer.getAddress(), "pending"),
-                gasPrice: (await provider.getGasPrice()).mul(2), // Double the gas price
-                gasLimit: 21000, // Standard gas limit for ETH transfer
-            });
-            
-            console.log("Cancellation transaction submitted:", tx.hash);
-            await tx.wait();
-            
+        if (receipt && receipt.contractAddress) {
+          console.log("Found existing deployment at:", receipt.contractAddress);
+          const isDeployed = await isContractDeployed(provider, receipt.contractAddress);
+          const isValid = await verifyContractBytecode(receipt.contractAddress, provider);
+          
+          if (isDeployed && isValid) {
+            setIsAlreadyDeployed(true);
+            setContractAddress(receipt.contractAddress);
+            setTransactionHash(KNOWN_DEPLOYMENT);
             toast({
-                title: "Transaction Cancelled",
-                description: "Previous pending transaction has been cancelled.",
+              title: "Contract Already Deployed",
+              description: "The NFT contract has already been deployed successfully.",
             });
-            
-            setPendingTx("");
-            setTransactionHash("");
-            setErrorMessage("");
-        } catch (error) {
-            console.error("Error cancelling transaction:", error);
-            toast({
-                title: "Error",
-                description: "Failed to cancel the pending transaction. Please try again.",
-                variant: "destructive",
-            });
+          }
         }
+      } catch (error) {
+        console.error("Error checking existing deployment:", error);
+      }
     };
 
-    const handleDeploy = async () => {
-        if (isAlreadyDeployed) {
-            toast({
-                title: "Contract Already Deployed",
-                description: "The NFT contract has already been deployed. You can't deploy it again.",
-                variant: "destructive",
-            });
-            return;
-        }
+    checkExistingDeployment();
+  }, [toast, setIsAlreadyDeployed, setContractAddress, setTransactionHash]);
 
-        setErrorMessage("");
-        setTransactionHash("");
+  // Check for pending transactions
+  useEffect(() => {
+    const checkPendingTransactions = async () => {
+      if (!window.ethereum) return;
+      
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const accounts = await provider.listAccounts();
         
-        if (!window.ethereum) {
-            toast({
-                title: "Error",
-                description: "Please install MetaMask to deploy the contract",
-                variant: "destructive",
-            });
-            return;
+        if (accounts.length === 0) return;
+        
+        const nonce = await provider.getTransactionCount(accounts[0], "pending");
+        const latestNonce = await provider.getTransactionCount(accounts[0], "latest");
+        
+        if (nonce > latestNonce) {
+          console.log("Pending transaction detected");
+          const pendingTxs = await provider.send("eth_getBlockByNumber", ["pending", true]);
+          const userPendingTx = pendingTxs.transactions.find(
+            (tx: any) => tx.from.toLowerCase() === accounts[0].toLowerCase()
+          );
+          
+          if (userPendingTx) {
+            console.log("Found pending transaction:", userPendingTx.hash);
+            setPendingTx(userPendingTx.hash);
+            setTransactionHash(userPendingTx.hash);
+            
+            // Monitor the pending transaction
+            await monitorTransaction(provider, userPendingTx.hash);
+          }
         }
-
-        if (pendingTx) {
-            toast({
-                title: "Pending Transaction",
-                description: "Please cancel the pending transaction before deploying a new one.",
-                variant: "destructive",
-            });
-            return;
-        }
-
-        try {
-            console.log("Requesting wallet connection...");
-            await window.ethereum.request({
-                method: "eth_requestAccounts"
-            });
-
-            const provider = new ethers.providers.Web3Provider(window.ethereum);
-            
-            const network = await provider.getNetwork();
-            console.log("Connected to network:", {
-                name: network.name,
-                chainId: network.chainId
-            });
-            
-            const isValidNetwork = network.chainId === parseInt(SEPOLIA_CHAIN_ID, 16);
-            
-            if (!isValidNetwork) {
-                toast({
-                    title: "Wrong Network",
-                    description: "Please switch to Sepolia network for testing",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            if (!estimatedGasCost) {
-                toast({
-                    title: "Error",
-                    description: "Please wait for gas estimation to complete",
-                    variant: "destructive",
-                });
-                return;
-            }
-
-            const signer = provider.getSigner();
-            setIsDeploying(true);
-            console.log("Initializing NFT contract deployment...");
-            const contract = await deployCleopatraNFT(signer);
-            
-            console.log("Contract deployment initiated with transaction hash:", contract.deployTransaction.hash);
-            setTransactionHash(contract.deployTransaction.hash);
-            
-            toast({
-                title: "Deployment Started",
-                description: "Please wait while your transaction is being processed...",
-            });
-
-            console.log("Waiting for transaction confirmation...");
-            await contract.deployed();
-            
-            console.log("NFT Contract deployment successful");
-            setContractAddress(contract.address);
-            
-            toast({
-                title: "Success",
-                description: `NFT Collection deployed at ${contract.address}`,
-            });
-        } catch (error) {
-            console.error("Deployment error:", error);
-            const errorMsg = error instanceof Error ? error.message : "Failed to deploy contract. Check console for details.";
-            setErrorMessage(errorMsg);
-            toast({
-                title: "Error",
-                description: errorMsg,
-                variant: "destructive",
-            });
-        } finally {
-            setIsDeploying(false);
-        }
+      } catch (error) {
+        console.error("Error checking pending transactions:", error);
+      }
     };
 
-    return (
-        <div className="space-y-6 p-6 bg-black/40 rounded-lg">
-            <CollectionInfo />
-            <GasEstimator onEstimateComplete={setEstimatedGasCost} />
-            {isAlreadyDeployed ? (
-                <div className="p-4 bg-yellow-900/20 rounded-lg">
-                    <p className="text-yellow-400">
-                        This NFT contract has already been deployed. You can view its details below.
-                    </p>
-                </div>
-            ) : (
-                <>
-                    {pendingTx && (
-                        <div className="p-4 bg-yellow-900/20 rounded-lg space-y-4">
-                            <p className="text-yellow-400">
-                                There is a pending transaction that needs to be cancelled before deploying a new contract.
-                            </p>
-                            <Button
-                                onClick={cancelPendingTransaction}
-                                variant="outline"
-                                className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-400/20"
-                            >
-                                Cancel Pending Transaction
-                            </Button>
-                        </div>
-                    )}
-                    <Button
-                        onClick={handleDeploy}
-                        disabled={isDeploying || !estimatedGasCost || !!pendingTx}
-                        className="w-full"
-                    >
-                        {isDeploying ? "Deploying..." : "Deploy NFT Contract"}
-                    </Button>
-                </>
-            )}
-            <DeploymentStatus 
-                contractAddress={contractAddress}
-                errorMessage={errorMessage}
-                transactionHash={transactionHash}
-            />
-        </div>
-    );
+    checkPendingTransactions();
+    const interval = setInterval(checkPendingTransactions, 30000);
+    return () => clearInterval(interval);
+  }, [setPendingTx, setTransactionHash, monitorTransaction]);
+
+  return (
+    <div className="space-y-6 p-6 bg-black/40 rounded-lg">
+      <CollectionInfo />
+      <GasEstimator onEstimateComplete={setEstimatedGasCost} />
+      <PendingTransactionHandler />
+      <DeploymentForm isMobile={isMobile} />
+      <DeploymentStatus 
+        contractAddress={contractAddress}
+        errorMessage={errorMessage}
+        transactionHash={transactionHash}
+      />
+    </div>
+  );
+};
+
+const NFTDeployment = ({ isMobile }: { isMobile: boolean }) => {
+  return (
+    <DeploymentProvider>
+      <NFTDeploymentContent isMobile={isMobile} />
+    </DeploymentProvider>
+  );
 };
 
 export default NFTDeployment;
