@@ -2,17 +2,15 @@ import { ethers } from "ethers";
 import { GAS_CONFIG } from "../constants/deploymentConstants";
 import CleopatraNFTContract from "../../contracts/CleopatraNecklaceNFT.json";
 
-async function attemptDeploy(factory: ethers.ContractFactory, dmcTokenAddress: string, config: any) {
+async function attemptDeploy(factory: ethers.ContractFactory, config: any) {
     console.log("\nAttempting deployment with gas config:", {
         gasLimit: config.gasLimit.toString(),
         maxFeePerGas: ethers.utils.formatUnits(config.maxFeePerGas, "gwei"),
         maxPriorityFeePerGas: ethers.utils.formatUnits(config.maxPriorityFeePerGas, "gwei")
     });
 
-    console.log("Using DMC Token address:", dmcTokenAddress);
-
     try {
-        return await factory.deploy(dmcTokenAddress, {
+        return await factory.deploy({
             gasLimit: config.gasLimit,
             maxFeePerGas: config.maxFeePerGas,
             maxPriorityFeePerGas: config.maxPriorityFeePerGas
@@ -26,7 +24,7 @@ async function attemptDeploy(factory: ethers.ContractFactory, dmcTokenAddress: s
     }
 }
 
-export async function createAndDeployContract(signer: ethers.Signer, dmcTokenAddress: string) {
+export async function createAndDeployContract(signer: ethers.Signer) {
     const factory = new ethers.ContractFactory(
         CleopatraNFTContract.abi,
         CleopatraNFTContract.bytecode,
@@ -42,16 +40,16 @@ export async function createAndDeployContract(signer: ethers.Signer, dmcTokenAdd
     // Try deployment with increasing gas configurations
     try {
         console.log("\nTrying initial deployment...");
-        return await attemptDeploy(factory, dmcTokenAddress, GAS_CONFIG.initial);
+        return await attemptDeploy(factory, GAS_CONFIG.initial);
     } catch (error: any) {
         console.log("Initial deployment failed:", error.message);
         console.log("Trying with higher gas (retry 1)...");
         try {
-            return await attemptDeploy(factory, dmcTokenAddress, GAS_CONFIG.retry1);
+            return await attemptDeploy(factory, GAS_CONFIG.retry1);
         } catch (error: any) {
             console.log("Retry 1 failed:", error.message);
             console.log("Attempting final retry with maximum gas...");
-            return await attemptDeploy(factory, dmcTokenAddress, GAS_CONFIG.retry2);
+            return await attemptDeploy(factory, GAS_CONFIG.retry2);
         }
     }
 }
@@ -75,7 +73,7 @@ export function handleDeploymentReceipt(receipt: ethers.ContractReceipt) {
         if (receipt.gasUsed.eq(receipt.cumulativeGasUsed)) {
             throw new Error("Contract deployment failed - Out of gas. Try increasing gas limit.");
         }
-        throw new Error("Contract deployment failed - transaction reverted. Check the DMC token address and deployment parameters.");
+        throw new Error("Contract deployment failed - transaction reverted. Check the deployment parameters.");
     }
 
     console.log("\nDeployment successful!");

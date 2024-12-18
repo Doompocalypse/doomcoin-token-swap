@@ -1,7 +1,6 @@
 import { ethers } from "ethers";
-import { verifyDMCToken, verifyDeployerBalance, logDeploymentParams } from "./utils/contractVerification";
+import { verifyDeployerBalance, logDeploymentParams } from "./utils/contractVerification";
 import { createAndDeployContract, handleDeploymentReceipt } from "./utils/deploymentHandler";
-import { DOOM_COIN_ADDRESS } from "./constants/deploymentConstants";
 
 export const deployCleopatraNFT = async (signer: ethers.Signer) => {
     try {
@@ -10,20 +9,12 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
             throw new Error("No provider available");
         }
 
-        console.log("Starting NFT deployment with DMC token address:", DOOM_COIN_ADDRESS);
+        console.log("Starting NFT deployment...");
 
-        // Verify DMC token exists and is valid
-        const dmcCode = await provider.getCode(DOOM_COIN_ADDRESS);
-        if (dmcCode === "0x") {
-            throw new Error("DMC token contract not found at the specified address");
-        }
-        console.log("DMC token contract verified at:", DOOM_COIN_ADDRESS);
-
-        await verifyDMCToken(provider);
         await verifyDeployerBalance(signer);
         await logDeploymentParams(signer);
 
-        const contract = await createAndDeployContract(signer, DOOM_COIN_ADDRESS);
+        const contract = await createAndDeployContract(signer);
         console.log("Transaction hash:", contract.deployTransaction.hash);
         
         console.log("\nWaiting for deployment confirmation...");
@@ -37,7 +28,7 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         console.error("\nError deploying contract:", error);
         
         if (error.code === 'INSUFFICIENT_FUNDS') {
-            throw new Error("Insufficient DMC tokens to deploy contract");
+            throw new Error("Insufficient ETH to deploy contract");
         }
         
         if (error.code === -32000) {
