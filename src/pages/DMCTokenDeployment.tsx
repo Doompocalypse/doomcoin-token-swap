@@ -4,10 +4,12 @@ import WalletConnect from "@/components/WalletConnect";
 import NFTDeployment from "@/components/nft/NFTDeployment";
 import CollectionInfo from "@/components/nft/CollectionInfo";
 import OwnedNFTs from "@/components/nft/OwnedNFTs";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const DMCTokenDeployment = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [connectedAccount, setConnectedAccount] = useState<string>();
+    const isMobile = useIsMobile();
 
     const handleConnect = (connected: boolean, account?: string) => {
         console.log("Wallet connection status:", connected, "Account:", account);
@@ -27,7 +29,7 @@ const DMCTokenDeployment = () => {
                     
                     {isConnected && connectedAccount ? (
                         <>
-                            <NFTDeployment />
+                            <NFTDeployment isMobile={isMobile} />
                             <OwnedNFTs walletAddress={connectedAccount} />
                         </>
                     ) : (

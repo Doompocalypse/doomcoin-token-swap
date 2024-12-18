@@ -5,6 +5,7 @@ import ErrorBoundary from "@/components/ErrorBoundary";
 import NFTDeployment from "@/components/nft/NFTDeployment";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -24,6 +25,7 @@ const TokenDeploymentTest = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [connectedAccount, setConnectedAccount] = useState<string>();
+  const isMobile = useIsMobile();
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Connection status:", connected, "Account:", account);
@@ -102,7 +104,7 @@ const TokenDeploymentTest = () => {
               </AlertDescription>
             </Alert>
             <ErrorBoundary fallback={<div>Error loading NFT deployment interface</div>}>
-              <NFTDeployment />
+              <NFTDeployment isMobile={isMobile} />
             </ErrorBoundary>
           </div>
         </main>
