@@ -59,6 +59,15 @@ export const COLLECTION_METADATA = {
         { trait_type: "Collection", value: "DMCNFT" },
         { trait_type: "Piece", value: "6 of 6" }
       ]
+    },
+    {
+      id: "7",
+      name: "Cleopatra's Necklace [Restored]",
+      description: "All 6 fragments of Queen Cleopatra's favorite necklace restored to its original condition",
+      attributes: [
+        { trait_type: "Collection", value: "DMCNFT" },
+        { trait_type: "Piece", value: "Restored" }
+      ]
     }
   ]
 };
