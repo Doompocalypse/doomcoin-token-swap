@@ -6,15 +6,6 @@ interface NFTCollectionImportProps {
   contractAddress: string;
 }
 
-interface WatchAssetParams {
-  type: string;
-  options: {
-    address: string;
-    name: string;
-    symbol: string;
-  };
-}
-
 const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
   const { toast } = useToast();
 
@@ -31,18 +22,17 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     try {
       console.log("Requesting NFT import to MetaMask...");
       
-      const params: WatchAssetParams = {
-        type: 'ERC721',
-        options: {
-          address: contractAddress,
-          name: "Cleopatra's Necklace",
-          symbol: "CLEO",
-        },
-      };
-
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
-        params,
+        params: [{
+          type: 'ERC721',
+          options: {
+            address: contractAddress,
+            name: "Cleopatra's Necklace",
+            symbol: "CLEO",
+            decimals: 0
+          },
+        }],
       });
 
       if (wasAdded) {
