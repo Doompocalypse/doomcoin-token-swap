@@ -11,6 +11,7 @@ interface Transaction {
   nft_id: string;
   buyer_address: string;
   purchase_date: string;
+  contract_address: string;
   mock_nfts: {
     name: string;
   };
@@ -72,6 +73,7 @@ const TransactionHistory = () => {
             <TableRow>
               <TableHead className="text-gray-300">NFT Name</TableHead>
               <TableHead className="text-gray-300">Buyer Address</TableHead>
+              <TableHead className="text-gray-300">Contract Address</TableHead>
               <TableHead className="text-gray-300">Time</TableHead>
               <TableHead className="text-gray-300">Actions</TableHead>
             </TableRow>
@@ -82,6 +84,13 @@ const TransactionHistory = () => {
                 <TableCell className="text-white">{tx.mock_nfts.name}</TableCell>
                 <TableCell className="text-white font-mono">
                   {tx.buyer_address.slice(0, 6)}...{tx.buyer_address.slice(-4)}
+                </TableCell>
+                <TableCell className="text-white font-mono">
+                  {tx.contract_address ? (
+                    `${tx.contract_address.slice(0, 6)}...${tx.contract_address.slice(-4)}`
+                  ) : (
+                    'N/A'
+                  )}
                 </TableCell>
                 <TableCell className="text-white">
                   {formatDistanceToNow(new Date(tx.purchase_date), { addSuffix: true })}
