@@ -77,6 +77,15 @@ const DeploymentForm = ({ isMobile }: DeploymentFormProps) => {
       const signer = provider.getSigner();
       setIsDeploying(true);
       console.log("Initializing NFT contract deployment...");
+      
+      // Get current gas price
+      const gasPrice = await provider.getGasPrice();
+      console.log("Current gas price:", ethers.utils.formatUnits(gasPrice, "gwei"), "gwei");
+      
+      // Add 20% to ensure transaction goes through
+      const adjustedGasPrice = gasPrice.mul(120).div(100);
+      console.log("Adjusted gas price:", ethers.utils.formatUnits(adjustedGasPrice, "gwei"), "gwei");
+
       const contract = await deployCleopatraNFT(signer);
       
       console.log("Contract deployment initiated with transaction hash:", contract.deployTransaction.hash);
@@ -84,11 +93,17 @@ const DeploymentForm = ({ isMobile }: DeploymentFormProps) => {
       
       toast({
         title: "Deployment Started",
-        description: "Please wait while your transaction is being processed...",
+        description: "Please wait while your transaction is being processed. Do not close this window.",
       });
 
       console.log("Waiting for transaction confirmation...");
-      await contract.deployed();
+      
+      // Monitor transaction status
+      const receipt = await contract.deployTransaction.wait();
+      
+      if (receipt.status === 0) {
+        throw new Error("Transaction failed - Please check Etherscan for details");
+      }
       
       console.log("NFT Contract deployment successful");
       setContractAddress(contract.address);
@@ -97,8 +112,31 @@ const DeploymentForm = ({ isMobile }: DeploymentFormProps) => {
         title: "Success",
         description: `NFT Collection deployed at ${contract.address}`,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error("Deployment error:", error);
+      
+      // Check if the error is due to user rejection
+      if (error.code === 4001) {
+        setErrorMessage("Transaction was rejected by user");
+        toast({
+          title: "Transaction Rejected",
+          description: "You rejected the transaction. No funds were spent.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
+      // Check for out of gas error
+      if (error.code === -32000) {
+        setErrorMessage("Transaction failed - Insufficient gas. Please try again with higher gas limit");
+        toast({
+          title: "Transaction Failed",
+          description: "Transaction failed due to insufficient gas. Please try again with higher gas limit.",
+          variant: "destructive",
+        });
+        return;
+      }
+      
       const errorMsg = error instanceof Error ? error.message : "Failed to deploy contract. Check console for details.";
       setErrorMessage(errorMsg);
       toast({

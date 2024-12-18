@@ -16,6 +16,7 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
     const { toast } = useToast();
     const [transactionStatus, setTransactionStatus] = useState<string>("");
     const [confirmations, setConfirmations] = useState<number>(0);
+    const [failureReason, setFailureReason] = useState<string>("");
 
     useEffect(() => {
         const checkTransactionStatus = async () => {
@@ -52,6 +53,28 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
                         setTransactionStatus("Confirmed");
                     } else {
                         setTransactionStatus("Failed");
+                        // Try to get more details about the failure
+                        try {
+                            const code = await provider.call(tx, tx.blockNumber);
+                            const reason = ethers.utils.toUtf8String("0x" + code.slice(138));
+                            setFailureReason(reason);
+                            console.error("Transaction failed reason:", reason);
+                            
+                            toast({
+                                title: "Transaction Failed",
+                                description: `Your transaction failed: ${reason}. Please check Etherscan for more details.`,
+                                variant: "destructive",
+                            });
+                        } catch (error) {
+                            console.error("Error getting failure reason:", error);
+                            setFailureReason("Unknown error - Please check Etherscan for details");
+                            
+                            toast({
+                                title: "Transaction Failed",
+                                description: "Your transaction failed. Please check Etherscan for more details.",
+                                variant: "destructive",
+                            });
+                        }
                     }
                 }
             } catch (error) {
@@ -64,7 +87,7 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
         checkTransactionStatus(); // Initial check
 
         return () => clearInterval(interval);
-    }, [transactionHash]);
+    }, [transactionHash, toast]);
 
     const copyError = () => {
         navigator.clipboard.writeText(errorMessage);
@@ -111,6 +134,11 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
                             Status: {transactionStatus}
                             {confirmations > 0 && ` (${confirmations} confirmations)`}
                         </p>
+                        {transactionStatus === "Failed" && failureReason && (
+                            <p className="text-red-400">
+                                Failure Reason: {failureReason}
+                            </p>
+                        )}
                         <div className="flex gap-2">
                             <Button
                                 variant="outline"
