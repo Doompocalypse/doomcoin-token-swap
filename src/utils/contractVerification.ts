@@ -1,28 +1,51 @@
 import { ethers } from "ethers";
-import CleopatraNFTContract from "../contracts/CleopatraNecklaceNFT.json";
+import { toast } from "@/components/ui/use-toast";
 
-export const isContractDeployed = async (provider: ethers.providers.Provider, address: string) => {
-    try {
-        console.log("Checking if contract is deployed at:", address);
-        const code = await provider.getCode(address);
-        const isDeployed = code !== "0x";
-        console.log("Contract deployed status:", isDeployed);
-        return isDeployed;
-    } catch (error) {
-        console.error("Error checking contract deployment:", error);
-        return false;
+export const verifyContractDeployment = async (
+  contractAddress: string,
+  provider: ethers.providers.Provider
+): Promise<boolean> => {
+  try {
+    console.log("Verifying contract deployment at:", contractAddress);
+    
+    // Check if the address is valid
+    if (!ethers.utils.isAddress(contractAddress)) {
+      console.error("Invalid contract address format");
+      toast({
+        title: "Invalid Contract Address",
+        description: "The contract address format is invalid.",
+        variant: "destructive",
+      });
+      return false;
     }
-};
 
-export const verifyContractCode = async (provider: ethers.providers.Provider, address: string) => {
-    try {
-        console.log("Verifying contract code at:", address);
-        const contract = new ethers.Contract(address, CleopatraNFTContract.abi, provider);
-        await contract.name();
-        console.log("Contract verification successful");
-        return true;
-    } catch (error) {
-        console.error("Contract verification failed:", error);
-        return false;
+    // Check if there's any code at the address
+    const code = await provider.getCode(contractAddress);
+    const isDeployed = code !== "0x";
+    
+    console.log("Contract deployment status:", {
+      address: contractAddress,
+      hasCode: isDeployed,
+      codeLength: code.length
+    });
+
+    if (!isDeployed) {
+      toast({
+        title: "Contract Not Found",
+        description: "No contract was found at this address. The deployment might have failed or is still pending.",
+        variant: "destructive",
+      });
+      return false;
     }
+
+    return true;
+  } catch (error) {
+    console.error("Error verifying contract:", error);
+    toast({
+      title: "Verification Error",
+      description: "Failed to verify contract deployment. Please check the console for details.",
+      variant: "destructive",
+    });
+    return false;
+  }
 };

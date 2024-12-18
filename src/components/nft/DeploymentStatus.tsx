@@ -4,6 +4,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import NFTCollectionImport from "./NFTCollectionImport";
+import DeploymentVerification from "./DeploymentVerification";
 
 interface DeploymentStatusProps {
     contractAddress: string;
@@ -74,7 +75,6 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
     };
 
     const getEtherscanUrl = (hash?: string) => {
-        // Using Sepolia network for verification
         if (hash) {
             return `https://sepolia.etherscan.io/tx/${hash}`;
         }
@@ -140,7 +140,7 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
                     <div className="mt-4 p-4 bg-green-900/20 rounded-lg">
                         <div className="flex flex-col gap-2">
                             <p className="text-green-400 break-all">
-                                Contract deployed successfully at: {contractAddress}
+                                Contract deployed at: {contractAddress}
                             </p>
                             <div className="flex gap-2">
                                 <Button
@@ -164,6 +164,10 @@ const DeploymentStatus = ({ contractAddress, errorMessage, transactionHash }: De
                             </div>
                         </div>
                     </div>
+                    <DeploymentVerification 
+                        contractAddress={contractAddress}
+                        transactionHash={transactionHash}
+                    />
                     <NFTCollectionImport contractAddress={contractAddress} />
                 </>
             )}
