@@ -46,13 +46,13 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
       if (!window.ethereum) return;
       
       try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        
         // First check local storage
         const savedStatus = localStorage.getItem(STORAGE_KEY);
         if (savedStatus) {
           const { contractAddress: savedAddress, transactionHash: savedHash } = JSON.parse(savedStatus);
           console.log("Found saved deployment status:", { savedAddress, savedHash });
-          
-          const provider = new ethers.providers.Web3Provider(window.ethereum);
           
           if (savedAddress) {
             const isDeployed = await isContractDeployed(provider, savedAddress);
