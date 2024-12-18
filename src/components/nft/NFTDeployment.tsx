@@ -4,7 +4,6 @@ import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { useState } from "react";
 import { ethers } from "ethers";
 import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
-import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
 
@@ -41,13 +40,12 @@ const NFTDeployment = () => {
                 chainId: network.chainId
             });
             
-            const isValidNetwork = network.chainId === 421613 || 
-                                 network.chainId === parseInt(SEPOLIA_CHAIN_ID, 16);
+            const isValidNetwork = network.chainId === parseInt(SEPOLIA_CHAIN_ID, 16);
             
             if (!isValidNetwork) {
                 toast({
                     title: "Wrong Network",
-                    description: "Please switch to either Sepolia (for testing) or Arbitrum One network",
+                    description: "Please switch to Sepolia network for testing",
                     variant: "destructive",
                 });
                 return;
@@ -55,7 +53,7 @@ const NFTDeployment = () => {
 
             const signer = provider.getSigner();
             setIsDeploying(true);
-            console.log("Initializing contract deployment...");
+            console.log("Initializing NFT contract deployment...");
             const contract = await deployCleopatraNFT(signer);
             
             console.log("Contract deployment initiated with transaction hash:", contract.deployTransaction.hash);
@@ -69,12 +67,12 @@ const NFTDeployment = () => {
             console.log("Waiting for transaction confirmation...");
             await contract.deployed();
             
-            console.log("Contract deployment successful");
+            console.log("NFT Contract deployment successful");
             setContractAddress(contract.address);
             
             toast({
                 title: "Success",
-                description: `NFT Collection deployed at ${contract.address} on ${network.name}`,
+                description: `NFT Collection deployed at ${contract.address}`,
             });
         } catch (error) {
             console.error("Deployment error:", error);
@@ -93,7 +91,6 @@ const NFTDeployment = () => {
     return (
         <div className="space-y-6 p-6 bg-black/40 rounded-lg">
             <CollectionInfo />
-            <GasEstimator onEstimateComplete={() => {}} />
             {transactionHash && (
                 <div className="p-4 bg-blue-900/20 rounded-lg">
                     <p className="text-blue-400 break-all">
@@ -109,7 +106,7 @@ const NFTDeployment = () => {
                 disabled={isDeploying}
                 className="w-full"
             >
-                {isDeploying ? "Deploying..." : "Deploy Contract"}
+                {isDeploying ? "Deploying..." : "Deploy NFT Contract"}
             </Button>
             <DeploymentStatus 
                 contractAddress={contractAddress}
