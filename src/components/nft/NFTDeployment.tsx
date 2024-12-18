@@ -11,6 +11,7 @@ import DeploymentForm from "./components/DeploymentForm";
 import { useTransactionMonitor } from "./hooks/useTransactionMonitor";
 
 const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
+const STORAGE_KEY = "nft_deployment_status";
 
 const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
   const { toast } = useToast();
@@ -27,13 +28,47 @@ const NFTDeploymentContent = ({ isMobile }: { isMobile: boolean }) => {
     setEstimatedGasCost,
   } = useDeploymentContext();
 
+  // Save deployment status to local storage
+  useEffect(() => {
+    if (contractAddress || transactionHash) {
+      console.log("Saving deployment status to local storage:", { contractAddress, transactionHash });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        contractAddress,
+        transactionHash,
+        timestamp: Date.now()
+      }));
+    }
+  }, [contractAddress, transactionHash]);
+
   // Check for existing deployment
   useEffect(() => {
     const checkExistingDeployment = async () => {
       if (!window.ethereum) return;
       
       try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        // First check local storage
+        const savedStatus = localStorage.getItem(STORAGE_KEY);
+        if (savedStatus) {
+          const { contractAddress: savedAddress, transactionHash: savedHash } = JSON.parse(savedStatus);
+          console.log("Found saved deployment status:", { savedAddress, savedHash });
+          
+          const provider = new ethers.providers.Web3Provider(window.ethereum);
+          
+          if (savedAddress) {
+            const isDeployed = await isContractDeployed(provider, savedAddress);
+            const isValid = await verifyContractBytecode(savedAddress, provider);
+            
+            if (isDeployed && isValid) {
+              console.log("Restored valid deployment from storage:", savedAddress);
+              setIsAlreadyDeployed(true);
+              setContractAddress(savedAddress);
+              setTransactionHash(savedHash);
+              return;
+            }
+          }
+        }
+
+        // Fallback to checking known deployment
         const receipt = await provider.getTransactionReceipt(KNOWN_DEPLOYMENT);
         
         if (receipt && receipt.contractAddress) {
