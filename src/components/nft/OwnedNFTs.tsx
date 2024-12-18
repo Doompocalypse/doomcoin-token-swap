@@ -12,7 +12,7 @@ interface OwnedNFT {
 }
 
 const OwnedNFTs = ({ walletAddress }: { walletAddress: string }) => {
-    const { data: ownedNFTs, isLoading } = useQuery({
+    const { data: ownedNFTs, isLoading, error } = useQuery({
         queryKey: ['owned-nfts', walletAddress],
         queryFn: async () => {
             console.log('Fetching owned NFTs for address:', walletAddress);
@@ -33,13 +33,28 @@ const OwnedNFTs = ({ walletAddress }: { walletAddress: string }) => {
                 throw error;
             }
 
-            console.log('Received owned NFTs:', data);
-            return data.map(purchase => ({
+            console.log('Raw purchase data:', data);
+
+            if (!data || data.length === 0) {
+                console.log('No NFTs found for this wallet');
+                return [];
+            }
+
+            const nfts = data.map(purchase => ({
                 nft_id: purchase.nft_id,
                 ...purchase.mock_nfts
-            })) as OwnedNFT[];
+            }));
+
+            console.log('Processed NFTs:', nfts);
+            return nfts as OwnedNFT[];
         },
+        refetchInterval: 5000 // Refetch every 5 seconds to catch new purchases
     });
+
+    if (error) {
+        console.error('Query error:', error);
+        return <div className="text-red-500">Error loading NFTs: {(error as Error).message}</div>;
+    }
 
     if (isLoading) {
         return <div className="text-white">Loading your NFTs...</div>;

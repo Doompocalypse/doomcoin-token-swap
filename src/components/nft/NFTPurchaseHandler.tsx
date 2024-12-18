@@ -1,10 +1,15 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
-export const useNFTPurchaseHandler = (connectedAccount?: string) => {
+export const useNFTPurchaseHandler = (connectedAccount?: string, contractAddress?: string) => {
   const { toast } = useToast();
 
   const handlePurchase = async (nftId: string) => {
+    console.log("Starting NFT purchase process...");
+    console.log("Connected account:", connectedAccount);
+    console.log("Contract address:", contractAddress);
+    console.log("NFT ID:", nftId);
+
     if (!connectedAccount) {
       toast({
         title: "Wallet Required",
@@ -14,18 +19,34 @@ export const useNFTPurchaseHandler = (connectedAccount?: string) => {
       return;
     }
 
+    if (!contractAddress) {
+      toast({
+        title: "Contract Required",
+        description: "No contract address found. Please deploy or connect to a contract first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
-      const { error } = await supabase
+      console.log("Inserting purchase record into Supabase...");
+      const { data, error } = await supabase
         .from('mock_purchases')
         .insert([
           { 
             nft_id: nftId, 
             buyer_address: connectedAccount,
-            contract_address: "0x1306e41b5042e649c4808cc0c0b46483e2ed5ea890e32296448cd5b85b551714" // Using the transaction hash you mentioned
+            contract_address: contractAddress
           }
-        ]);
+        ])
+        .select();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log("Purchase record created:", data);
 
       toast({
         title: "Purchase Successful",

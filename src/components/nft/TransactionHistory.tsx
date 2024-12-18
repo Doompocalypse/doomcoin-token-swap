@@ -38,13 +38,12 @@ const TransactionHistory = () => {
         throw error;
       }
 
-      console.log('Received transactions:', data);
+      console.log('Raw transaction data:', data);
       return data as Transaction[];
     },
-    refetchInterval: 5000, // Refetch every 5 seconds to catch new transactions
-    initialData: [], // Initialize with empty array to avoid undefined
-    retry: 3, // Retry failed requests 3 times
-    staleTime: 1000, // Consider data stale after 1 second
+    refetchInterval: 5000, // Refetch every 5 seconds
+    retry: 3,
+    staleTime: 1000,
   });
 
   const copyAddress = (address: string) => {
