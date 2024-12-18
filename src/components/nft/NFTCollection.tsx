@@ -12,6 +12,14 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
   
   const { handleMint } = useNFTMintHandler(walletAddress, contractAddress);
 
+  // Add more detailed logging for debugging
+  console.log("NFTCollection: Checking conditions for rendering mint button:", {
+    hasContractAddress: Boolean(contractAddress),
+    hasWalletAddress: Boolean(walletAddress),
+    contractAddressValue: contractAddress,
+    walletAddressValue: walletAddress
+  });
+
   if (!contractAddress) {
     console.log("NFTCollection: No contract address provided");
     return (
@@ -32,7 +40,7 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
         className="w-full bg-white text-black hover:bg-white/90"
         disabled={!walletAddress}
       >
-        Mint NFT
+        {!walletAddress ? "Connect Wallet to Mint" : "Mint NFT"}
       </Button>
       
       <NFTCollectionImport contractAddress={contractAddress} />
