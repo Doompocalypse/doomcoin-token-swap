@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { ethers } from "ethers";
-import { useDeploymentContext } from "../context/DeploymentContext";
+import { useDeploymentContext } from "../deployment/DeploymentProvider";
 import { useNetworkValidation } from "../hooks/useNetworkValidation";
 
 interface DeploymentFormProps {

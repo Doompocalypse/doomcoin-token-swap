@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { ethers } from "ethers";
-import { useDeploymentContext } from "../context/DeploymentContext";
+import { useDeploymentContext } from "../deployment/DeploymentProvider";
 
 const PendingTransactionHandler = () => {
   const { toast } = useToast();
