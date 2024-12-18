@@ -12,6 +12,13 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
 
         console.log("Starting NFT deployment with DMC token address:", DOOM_COIN_ADDRESS);
 
+        // Verify DMC token exists and is valid
+        const dmcCode = await provider.getCode(DOOM_COIN_ADDRESS);
+        if (dmcCode === "0x") {
+            throw new Error("DMC token contract not found at the specified address");
+        }
+        console.log("DMC token contract verified at:", DOOM_COIN_ADDRESS);
+
         await verifyDMCToken(provider);
         await verifyDeployerBalance(signer);
         await logDeploymentParams(signer);

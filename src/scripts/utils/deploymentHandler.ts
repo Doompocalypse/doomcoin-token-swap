@@ -5,8 +5,8 @@ import CleopatraNFTContract from "../../contracts/CleopatraNecklaceNFT.json";
 async function attemptDeploy(factory: ethers.ContractFactory, dmcTokenAddress: string, config: any) {
     console.log("\nAttempting deployment with gas config:", {
         gasLimit: config.gasLimit.toString(),
-        maxFeePerGas: config.maxFeePerGas,
-        maxPriorityFeePerGas: config.maxPriorityFeePerGas
+        maxFeePerGas: ethers.utils.formatUnits(config.maxFeePerGas, "gwei"),
+        maxPriorityFeePerGas: ethers.utils.formatUnits(config.maxPriorityFeePerGas, "gwei")
     });
 
     console.log("Using DMC Token address:", dmcTokenAddress);
@@ -14,8 +14,8 @@ async function attemptDeploy(factory: ethers.ContractFactory, dmcTokenAddress: s
     try {
         return await factory.deploy(dmcTokenAddress, {
             gasLimit: config.gasLimit,
-            maxFeePerGas: ethers.utils.parseUnits(config.maxFeePerGas, "gwei"),
-            maxPriorityFeePerGas: ethers.utils.parseUnits(config.maxPriorityFeePerGas, "gwei")
+            maxFeePerGas: config.maxFeePerGas,
+            maxPriorityFeePerGas: config.maxPriorityFeePerGas
         });
     } catch (error: any) {
         console.error("Deployment attempt failed:", error.message);
