@@ -14,19 +14,28 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
         const estimateGas = async () => {
             if (window.ethereum) {
                 try {
+                    console.log("Starting gas estimation for NFT deployment...");
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     const feeData = await provider.getFeeData();
                     const gasPrice = feeData.gasPrice;
                     
-                    if (!gasPrice) throw new Error("Could not get gas price");
+                    if (!gasPrice) {
+                        console.error("Could not get gas price");
+                        throw new Error("Could not get gas price");
+                    }
                     
                     const gasPriceInGwei = ethers.utils.formatUnits(gasPrice, "gwei");
+                    console.log("Current gas price:", gasPriceInGwei, "Gwei");
                     setCurrentGasPrice(gasPriceInGwei);
                     
                     const estimatedGasUnits = GAS_CONFIG.initial.gasLimit;
+                    console.log("Estimated gas units:", estimatedGasUnits.toString());
+                    
                     const totalGasCost = gasPrice.mul(estimatedGasUnits);
+                    console.log("Total gas cost (wei):", totalGasCost.toString());
                     
                     const gasCostInEth = ethers.utils.formatEther(totalGasCost);
+                    console.log("Total gas cost (ETH):", gasCostInEth);
                     setEstimatedGas(gasCostInEth);
                     
                     onEstimateComplete(totalGasCost);

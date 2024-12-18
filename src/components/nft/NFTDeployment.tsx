@@ -4,6 +4,7 @@ import { deployCleopatraNFT } from "@/scripts/deployCleopatraNFT";
 import { useState } from "react";
 import { ethers } from "ethers";
 import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
+import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
 
@@ -12,6 +13,7 @@ const NFTDeployment = () => {
     const [contractAddress, setContractAddress] = useState<string>("");
     const [errorMessage, setErrorMessage] = useState<string>("");
     const [transactionHash, setTransactionHash] = useState<string>("");
+    const [estimatedGasCost, setEstimatedGasCost] = useState<ethers.BigNumber>();
     const { toast } = useToast();
 
     const handleDeploy = async () => {
@@ -46,6 +48,15 @@ const NFTDeployment = () => {
                 toast({
                     title: "Wrong Network",
                     description: "Please switch to Sepolia network for testing",
+                    variant: "destructive",
+                });
+                return;
+            }
+
+            if (!estimatedGasCost) {
+                toast({
+                    title: "Error",
+                    description: "Please wait for gas estimation to complete",
                     variant: "destructive",
                 });
                 return;
@@ -91,6 +102,7 @@ const NFTDeployment = () => {
     return (
         <div className="space-y-6 p-6 bg-black/40 rounded-lg">
             <CollectionInfo />
+            <GasEstimator onEstimateComplete={setEstimatedGasCost} />
             {transactionHash && (
                 <div className="p-4 bg-blue-900/20 rounded-lg">
                     <p className="text-blue-400 break-all">
@@ -103,7 +115,7 @@ const NFTDeployment = () => {
             )}
             <Button
                 onClick={handleDeploy}
-                disabled={isDeploying}
+                disabled={isDeploying || !estimatedGasCost}
                 className="w-full"
             >
                 {isDeploying ? "Deploying..." : "Deploy NFT Contract"}
