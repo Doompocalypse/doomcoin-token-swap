@@ -1,5 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useNFTMintHandler } from "./NFTMintHandler";
+import NFTCollectionImport from "./NFTCollectionImport";
 
 interface NFTCollectionProps {
   contractAddress?: string;
@@ -30,6 +31,8 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
       >
         Mint NFT
       </Button>
+      
+      <NFTCollectionImport contractAddress={contractAddress} />
     </div>
   );
 };
