@@ -21,7 +21,8 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
 
     try {
       console.log("Requesting NFT import to MetaMask...");
-      await window.ethereum.request({
+      // Updated parameter structure to match MetaMask's expected format
+      const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
         params: {
           type: 'ERC721',
@@ -32,11 +33,18 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           },
         },
       });
-      
-      toast({
-        title: "Success",
-        description: "NFT Collection added to MetaMask",
-      });
+
+      if (wasAdded) {
+        toast({
+          title: "Success",
+          description: "NFT Collection added to MetaMask",
+        });
+      } else {
+        toast({
+          title: "Cancelled",
+          description: "User cancelled the import",
+        });
+      }
     } catch (error) {
       console.error("Error importing NFT collection:", error);
       toast({
