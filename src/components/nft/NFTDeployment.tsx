@@ -7,6 +7,9 @@ import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
+import { isContractDeployed, verifyContractCode } from "@/utils/contractVerification";
+
+const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
 
 const NFTDeployment = () => {
     const [isDeploying, setIsDeploying] = useState(false);
@@ -15,7 +18,39 @@ const NFTDeployment = () => {
     const [transactionHash, setTransactionHash] = useState<string>("");
     const [estimatedGasCost, setEstimatedGasCost] = useState<ethers.BigNumber>();
     const [pendingTx, setPendingTx] = useState<string>("");
+    const [isAlreadyDeployed, setIsAlreadyDeployed] = useState(false);
     const { toast } = useToast();
+
+    useEffect(() => {
+        const checkExistingDeployment = async () => {
+            if (!window.ethereum) return;
+            
+            try {
+                const provider = new ethers.providers.Web3Provider(window.ethereum);
+                const receipt = await provider.getTransactionReceipt(KNOWN_DEPLOYMENT);
+                
+                if (receipt && receipt.contractAddress) {
+                    console.log("Found existing deployment at:", receipt.contractAddress);
+                    const isDeployed = await isContractDeployed(provider, receipt.contractAddress);
+                    const isValid = await verifyContractCode(provider, receipt.contractAddress);
+                    
+                    if (isDeployed && isValid) {
+                        setIsAlreadyDeployed(true);
+                        setContractAddress(receipt.contractAddress);
+                        setTransactionHash(KNOWN_DEPLOYMENT);
+                        toast({
+                            title: "Contract Already Deployed",
+                            description: "The NFT contract has already been deployed successfully.",
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error("Error checking existing deployment:", error);
+            }
+        };
+
+        checkExistingDeployment();
+    }, [toast]);
 
     // Check for pending transactions on component mount
     useEffect(() => {
@@ -91,6 +126,15 @@ const NFTDeployment = () => {
     };
 
     const handleDeploy = async () => {
+        if (isAlreadyDeployed) {
+            toast({
+                title: "Contract Already Deployed",
+                description: "The NFT contract has already been deployed. You can't deploy it again.",
+                variant: "destructive",
+            });
+            return;
+        }
+
         setErrorMessage("");
         setTransactionHash("");
         
@@ -187,40 +231,41 @@ const NFTDeployment = () => {
         <div className="space-y-6 p-6 bg-black/40 rounded-lg">
             <CollectionInfo />
             <GasEstimator onEstimateComplete={setEstimatedGasCost} />
-            {pendingTx && (
-                <div className="p-4 bg-yellow-900/20 rounded-lg space-y-4">
+            {isAlreadyDeployed ? (
+                <div className="p-4 bg-yellow-900/20 rounded-lg">
                     <p className="text-yellow-400">
-                        There is a pending transaction that needs to be cancelled before deploying a new contract.
+                        This NFT contract has already been deployed. You can view its details below.
                     </p>
+                </div>
+            ) : (
+                <>
+                    {pendingTx && (
+                        <div className="p-4 bg-yellow-900/20 rounded-lg space-y-4">
+                            <p className="text-yellow-400">
+                                There is a pending transaction that needs to be cancelled before deploying a new contract.
+                            </p>
+                            <Button
+                                onClick={cancelPendingTransaction}
+                                variant="outline"
+                                className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-400/20"
+                            >
+                                Cancel Pending Transaction
+                            </Button>
+                        </div>
+                    )}
                     <Button
-                        onClick={cancelPendingTransaction}
-                        variant="outline"
-                        className="w-full border-yellow-400 text-yellow-400 hover:bg-yellow-400/20"
+                        onClick={handleDeploy}
+                        disabled={isDeploying || !estimatedGasCost || !!pendingTx}
+                        className="w-full"
                     >
-                        Cancel Pending Transaction
+                        {isDeploying ? "Deploying..." : "Deploy NFT Contract"}
                     </Button>
-                </div>
+                </>
             )}
-            {transactionHash && !pendingTx && (
-                <div className="p-4 bg-blue-900/20 rounded-lg">
-                    <p className="text-blue-400 break-all">
-                        Transaction Hash: {transactionHash}
-                    </p>
-                    <p className="text-sm text-blue-300 mt-2">
-                        Your transaction is being processed. This may take a few minutes...
-                    </p>
-                </div>
-            )}
-            <Button
-                onClick={handleDeploy}
-                disabled={isDeploying || !estimatedGasCost || !!pendingTx}
-                className="w-full"
-            >
-                {isDeploying ? "Deploying..." : "Deploy NFT Contract"}
-            </Button>
             <DeploymentStatus 
                 contractAddress={contractAddress}
                 errorMessage={errorMessage}
+                transactionHash={transactionHash}
             />
         </div>
     );
