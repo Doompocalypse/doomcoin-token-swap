@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Copy, ExternalLink } from "lucide-react";
+import { useState } from "react";
 
 interface NFTCollectionImportProps {
   contractAddress: string;
@@ -8,6 +9,7 @@ interface NFTCollectionImportProps {
 
 const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
   const { toast } = useToast();
+  const [tokenId, setTokenId] = useState("1"); // Default to token ID 1
 
   const handleImportToMetaMask = async () => {
     if (!window.ethereum) {
@@ -20,7 +22,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     }
 
     try {
-      console.log("Requesting NFT import to MetaMask...");
+      console.log("Requesting NFT import to MetaMask...", {
+        contractAddress,
+        tokenId
+      });
       
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
@@ -28,9 +33,9 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           type: 'ERC721',
           options: {
             address: contractAddress,
+            tokenId: tokenId,
             name: "Cleopatra's Necklace",
-            symbol: "CLEO",
-            decimals: 0
+            symbol: "CLEO"
           },
         }],
       });
@@ -76,6 +81,17 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           <li>Open MetaMask and go to the NFTs tab</li>
           <li>Your NFTs from this collection will appear there</li>
         </ol>
+        <div className="flex items-center gap-2">
+          <input
+            type="number"
+            value={tokenId}
+            onChange={(e) => setTokenId(e.target.value)}
+            className="w-24 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
+            placeholder="Token ID"
+            min="1"
+          />
+          <span className="text-sm text-green-300">← Enter your Token ID</span>
+        </div>
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <Button
