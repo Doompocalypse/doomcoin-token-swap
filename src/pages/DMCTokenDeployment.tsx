@@ -4,6 +4,7 @@ import WalletConnect from "@/components/WalletConnect";
 import NFTDeployment from "@/components/nft/NFTDeployment";
 import CollectionInfo from "@/components/nft/CollectionInfo";
 import OwnedNFTs from "@/components/nft/OwnedNFTs";
+import TransactionHistory from "@/components/nft/TransactionHistory";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const DMCTokenDeployment = () => {
@@ -31,6 +32,7 @@ const DMCTokenDeployment = () => {
                         <>
                             <NFTDeployment isMobile={isMobile} />
                             <OwnedNFTs walletAddress={connectedAccount} />
+                            <TransactionHistory />
                         </>
                     ) : (
                         <div className="bg-black/40 p-6 rounded-lg">
