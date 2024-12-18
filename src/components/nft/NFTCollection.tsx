@@ -8,9 +8,12 @@ interface NFTCollectionProps {
 }
 
 const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) => {
+  console.log("NFTCollection rendered with props:", { contractAddress, walletAddress });
+  
   const { handleMint } = useNFTMintHandler(walletAddress, contractAddress);
 
   if (!contractAddress) {
+    console.log("NFTCollection: No contract address provided");
     return (
       <div className="p-4 bg-black/20 rounded-lg">
         <p className="text-white">Deploy the contract first to mint NFTs</p>
@@ -26,7 +29,7 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
       </p>
       <Button 
         onClick={handleMint}
-        className="w-full"
+        className="w-full bg-white text-black hover:bg-white/90"
         disabled={!walletAddress}
       >
         Mint NFT

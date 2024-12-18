@@ -34,6 +34,13 @@ const DMCTokenDeployment = () => {
         setContractAddress(address);
     };
 
+    // Add debug logs to track state
+    console.log("Current state:", {
+        isConnected,
+        connectedAccount,
+        contractAddress
+    });
+
     return (
         <div className="relative min-h-screen">
             <VideoBackground />
@@ -75,10 +82,12 @@ const DMCTokenDeployment = () => {
                                 isMobile={isMobile} 
                                 onContractDeployed={handleContractDeployed}
                             />
-                            <NFTCollection 
-                                contractAddress={contractAddress} 
-                                walletAddress={connectedAccount} 
-                            />
+                            {contractAddress && (
+                                <NFTCollection 
+                                    contractAddress={contractAddress}
+                                    walletAddress={connectedAccount}
+                                />
+                            )}
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
                         </>
