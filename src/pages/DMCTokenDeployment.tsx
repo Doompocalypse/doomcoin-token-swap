@@ -1,5 +1,5 @@
 import VideoBackground from "@/components/VideoBackground";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import WalletConnect from "@/components/WalletConnect";
 import NFTDeployment from "@/components/nft/NFTDeployment";
 import CollectionInfo from "@/components/nft/CollectionInfo";
@@ -17,12 +17,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Menu } from "lucide-react";
 
+const STORAGE_KEY = "nft_deployment_status";
+
 const DMCTokenDeployment = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [connectedAccount, setConnectedAccount] = useState<string>();
     const [contractAddress, setContractAddress] = useState<string>();
     const isMobile = useIsMobile();
     const navigate = useNavigate();
+
+    // Load existing deployment on mount
+    useEffect(() => {
+        const savedStatus = localStorage.getItem(STORAGE_KEY);
+        if (savedStatus) {
+            const { contractAddress: savedAddress } = JSON.parse(savedStatus);
+            console.log("Found saved contract address:", savedAddress);
+            if (savedAddress) {
+                setContractAddress(savedAddress);
+            }
+        }
+    }, []);
 
     const handleConnect = (connected: boolean, account?: string) => {
         console.log("Wallet connection status:", connected, "Account:", account);
@@ -79,24 +93,25 @@ const DMCTokenDeployment = () => {
                 <div className="max-w-6xl mx-auto space-y-8">
                     {isConnected && connectedAccount ? (
                         <>
+                            {contractAddress && (
+                                <ContractInfo 
+                                    contractAddress={contractAddress}
+                                    walletAddress={connectedAccount}
+                                />
+                            )}
+                            
                             {!contractAddress && (
                                 <NFTDeployment 
                                     isMobile={isMobile} 
                                     onContractDeployed={handleContractDeployed}
                                 />
                             )}
-                            {contractAddress && (
-                                <>
-                                    <ContractInfo 
-                                        contractAddress={contractAddress}
-                                        walletAddress={connectedAccount}
-                                    />
-                                    <NFTCollection 
-                                        contractAddress={contractAddress}
-                                        walletAddress={connectedAccount}
-                                    />
-                                </>
-                            )}
+
+                            <NFTCollection 
+                                contractAddress={contractAddress}
+                                walletAddress={connectedAccount}
+                            />
+                            
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
                         </>
