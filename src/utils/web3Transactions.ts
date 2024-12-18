@@ -47,19 +47,28 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
   console.log("USD value (DMC tokens to receive):", usdAmount);
   
   return queueTransaction(async () => {
-    // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
-    const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
-    
     try {
+      // Ensure ethValue is a valid number
+      const ethAmount = parseFloat(ethValue);
+      if (isNaN(ethAmount) || ethAmount <= 0) {
+        throw new Error("Invalid ETH amount");
+      }
+
+      // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
+      // Use BigInt to handle the conversion precisely
+      const weiValue = BigInt(Math.floor(ethAmount * 1e18));
+      console.log("Wei value for transaction:", weiValue.toString());
+      
+      // Format the value as hexadecimal, removing the '0x' prefix if present
+      const hexValue = weiValue.toString(16);
+      console.log("Hex value for transaction:", hexValue);
+
       // User sends ETH to Bot Wallet with exact amount
       const transactionParameters = {
         to: BOT_WALLET,
         from: userAccount,
-        value: `0x${weiValue}`,
+        value: `0x${hexValue}`, // Ensure the '0x' prefix is added here
         data: "0x",
-        // Add gas parameters to ensure transaction uses exact amount
-        gas: undefined,
-        gasPrice: undefined
       };
 
       console.log("Transaction parameters:", transactionParameters);
@@ -72,7 +81,7 @@ export const handleTokenExchange = async (userAccount: string, ethValue: string,
 
       console.log("ETH Transaction hash:", txHash);
 
-      // Call our Edge Function to process the DMC token transfer using the correct URL format
+      // Call our Edge Function to process the DMC token transfer
       const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
         method: 'POST',
         headers: {
