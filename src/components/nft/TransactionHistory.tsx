@@ -42,6 +42,9 @@ const TransactionHistory = () => {
       return data as Transaction[];
     },
     refetchInterval: 5000, // Refetch every 5 seconds to catch new transactions
+    initialData: [], // Initialize with empty array to avoid undefined
+    retry: 3, // Retry failed requests 3 times
+    staleTime: 1000, // Consider data stale after 1 second
   });
 
   const copyAddress = (address: string) => {
