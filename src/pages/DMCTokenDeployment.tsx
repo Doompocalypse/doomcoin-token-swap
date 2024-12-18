@@ -2,6 +2,8 @@ import VideoBackground from "@/components/VideoBackground";
 import { useState } from "react";
 import WalletConnect from "@/components/WalletConnect";
 import NFTDeployment from "@/components/nft/NFTDeployment";
+import CollectionInfo from "@/components/nft/CollectionInfo";
+import OwnedNFTs from "@/components/nft/OwnedNFTs";
 
 const DMCTokenDeployment = () => {
     const [isConnected, setIsConnected] = useState(false);
@@ -20,14 +22,14 @@ const DMCTokenDeployment = () => {
                 <div className="flex justify-end mb-4">
                     <WalletConnect onConnect={handleConnect} />
                 </div>
-                <div className="max-w-2xl mx-auto">
+                <div className="max-w-6xl mx-auto space-y-8">
                     <h1 className="text-2xl font-bold text-white mb-4">Cleopatra's Necklace NFT Collection</h1>
-                    <p className="text-gray-300 mb-6">
-                        Deploy and mint unique Cleopatra's Necklace NFTs. Each NFT costs 10,000 DMC tokens.
-                        Make sure you have enough DMC tokens in your wallet before minting.
-                    </p>
+                    
                     {isConnected && connectedAccount ? (
-                        <NFTDeployment />
+                        <>
+                            <NFTDeployment />
+                            <OwnedNFTs walletAddress={connectedAccount} />
+                        </>
                     ) : (
                         <div className="bg-black/40 p-6 rounded-lg">
                             <p className="text-white text-center">
@@ -35,6 +37,8 @@ const DMCTokenDeployment = () => {
                             </p>
                         </div>
                     )}
+                    
+                    <CollectionInfo />
                 </div>
             </div>
         </div>
