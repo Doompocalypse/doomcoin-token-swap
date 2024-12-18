@@ -54,18 +54,21 @@ export type Database = {
       mock_purchases: {
         Row: {
           buyer_address: string
+          contract_address: string
           id: string
           nft_id: string
           purchase_date: string
         }
         Insert: {
           buyer_address: string
+          contract_address: string
           id?: string
           nft_id: string
           purchase_date?: string
         }
         Update: {
           buyer_address?: string
+          contract_address?: string
           id?: string
           nft_id?: string
           purchase_date?: string

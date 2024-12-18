@@ -66,9 +66,7 @@ const DMCTokenDeployment = () => {
                         <>
                             <NFTDeployment isMobile={isMobile} />
                             <OwnedNFTs walletAddress={connectedAccount} />
-                            <div className="mt-8">
-                                <TransactionHistory />
-                            </div>
+                            <TransactionHistory />
                         </>
                     ) : (
                         <div className="bg-black/40 p-6 rounded-lg">
