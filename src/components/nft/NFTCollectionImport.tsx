@@ -77,9 +77,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           To view your NFTs in MetaMask:
         </p>
         <ol className="list-decimal list-inside space-y-1 text-sm text-green-200">
-          <li>Click the button below to import the collection</li>
+          <li>Enter your Token ID below (the ID of the NFT you own)</li>
+          <li>Click "Import to MetaMask" to add your NFT</li>
           <li>Open MetaMask and go to the NFTs tab</li>
-          <li>Your NFTs from this collection will appear there</li>
+          <li>Your NFT will appear there</li>
         </ol>
         <div className="flex items-center gap-2">
           <input
