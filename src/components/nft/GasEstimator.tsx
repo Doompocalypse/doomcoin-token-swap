@@ -36,7 +36,7 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
                     console.log("Max fee per gas:", maxFeeInGwei, "Gwei");
                     setMaxFeePerGas(maxFeeInGwei);
                     
-                    // Increase gas limit by 20% for safety
+                    // Use the BigNumber gasLimit from GAS_CONFIG
                     const estimatedGasUnits = GAS_CONFIG.initial.gasLimit.mul(120).div(100);
                     console.log("Estimated gas units (with buffer):", estimatedGasUnits.toString());
                     
@@ -72,7 +72,7 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
                 Max fee per gas: {maxFeePerGas} Gwei
             </p>
             <p className="text-xs text-blue-300/80">
-                Gas limit: {GAS_CONFIG.initial.gasLimit.mul(120).div(100).toLocaleString()} units (includes 20% buffer)
+                Gas limit: {GAS_CONFIG.initial.gasLimit.toString()} units (includes 20% buffer)
             </p>
             <p className="text-xs text-yellow-300/80">
                 Note: Estimates include a 20% buffer to increase transaction success rate
