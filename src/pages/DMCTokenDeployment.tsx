@@ -8,6 +8,7 @@ import TransactionHistory from "@/components/nft/TransactionHistory";
 import NFTCollection from "@/components/nft/NFTCollection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
+import ContractInfo from "@/components/exchange/ContractInfo";
 import {
     DropdownMenu,
     DropdownMenuContent,
@@ -78,15 +79,23 @@ const DMCTokenDeployment = () => {
                 <div className="max-w-6xl mx-auto space-y-8">
                     {isConnected && connectedAccount ? (
                         <>
-                            <NFTDeployment 
-                                isMobile={isMobile} 
-                                onContractDeployed={handleContractDeployed}
-                            />
-                            {contractAddress && (
-                                <NFTCollection 
-                                    contractAddress={contractAddress}
-                                    walletAddress={connectedAccount}
+                            {!contractAddress && (
+                                <NFTDeployment 
+                                    isMobile={isMobile} 
+                                    onContractDeployed={handleContractDeployed}
                                 />
+                            )}
+                            {contractAddress && (
+                                <>
+                                    <ContractInfo 
+                                        contractAddress={contractAddress}
+                                        walletAddress={connectedAccount}
+                                    />
+                                    <NFTCollection 
+                                        contractAddress={contractAddress}
+                                        walletAddress={connectedAccount}
+                                    />
+                                </>
                             )}
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
