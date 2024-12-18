@@ -1,7 +1,9 @@
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { Copy, ExternalLink } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { ethers } from "ethers";
+import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
 
 interface NFTCollectionImportProps {
   contractAddress: string;
@@ -9,13 +11,50 @@ interface NFTCollectionImportProps {
 
 const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
   const { toast } = useToast();
-  const [tokenId, setTokenId] = useState("1"); // Default to token ID 1
+  const [tokenId, setTokenId] = useState("1");
+  const [totalSupply, setTotalSupply] = useState<number>(0);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchTotalSupply = async () => {
+      if (!window.ethereum) return;
+      
+      try {
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const contract = new ethers.Contract(
+          contractAddress,
+          CleopatraNFTContract.abi,
+          provider
+        );
+        
+        const supply = await contract.totalSupply();
+        console.log("Total NFT supply:", supply.toString());
+        setTotalSupply(supply.toNumber());
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching total supply:", error);
+        setIsLoading(false);
+      }
+    };
+
+    fetchTotalSupply();
+  }, [contractAddress]);
 
   const handleImportToMetaMask = async () => {
     if (!window.ethereum) {
       toast({
         title: "MetaMask Required",
         description: "Please install MetaMask to import the NFT collection.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const tokenIdNum = parseInt(tokenId);
+    if (isNaN(tokenIdNum) || tokenIdNum < 1 || tokenIdNum > totalSupply) {
+      toast({
+        title: "Invalid Token ID",
+        description: `Please enter a valid token ID between 1 and ${totalSupply}`,
         variant: "destructive",
       });
       return;
@@ -34,8 +73,6 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           options: {
             address: contractAddress,
             tokenId: tokenId,
-            name: "Cleopatra's Necklace",
-            symbol: "CLEO"
           },
         }],
       });
@@ -43,7 +80,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       if (wasAdded) {
         toast({
           title: "Success",
-          description: "NFT Collection added to MetaMask",
+          description: "NFT added to MetaMask",
         });
       } else {
         toast({
@@ -55,7 +92,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       console.error("Error importing NFT collection:", error);
       toast({
         title: "Import Failed",
-        description: "Failed to import NFT collection to MetaMask",
+        description: "Failed to import NFT to MetaMask",
         variant: "destructive",
       });
     }
@@ -73,32 +110,43 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     <div className="mt-4 p-4 bg-green-900/20 rounded-lg space-y-4">
       <h3 className="text-lg font-semibold text-green-400">View Your NFTs</h3>
       <div className="space-y-2">
-        <p className="text-green-300 text-sm">
-          To view your NFTs in MetaMask:
-        </p>
-        <ol className="list-decimal list-inside space-y-1 text-sm text-green-200">
-          <li>Enter your Token ID below (the ID of the NFT you own)</li>
-          <li>Click "Import to MetaMask" to add your NFT</li>
-          <li>Open MetaMask and go to the NFTs tab</li>
-          <li>Your NFT will appear there</li>
-        </ol>
-        <div className="flex items-center gap-2">
-          <input
-            type="number"
-            value={tokenId}
-            onChange={(e) => setTokenId(e.target.value)}
-            className="w-24 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
-            placeholder="Token ID"
-            min="1"
-          />
-          <span className="text-sm text-green-300">← Enter your Token ID</span>
-        </div>
+        {isLoading ? (
+          <p className="text-green-300 text-sm">Loading available NFTs...</p>
+        ) : (
+          <>
+            <p className="text-green-300 text-sm">
+              Available NFTs: {totalSupply} tokens minted
+            </p>
+            <p className="text-green-300 text-sm">
+              To view your NFTs in MetaMask:
+            </p>
+            <ol className="list-decimal list-inside space-y-1 text-sm text-green-200">
+              <li>Enter your Token ID below (between 1 and {totalSupply})</li>
+              <li>Click "Import to MetaMask" to add your NFT</li>
+              <li>Open MetaMask and go to the NFTs tab</li>
+              <li>Your NFT will appear there</li>
+            </ol>
+            <div className="flex items-center gap-2">
+              <input
+                type="number"
+                value={tokenId}
+                onChange={(e) => setTokenId(e.target.value)}
+                className="w-24 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
+                placeholder="Token ID"
+                min="1"
+                max={totalSupply}
+              />
+              <span className="text-sm text-green-300">← Enter your Token ID</span>
+            </div>
+          </>
+        )}
       </div>
       <div className="flex flex-col sm:flex-row gap-2">
         <Button
           onClick={handleImportToMetaMask}
           className="text-green-400 border-green-400 hover:bg-green-400/20"
           variant="outline"
+          disabled={isLoading}
         >
           Import to MetaMask
         </Button>
