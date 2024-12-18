@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { Button } from "@/components/ui/button";
 import { ExternalLink, RefreshCw } from "lucide-react";
-import { verifyContractDeployment } from "@/utils/contractVerification";
+import { verifyContractDeployment, verifyContractBytecode } from "@/utils/contractVerification";
 import { useToast } from "@/components/ui/use-toast";
 
 interface DeploymentVerificationProps {
@@ -13,6 +13,7 @@ interface DeploymentVerificationProps {
 const DeploymentVerification = ({ contractAddress, transactionHash }: DeploymentVerificationProps) => {
   const [isVerifying, setIsVerifying] = useState(false);
   const [isVerified, setIsVerified] = useState(false);
+  const [bytecodeValid, setBytecodeValid] = useState(false);
   const { toast } = useToast();
 
   const verifyContract = async () => {
@@ -28,6 +29,17 @@ const DeploymentVerification = ({ contractAddress, transactionHash }: Deployment
     setIsVerifying(true);
     try {
       const provider = new ethers.providers.Web3Provider(window.ethereum);
+      
+      // First verify the bytecode
+      const isValidBytecode = await verifyContractBytecode(contractAddress, provider);
+      setBytecodeValid(isValidBytecode);
+      
+      if (!isValidBytecode) {
+        console.error("Contract bytecode verification failed");
+        return;
+      }
+
+      // Then verify the deployment and functionality
       const verified = await verifyContractDeployment(contractAddress, provider);
       setIsVerified(verified);
       
@@ -39,6 +51,11 @@ const DeploymentVerification = ({ contractAddress, transactionHash }: Deployment
       }
     } catch (error) {
       console.error("Verification error:", error);
+      toast({
+        title: "Verification Failed",
+        description: "The contract verification failed. The contract might be invalid.",
+        variant: "destructive",
+      });
     } finally {
       setIsVerifying(false);
     }
@@ -73,10 +90,16 @@ const DeploymentVerification = ({ contractAddress, transactionHash }: Deployment
       </div>
       
       <div className="flex flex-col gap-2">
+        {!bytecodeValid && (
+          <p className="text-red-400">
+            ⚠️ Contract bytecode verification failed - The deployed contract code is invalid
+          </p>
+        )}
+        
         <p className={`${isVerified ? 'text-green-400' : 'text-yellow-400'}`}>
           {isVerified 
             ? "✓ Contract verified on blockchain" 
-            : "⚠️ Contract verification pending"}
+            : "⚠️ Contract verification pending or failed"}
         </p>
         
         <div className="flex gap-2">
