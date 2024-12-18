@@ -32,27 +32,61 @@ export const isContractDeployed = async (
   }
 };
 
-export const verifyContractCode = async (
-  provider: ethers.providers.Provider,
-  contractAddress: string
+export const verifyContractDeployment = async (
+  contractAddress: string,
+  provider: ethers.providers.Provider
 ): Promise<boolean> => {
   try {
-    console.log("Verifying contract code at:", contractAddress);
+    console.log("Verifying contract deployment at:", contractAddress);
     
-    // Try to interact with the contract to verify its functionality
-    const contract = new ethers.Contract(
-      contractAddress,
-      CleopatraNFTContract.abi,
-      provider
-    );
-    
-    // Try to call a view function to verify the contract
-    await contract.tokenURI(1);
-    
-    console.log("Contract code verification successful - contract responds to function calls");
-    return true;
+    const isDeployed = await isContractDeployed(provider, contractAddress);
+    if (!isDeployed) {
+      toast({
+        title: "Contract Not Found",
+        description: "No contract was found at this address. The deployment might have failed.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Verify contract code
+    const isValid = await verifyContractBytecode(contractAddress, provider);
+    if (!isValid) {
+      toast({
+        title: "Invalid Contract",
+        description: "The deployed contract's bytecode doesn't match the expected code.",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Try to interact with the contract
+    try {
+      const contract = new ethers.Contract(
+        contractAddress,
+        CleopatraNFTContract.abi,
+        provider
+      );
+      
+      await contract.tokenURI(1);
+      console.log("Contract verification successful - contract responds to function calls");
+      return true;
+    } catch (error) {
+      console.error("Contract verification failed - invalid contract:", error);
+      toast({
+        title: "Invalid Contract",
+        description: "The contract at this address appears to be invalid or corrupted.",
+        variant: "destructive",
+      });
+      return false;
+    }
   } catch (error) {
-    console.error("Contract code verification failed:", error);
+    console.error("Error verifying contract:", error);
+    toast({
+      title: "Verification Error",
+      description: "Failed to verify contract deployment. The contract may be invalid.",
+      variant: "destructive",
+    });
     return false;
   }
 };

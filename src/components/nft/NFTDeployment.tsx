@@ -7,7 +7,7 @@ import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
-import { isContractDeployed, verifyContractCode } from "@/utils/contractVerification";
+import { isContractDeployed, verifyContractBytecode } from "@/utils/contractVerification";
 
 const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
 
@@ -32,7 +32,7 @@ const NFTDeployment = () => {
                 if (receipt && receipt.contractAddress) {
                     console.log("Found existing deployment at:", receipt.contractAddress);
                     const isDeployed = await isContractDeployed(provider, receipt.contractAddress);
-                    const isValid = await verifyContractCode(provider, receipt.contractAddress);
+                    const isValid = await verifyContractBytecode(provider, receipt.contractAddress);
                     
                     if (isDeployed && isValid) {
                         setIsAlreadyDeployed(true);
