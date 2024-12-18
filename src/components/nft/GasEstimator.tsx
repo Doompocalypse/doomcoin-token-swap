@@ -9,6 +9,7 @@ interface GasEstimatorProps {
 const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
     const [estimatedGas, setEstimatedGas] = useState<string>("");
     const [currentGasPrice, setCurrentGasPrice] = useState<string>("");
+    const [maxFeePerGas, setMaxFeePerGas] = useState<string>("");
 
     useEffect(() => {
         const estimateGas = async () => {
@@ -17,21 +18,29 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
                     console.log("Starting gas estimation for NFT deployment...");
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     const feeData = await provider.getFeeData();
-                    const gasPrice = feeData.gasPrice;
                     
-                    if (!gasPrice) {
-                        console.error("Could not get gas price");
-                        throw new Error("Could not get gas price");
+                    if (!feeData.gasPrice || !feeData.maxFeePerGas) {
+                        console.error("Could not get gas price data");
+                        throw new Error("Could not get gas price data");
                     }
                     
-                    const gasPriceInGwei = ethers.utils.formatUnits(gasPrice, "gwei");
-                    console.log("Current gas price:", gasPriceInGwei, "Gwei");
+                    // Add 20% buffer to gas price for higher likelihood of success
+                    const adjustedGasPrice = feeData.gasPrice.mul(120).div(100);
+                    const gasPriceInGwei = ethers.utils.formatUnits(adjustedGasPrice, "gwei");
+                    console.log("Adjusted gas price:", gasPriceInGwei, "Gwei");
                     setCurrentGasPrice(gasPriceInGwei);
                     
-                    const estimatedGasUnits = GAS_CONFIG.initial.gasLimit;
-                    console.log("Estimated gas units:", estimatedGasUnits.toString());
+                    // Set max fee per gas with buffer
+                    const adjustedMaxFee = feeData.maxFeePerGas.mul(120).div(100);
+                    const maxFeeInGwei = ethers.utils.formatUnits(adjustedMaxFee, "gwei");
+                    console.log("Max fee per gas:", maxFeeInGwei, "Gwei");
+                    setMaxFeePerGas(maxFeeInGwei);
                     
-                    const totalGasCost = gasPrice.mul(estimatedGasUnits);
+                    // Increase gas limit by 20% for safety
+                    const estimatedGasUnits = GAS_CONFIG.initial.gasLimit.mul(120).div(100);
+                    console.log("Estimated gas units (with buffer):", estimatedGasUnits.toString());
+                    
+                    const totalGasCost = adjustedGasPrice.mul(estimatedGasUnits);
                     console.log("Total gas cost (wei):", totalGasCost.toString());
                     
                     const gasCostInEth = ethers.utils.formatEther(totalGasCost);
@@ -46,6 +55,9 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
         };
 
         estimateGas();
+        // Refresh estimates every 30 seconds
+        const interval = setInterval(estimateGas, 30000);
+        return () => clearInterval(interval);
     }, [onEstimateComplete]);
 
     return (
@@ -56,8 +68,14 @@ const GasEstimator = ({ onEstimateComplete }: GasEstimatorProps) => {
             <p className="text-sm text-blue-300">
                 Current gas price: {currentGasPrice} Gwei
             </p>
+            <p className="text-sm text-blue-300">
+                Max fee per gas: {maxFeePerGas} Gwei
+            </p>
             <p className="text-xs text-blue-300/80">
-                Gas limit: {GAS_CONFIG.initial.gasLimit.toLocaleString()} units
+                Gas limit: {GAS_CONFIG.initial.gasLimit.mul(120).div(100).toLocaleString()} units (includes 20% buffer)
+            </p>
+            <p className="text-xs text-yellow-300/80">
+                Note: Estimates include a 20% buffer to increase transaction success rate
             </p>
         </div>
     );
