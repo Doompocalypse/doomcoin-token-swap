@@ -26,9 +26,9 @@ export const deployContract = async (signer: ethers.Signer) => {
         signer
     );
 
-    console.log("Deploying contract with higher gas limit...");
+    console.log("Deploying contract with optimized gas settings...");
     const contract = await factory.deploy({
-        gasLimit: 5000000  // Increased from 3000000 to 5000000
+        gasLimit: 1200000  // Using the optimized initial gas limit
     });
     
     console.log("Deployment transaction hash:", contract.deployTransaction.hash);
