@@ -19,7 +19,7 @@ interface Transaction {
 
 const TransactionHistory = () => {
   const { toast } = useToast();
-  const { data: transactions, isLoading } = useQuery({
+  const { data: transactions, isLoading, error } = useQuery({
     queryKey: ['nft-transactions'],
     queryFn: async () => {
       console.log('Fetching NFT transaction history');
@@ -41,6 +41,7 @@ const TransactionHistory = () => {
       console.log('Received transactions:', data);
       return data as Transaction[];
     },
+    refetchInterval: 5000, // Refetch every 5 seconds to catch new transactions
   });
 
   const copyAddress = (address: string) => {
@@ -53,6 +54,11 @@ const TransactionHistory = () => {
 
   if (isLoading) {
     return <div className="text-white">Loading transaction history...</div>;
+  }
+
+  if (error) {
+    console.error('Transaction history error:', error);
+    return <div className="text-red-500">Error loading transaction history: {error.message}</div>;
   }
 
   if (!transactions?.length) {
