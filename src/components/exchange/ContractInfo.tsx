@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 
-const ContractInfo = ({ contractAddress }: { contractAddress?: string }) => {
+const ContractInfo = ({ contractAddress, walletAddress }: { contractAddress?: string, walletAddress?: string }) => {
   const navigate = useNavigate();
 
   if (!contractAddress) {
@@ -18,6 +18,9 @@ const ContractInfo = ({ contractAddress }: { contractAddress?: string }) => {
       <div className="text-sm text-green-400 space-y-2">
         <h3 className="font-semibold">🎉 Contract Successfully Deployed!</h3>
         <p>Your contract is ready at: {contractAddress}</p>
+        {walletAddress && (
+          <p className="text-xs">Connected Wallet: {walletAddress}</p>
+        )}
       </div>
       
       <div className="space-y-2">

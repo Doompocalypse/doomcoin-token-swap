@@ -45,33 +45,30 @@ const OwnedNFTs = ({ walletAddress }: { walletAddress: string }) => {
         return <div className="text-white">Loading your NFTs...</div>;
     }
 
-    if (!ownedNFTs?.length) {
-        return (
-            <div className="bg-black/40 p-6 rounded-lg">
-                <h2 className="text-xl font-bold text-white mb-2">My NFTs</h2>
-                <p className="text-gray-300">You don't own any NFTs from this collection yet.</p>
-            </div>
-        );
-    }
-
     return (
         <div className="bg-black/40 p-6 rounded-lg">
-            <h2 className="text-xl font-bold text-white mb-4">My NFTs</h2>
-            <ScrollArea className="h-[400px]">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {ownedNFTs.map((nft) => (
-                        <Card key={nft.nft_id} className="bg-black/40 border-[#8E9196]/20">
-                            <VideoPlayer videoUrl={nft.video_url} />
-                            <div className="p-4">
-                                <h3 className="text-lg font-bold text-white mb-2">{nft.name}</h3>
-                                {nft.description && (
-                                    <p className="text-gray-300 text-sm">{nft.description}</p>
-                                )}
-                            </div>
-                        </Card>
-                    ))}
-                </div>
-            </ScrollArea>
+            <h2 className="text-xl font-bold text-white mb-2">My NFTs</h2>
+            <p className="text-gray-300 text-sm mb-4">Wallet Address: {walletAddress}</p>
+            
+            {!ownedNFTs?.length ? (
+                <p className="text-gray-300">You don't own any NFTs from this collection yet.</p>
+            ) : (
+                <ScrollArea className="h-[400px]">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {ownedNFTs.map((nft) => (
+                            <Card key={nft.nft_id} className="bg-black/40 border-[#8E9196]/20">
+                                <VideoPlayer videoUrl={nft.video_url} />
+                                <div className="p-4">
+                                    <h3 className="text-lg font-bold text-white mb-2">{nft.name}</h3>
+                                    {nft.description && (
+                                        <p className="text-gray-300 text-sm">{nft.description}</p>
+                                    )}
+                                </div>
+                            </Card>
+                        ))}
+                    </div>
+                </ScrollArea>
+            )}
         </div>
     );
 };
