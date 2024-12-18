@@ -5,6 +5,7 @@ import NFTDeployment from "@/components/nft/NFTDeployment";
 import CollectionInfo from "@/components/nft/CollectionInfo";
 import OwnedNFTs from "@/components/nft/OwnedNFTs";
 import TransactionHistory from "@/components/nft/TransactionHistory";
+import NFTCollection from "@/components/nft/NFTCollection";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import {
@@ -18,6 +19,7 @@ import { Menu } from "lucide-react";
 const DMCTokenDeployment = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [connectedAccount, setConnectedAccount] = useState<string>();
+    const [contractAddress, setContractAddress] = useState<string>();
     const isMobile = useIsMobile();
     const navigate = useNavigate();
 
@@ -25,6 +27,11 @@ const DMCTokenDeployment = () => {
         console.log("Wallet connection status:", connected, "Account:", account);
         setIsConnected(connected);
         setConnectedAccount(account);
+    };
+
+    const handleContractDeployed = (address: string) => {
+        console.log("Contract deployed at:", address);
+        setContractAddress(address);
     };
 
     return (
@@ -64,7 +71,8 @@ const DMCTokenDeployment = () => {
                 <div className="max-w-6xl mx-auto space-y-8">
                     {isConnected && connectedAccount ? (
                         <>
-                            <NFTDeployment isMobile={isMobile} />
+                            <NFTDeployment isMobile={isMobile} onContractDeployed={handleContractDeployed} />
+                            <NFTCollection contractAddress={contractAddress} walletAddress={connectedAccount} />
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
                         </>
