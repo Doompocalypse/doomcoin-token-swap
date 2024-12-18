@@ -8,6 +8,7 @@ import GasEstimator from "./GasEstimator";
 import DeploymentStatus from "./DeploymentStatus";
 import CollectionInfo from "./CollectionInfo";
 import { isContractDeployed, verifyContractBytecode } from "@/utils/contractVerification";
+import { handlePendingTransaction } from "@/utils/pendingTransactionHandler";
 
 const KNOWN_DEPLOYMENT = "0xce4cd90711fedba2634a794aebcacae15c6925b3cb46d60f4da1f476706722da";
 
@@ -21,6 +22,7 @@ const NFTDeployment = () => {
     const [isAlreadyDeployed, setIsAlreadyDeployed] = useState(false);
     const { toast } = useToast();
 
+    // Check for existing deployment
     useEffect(() => {
         const checkExistingDeployment = async () => {
             if (!window.ethereum) return;
@@ -32,7 +34,7 @@ const NFTDeployment = () => {
                 if (receipt && receipt.contractAddress) {
                     console.log("Found existing deployment at:", receipt.contractAddress);
                     const isDeployed = await isContractDeployed(provider, receipt.contractAddress);
-                    const isValid = await verifyContractBytecode(provider, receipt.contractAddress);
+                    const isValid = await verifyContractBytecode(receipt.contractAddress, provider);
                     
                     if (isDeployed && isValid) {
                         setIsAlreadyDeployed(true);
@@ -52,7 +54,7 @@ const NFTDeployment = () => {
         checkExistingDeployment();
     }, [toast]);
 
-    // Check for pending transactions on component mount
+    // Check for pending transactions
     useEffect(() => {
         const checkPendingTransactions = async () => {
             if (!window.ethereum) return;
@@ -68,7 +70,6 @@ const NFTDeployment = () => {
                 
                 if (nonce > latestNonce) {
                     console.log("Pending transaction detected");
-                    // Get the last pending transaction
                     const pendingTxs = await provider.send("eth_getBlockByNumber", ["pending", true]);
                     const userPendingTx = pendingTxs.transactions.find(
                         (tx: any) => tx.from.toLowerCase() === accounts[0].toLowerCase()
@@ -78,6 +79,27 @@ const NFTDeployment = () => {
                         console.log("Found pending transaction:", userPendingTx.hash);
                         setPendingTx(userPendingTx.hash);
                         setTransactionHash(userPendingTx.hash);
+                        
+                        // Monitor the pending transaction
+                        handlePendingTransaction(userPendingTx.hash, provider, {
+                            onSuccess: () => {
+                                setPendingTx("");
+                                setTransactionHash("");
+                                toast({
+                                    title: "Transaction Completed",
+                                    description: "The pending transaction has been confirmed.",
+                                });
+                            },
+                            onError: (error) => {
+                                console.error("Transaction failed:", error);
+                                setErrorMessage("Transaction failed: " + error.message);
+                                toast({
+                                    title: "Transaction Failed",
+                                    description: "The pending transaction has failed. You can try canceling it.",
+                                    variant: "destructive",
+                                });
+                            }
+                        });
                     }
                 }
             } catch (error) {
@@ -86,7 +108,12 @@ const NFTDeployment = () => {
         };
 
         checkPendingTransactions();
-    }, []);
+        
+        // Set up interval to check pending transactions
+        const interval = setInterval(checkPendingTransactions, 30000); // Check every 30 seconds
+        
+        return () => clearInterval(interval);
+    }, [toast]);
 
     const cancelPendingTransaction = async () => {
         if (!window.ethereum || !pendingTx) return;
@@ -102,6 +129,7 @@ const NFTDeployment = () => {
                 value: 0,
                 nonce: await provider.getTransactionCount(await signer.getAddress(), "pending"),
                 gasPrice: (await provider.getGasPrice()).mul(2), // Double the gas price
+                gasLimit: 21000, // Standard gas limit for ETH transfer
             });
             
             console.log("Cancellation transaction submitted:", tx.hash);
