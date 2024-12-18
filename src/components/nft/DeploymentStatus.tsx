@@ -16,7 +16,7 @@ const DeploymentStatus = ({
   transactionHash,
 }: DeploymentStatusProps) => {
   if (errorMessage) {
-    return <ErrorDisplay message={errorMessage} />;
+    return <ErrorDisplay errorMessage={errorMessage} />;
   }
 
   if (!contractAddress && !transactionHash) {
@@ -24,7 +24,13 @@ const DeploymentStatus = ({
   }
 
   if (!contractAddress && transactionHash) {
-    return <TransactionDetails transactionHash={transactionHash} />;
+    return (
+      <TransactionDetails 
+        transactionHash={transactionHash}
+        status="Pending"
+        confirmations={0}
+      />
+    );
   }
 
   return <ContractDetails contractAddress={contractAddress} transactionHash={transactionHash} />;

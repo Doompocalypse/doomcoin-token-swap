@@ -3,7 +3,7 @@ import { Copy } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 
 interface ErrorDisplayProps {
-    errorMessage: string;
+    errorMessage: string;  // Changed from 'message' to 'errorMessage' to match usage
 }
 
 const ErrorDisplay = ({ errorMessage }: ErrorDisplayProps) => {
