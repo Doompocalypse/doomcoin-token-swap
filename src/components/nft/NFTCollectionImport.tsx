@@ -1,9 +1,10 @@
-import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Copy, ExternalLink } from "lucide-react";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
+import TokenIdInput from "./components/TokenIdInput";
+import ImportActions from "./components/ImportActions";
+import SupplyInfo from "./components/SupplyInfo";
 
 interface NFTCollectionImportProps {
   contractAddress: string;
@@ -123,70 +124,21 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     <div className="mt-4 p-4 bg-green-900/20 rounded-lg space-y-4">
       <h3 className="text-lg font-semibold text-green-400">View Your NFTs</h3>
       <div className="space-y-2">
-        {isLoading ? (
-          <p className="text-green-300 text-sm">Loading available NFTs...</p>
-        ) : totalSupply === 0 ? (
-          <p className="text-green-300 text-sm">
-            No NFTs have been minted yet in this collection. Mint an NFT first to view it in MetaMask.
-          </p>
-        ) : (
-          <>
-            <p className="text-green-300 text-sm">
-              Available NFTs: {totalSupply} tokens minted
-            </p>
-            <p className="text-green-300 text-sm">
-              To view your NFTs in MetaMask:
-            </p>
-            <ol className="list-decimal list-inside space-y-1 text-sm text-green-200">
-              <li>Enter your Token ID below</li>
-              <li>Click "Import to MetaMask" to add your NFT</li>
-              <li>Open MetaMask and go to the NFTs tab</li>
-              <li>Your NFT will appear there</li>
-            </ol>
-            <div className="flex items-center gap-2">
-              <input
-                type="text"
-                value={tokenId}
-                onChange={(e) => setTokenId(e.target.value.toUpperCase())}
-                className="w-20 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
-                placeholder="01A"
-                maxLength={3}
-                pattern="\d{2}[AB]"
-                disabled={totalSupply === 0}
-              />
-              <span className="text-sm text-green-300">← Enter your Token ID (01A for Tier NFTs, 01B for Collection NFTs)</span>
-            </div>
-          </>
+        <SupplyInfo isLoading={isLoading} totalSupply={totalSupply} />
+        {!isLoading && totalSupply > 0 && (
+          <TokenIdInput
+            tokenId={tokenId}
+            onChange={setTokenId}
+            disabled={totalSupply === 0}
+          />
         )}
       </div>
-      <div className="flex flex-col sm:flex-row gap-2">
-        <Button
-          onClick={handleImportToMetaMask}
-          className="text-green-400 border-green-400 hover:bg-green-400/20"
-          variant="outline"
-          disabled={isLoading || totalSupply === 0}
-        >
-          Import to MetaMask
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={copyAddress}
-          className="text-green-400 border-green-400 hover:bg-green-400/20"
-        >
-          <Copy className="h-4 w-4 mr-2" />
-          Copy Contract Address
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => window.open(`https://sepolia.etherscan.io/address/${contractAddress}`, '_blank')}
-          className="text-green-400 border-green-400 hover:bg-green-400/20"
-        >
-          <ExternalLink className="h-4 w-4 mr-2" />
-          View on Etherscan
-        </Button>
-      </div>
+      <ImportActions
+        onImport={handleImportToMetaMask}
+        onCopy={copyAddress}
+        contractAddress={contractAddress}
+        disabled={isLoading || totalSupply === 0}
+      />
     </div>
   );
 };
