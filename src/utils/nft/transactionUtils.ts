@@ -2,6 +2,7 @@ import { ethers } from "ethers";
 
 export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
   console.log("Looking for Transfer event in receipt. All events:", receipt.events);
+  console.log("Raw logs:", receipt.logs);
   
   // First try to find an event with the Transfer name
   const transferEvent = receipt.events?.find(event => event.event === 'Transfer');
@@ -29,7 +30,32 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
     if (log.topics[0] === transferTopic) {
       console.log("Found Transfer event in raw logs:", log);
       const baseEvent = receipt.events![0]; // Use first event as base for methods
-      const tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
+      
+      // Parse the tokenId from the topics
+      let tokenId;
+      try {
+        // The tokenId should be in the last topic for a Transfer event
+        tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
+        console.log("Parsed token ID from topics:", tokenId?.toString());
+      } catch (error) {
+        console.error("Error parsing token ID from topics:", error);
+        // Try parsing from data if not in topics
+        try {
+          const iface = new ethers.utils.Interface([
+            "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
+          ]);
+          const parsed = iface.parseLog(log);
+          tokenId = parsed.args.tokenId;
+          console.log("Parsed token ID from data:", tokenId?.toString());
+        } catch (parseError) {
+          console.error("Error parsing token ID from data:", parseError);
+        }
+      }
+      
+      if (!tokenId) {
+        console.error("Could not parse token ID from event");
+        continue;
+      }
       
       // Create a proper Result object for args
       const args = Object.assign([] as unknown as ethers.utils.Result, {
@@ -87,5 +113,6 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
     }
   }
 
+  console.log("Transfer event validation successful. Token ID:", transferEvent.args?.tokenId?.toString());
   return transferEvent;
 };
