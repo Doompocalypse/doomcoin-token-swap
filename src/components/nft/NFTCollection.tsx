@@ -72,6 +72,8 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
     );
   }
 
+  const canMintCompleteSet = totalSupply === 6;
+
   return (
     <div className="p-4 bg-black/20 rounded-lg space-y-4">
       <h2 className="text-xl font-bold text-white">Cleopatra's Necklace NFT Collection</h2>
@@ -97,20 +99,42 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
               </div>
             ))}
           </div>
+          <div className={`mt-4 p-2 rounded-lg text-center ${
+            canMintCompleteSet ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'
+          }`}>
+            #7 - Complete Set
+            <div className="text-xs">
+              {canMintCompleteSet ? 'Available to Mint' : 'Unlock by minting pieces 1-6'}
+            </div>
+          </div>
           <p className="text-sm text-gray-400 mt-2">
             {totalSupply}/6 pieces minted
-            {totalSupply === 6 && " - Only complete set (Token #7) remains"}
+            {canMintCompleteSet && " - Complete set (Token #7) is now available!"}
           </p>
         </div>
       </div>
       
-      <Button 
-        onClick={handleMint}
-        className="w-full bg-white text-black hover:bg-white/90"
-        disabled={totalSupply >= 6}
-      >
-        {totalSupply >= 6 ? "Individual Pieces Sold Out" : "Mint NFT"}
-      </Button>
+      {canMintCompleteSet ? (
+        <div className="space-y-4">
+          <Button 
+            onClick={handleMint}
+            className="w-full bg-purple-500 text-white hover:bg-purple-600"
+          >
+            Mint Complete Set (Token #7)
+          </Button>
+          <p className="text-sm text-purple-400 text-center">
+            All individual pieces have been minted. You can now mint the complete set (Token #7)!
+          </p>
+        </div>
+      ) : (
+        <Button 
+          onClick={handleMint}
+          className="w-full bg-white text-black hover:bg-white/90"
+          disabled={totalSupply >= 6}
+        >
+          {totalSupply >= 6 ? "Individual Pieces Sold Out" : "Mint NFT"}
+        </Button>
+      )}
       
       <NFTCollectionImport contractAddress={effectiveContractAddress} />
     </div>
