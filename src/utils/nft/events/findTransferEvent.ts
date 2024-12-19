@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { CustomTransferEvent } from "../types/eventTypes";
+import { CustomTransferEvent, TransferEventResult } from "../types/eventTypes";
 
 export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransferEvent[] => {
   console.log("Looking for Transfer events in receipt:", receipt);
