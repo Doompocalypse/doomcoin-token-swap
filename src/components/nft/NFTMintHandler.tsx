@@ -37,36 +37,85 @@ export const useNFTMintHandler = (walletAddress?: string, contractAddress?: stri
       const receipt = await tx.wait();
       console.log("Mint transaction confirmed:", receipt);
 
-      // Get the token ID from the mint event
-      const mintEvent = receipt.events?.find(
-        (event: any) => event.event === "Transfer" && 
-        event.args.from === ethers.constants.AddressZero
-      );
+      // Look for Transfer event in all events
+      const transferEvent = receipt.events?.find(event => {
+        console.log("Checking event:", event);
+        return (
+          event.event === "Transfer" &&
+          event.args &&
+          event.args.from &&
+          event.args.from === ethers.constants.AddressZero
+        );
+      });
 
-      if (!mintEvent) {
-        throw new Error("Could not find mint event in transaction");
+      // If no Transfer event found, try parsing logs manually
+      if (!transferEvent) {
+        console.log("No Transfer event found in events, checking logs...");
+        const transferTopic = ethers.utils.id("Transfer(address,address,uint256)");
+        const log = receipt.logs.find(log => log.topics[0] === transferTopic);
+        
+        if (!log) {
+          console.error("No Transfer log found in transaction");
+          throw new Error("Could not find mint event in transaction. Please check the transaction on Etherscan for details.");
+        }
+
+        // Parse the log manually
+        const iface = new ethers.utils.Interface(CleopatraNFTContract.abi);
+        const parsedLog = iface.parseLog(log);
+        console.log("Parsed transfer log:", parsedLog);
+        
+        if (!parsedLog.args.tokenId) {
+          throw new Error("Could not find token ID in transaction logs");
+        }
+
+        const tokenId = parsedLog.args.tokenId.toString();
+        console.log("Token ID from parsed log:", tokenId);
+
+        // Generate a UUID for Supabase storage
+        const uuid = crypto.randomUUID();
+        console.log("Generated UUID for storage:", uuid);
+
+        // Record the mint in Supabase
+        const { error: dbError } = await supabase
+          .from('mock_purchases')
+          .insert([{ 
+            id: uuid,
+            nft_id: uuid,
+            buyer_address: walletAddress,
+            contract_address: contractAddress
+          }]);
+
+        if (dbError) {
+          console.error('Error recording mint:', dbError);
+        }
+
+        toast({
+          title: "Success",
+          description: `Successfully minted NFT with ID: ${tokenId}`,
+        });
+
+        return tokenId;
       }
 
-      const tokenId = mintEvent.args.tokenId.toString();
+      const tokenId = transferEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
       // Generate a UUID for Supabase storage
       const uuid = crypto.randomUUID();
       console.log("Generated UUID for storage:", uuid);
 
-      // Record the mint in Supabase using the generated UUID
+      // Record the mint in Supabase
       const { error: dbError } = await supabase
         .from('mock_purchases')
         .insert([{ 
-          id: uuid,  // Use the generated UUID as the primary key
-          nft_id: uuid,  // Use the same UUID for nft_id
+          id: uuid,
+          nft_id: uuid,
           buyer_address: walletAddress,
           contract_address: contractAddress
         }]);
 
       if (dbError) {
         console.error('Error recording mint:', dbError);
-        // Don't throw here as the NFT was successfully minted
       }
 
       toast({
