@@ -3,6 +3,28 @@ import { ethers } from "ethers";
 import { useNFTStorage } from "@/hooks/nft/useNFTStorage";
 import { useNFTContract } from "@/hooks/nft/useNFTContract";
 import { findTransferEvent, validateTransferEvent } from "@/utils/nft/transactionUtils";
+import { Button } from "@/components/ui/button";
+import { Copy } from "lucide-react";
+
+const ToastWithCopy = ({ message }: { message: string }) => {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message);
+  };
+
+  return (
+    <div className="flex items-start justify-between gap-2">
+      <p className="break-all select-text">{message}</p>
+      <Button 
+        variant="outline" 
+        size="icon"
+        onClick={handleCopy}
+        className="h-6 w-6 shrink-0"
+      >
+        <Copy className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
 
 export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: string) => {
   const { toast } = useToast();
@@ -79,7 +101,7 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       if (error.code === "ACTION_REJECTED") {
         toast({
           title: "Transaction Cancelled",
-          description: "You cancelled the transaction. No NFT was minted.",
+          description: <ToastWithCopy message="You cancelled the transaction. No NFT was minted." />,
           variant: "destructive",
         });
         return;
@@ -88,7 +110,7 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       // Handle other errors
       toast({
         title: "Minting Failed",
-        description: error.message || "Failed to mint NFT. Please try again.",
+        description: <ToastWithCopy message={error.message || "Failed to mint NFT. Please try again."} />,
         variant: "destructive",
       });
       throw error;
