@@ -1,4 +1,4 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { useState, useEffect } from "react";
 import { ethers } from "ethers";
 import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
@@ -59,11 +59,27 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       const accounts = await provider.listAccounts();
       if (!accounts[0]) throw new Error("No wallet connected");
       
-      const owner = await contract.ownerOf(tokenId);
-      console.log("NFT owner:", owner);
-      console.log("Current account:", accounts[0]);
+      // First check if the token exists
+      try {
+        await contract.ownerOf(tokenId);
+      } catch (error) {
+        console.error("Token does not exist:", error);
+        return false;
+      }
       
-      return owner.toLowerCase() === accounts[0].toLowerCase();
+      // Then verify ownership
+      const owner = await contract.ownerOf(tokenId);
+      const currentAccount = accounts[0].toLowerCase();
+      const tokenOwner = owner.toLowerCase();
+      
+      console.log("NFT ownership check:", {
+        tokenId,
+        owner: tokenOwner,
+        currentAccount,
+        isOwner: tokenOwner === currentAccount
+      });
+      
+      return tokenOwner === currentAccount;
     } catch (error) {
       console.error("Error verifying ownership:", error);
       return false;
@@ -80,19 +96,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    if (totalSupply === 0) {
-      toast({
-        title: "No NFTs Available",
-        description: "There are no NFTs minted yet in this collection.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     if (!tokenId || isNaN(Number(tokenId)) || Number(tokenId) <= 0) {
       toast({
         title: "Invalid Token ID",
-        description: "Please enter a valid numeric Token ID",
+        description: "Please enter a valid Token ID number",
         variant: "destructive",
       });
       return;
@@ -119,13 +126,13 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       
       const wasAdded = await window.ethereum.request({
         method: 'wallet_watchAsset',
-        params: [{
+        params: {
           type: 'ERC721',
           options: {
             address: contractAddress,
             tokenId: tokenId,
           },
-        }],
+        },
       });
 
       if (wasAdded) {
