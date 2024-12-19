@@ -13,16 +13,21 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [error, setError] = useState<string>("");
   const { toast } = useToast();
-  const { contract } = useNFTContract(contractAddress);
+  const { getContract } = useNFTContract();
 
   const fetchTotalSupply = async () => {
-    if (!contract || !contractAddress) {
-      console.log("No contract available for total supply check");
+    if (!contractAddress || !window.ethereum) {
+      console.log("No contract address or ethereum provider available");
       return;
     }
 
     try {
-      console.log("Fetching total supply...");
+      console.log("Fetching total supply for contract:", contractAddress);
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+      const contract = getContract(contractAddress, signer);
+
+      console.log("Calling totalSupply on contract...");
       const supply = await contract.totalSupply();
       console.log("Total supply fetched:", supply.toString());
       setTotalSupply(supply.toNumber());
@@ -49,7 +54,7 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
     if (contractAddress) {
       fetchTotalSupply();
     }
-  }, [contractAddress, contract]);
+  }, [contractAddress]);
 
   if (error) {
     return <ErrorDisplay errorMessage={error} />;
@@ -67,11 +72,15 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
 
   return (
     <div className="p-4 bg-black/20 rounded-lg space-y-4">
-      <h2 className="text-xl font-bold">NFT Collection</h2>
+      <h2 className="text-xl font-bold text-white">NFT Collection</h2>
       <div className="grid gap-4">
         <div className="flex justify-between items-center p-3 bg-black/40 rounded">
-          <span>Total Supply</span>
-          <span>{totalSupply}</span>
+          <span className="text-gray-300">Total Supply</span>
+          <span className="text-white font-medium">{totalSupply} NFTs</span>
+        </div>
+        <div className="text-sm text-gray-400">
+          <p>• Individual Pieces (1-6): {Math.min(totalSupply, 6)} / 6 minted</p>
+          <p>• Complete Set: {totalSupply > 6 ? "1" : "0"} / 1 available</p>
         </div>
       </div>
     </div>
