@@ -24,7 +24,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       provider
     );
 
-    // Verify ERC721 interface support
+    // First verify ERC721 interface support
     const isERC721 = await contract.supportsInterface('0x80ac58cd');
     console.log("Contract ERC721 support:", isERC721);
     
@@ -38,35 +38,68 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       return false;
     }
 
-    // Get token URI to verify token exists and get metadata
-    try {
-      const tokenURI = await contract.tokenURI(tokenId);
-      console.log("Token URI verified:", tokenURI);
-    } catch (error) {
-      console.error("Token URI verification failed:", error);
+    // Get current connected account
+    const accounts = await provider.listAccounts();
+    if (!accounts[0]) {
+      console.error("No wallet connected");
       toast({
         title: "Import Failed",
-        description: "This token ID does not exist",
+        description: "No wallet connected",
         variant: "destructive",
       });
       return false;
     }
 
-    console.log("Requesting NFT import to MetaMask...");
+    // Verify token ownership
+    try {
+      const owner = await contract.ownerOf(tokenId);
+      console.log("Token owner:", owner);
+      console.log("Current account:", accounts[0]);
+      
+      if (owner.toLowerCase() !== accounts[0].toLowerCase()) {
+        console.error("Token ownership verification failed");
+        toast({
+          title: "Import Failed",
+          description: "You don't own this NFT",
+          variant: "destructive",
+        });
+        return false;
+      }
+    } catch (error) {
+      console.error("Token ownership verification failed:", error);
+      toast({
+        title: "Import Failed",
+        description: "Failed to verify token ownership",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Get token metadata
+    const name = await contract.name();
+    const symbol = await contract.symbol();
+    const tokenURI = await contract.tokenURI(tokenId);
     
-    // MetaMask's wallet_watchAsset API for ERC721 tokens with complete parameters
+    console.log("NFT Metadata:", {
+      name,
+      symbol,
+      tokenURI,
+      tokenId
+    });
+
+    // Request MetaMask to watch the asset
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
-      params: [{
+      params: {
         type: 'ERC721',
         options: {
           address: contractAddress,
           tokenId: tokenId,
-          name: await contract.name(),
-          symbol: await contract.symbol(),
-          tokenURI: await contract.tokenURI(tokenId),
+          name: name,
+          symbol: symbol,
+          tokenURI: tokenURI
         },
-      }]
+      }
     });
 
     if (wasAdded) {
