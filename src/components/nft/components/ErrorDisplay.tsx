@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import CopyButton from "../components/CopyButton";
+import CopyButton from "./CopyButton";
 
 interface ErrorDisplayProps {
   errorMessage: string;
