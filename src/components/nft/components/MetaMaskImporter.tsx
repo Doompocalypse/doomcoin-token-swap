@@ -75,21 +75,20 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       return false;
     }
 
-    // Get token metadata
-    const name = await contract.name();
-    const symbol = await contract.symbol();
+    // Get token metadata URL
+    const tokenURI = await contract.tokenURI(tokenId);
+    console.log("Token URI:", tokenURI);
+
+    // Fetch metadata from our edge function
+    const response = await fetch(`${tokenURI}?tokenId=${tokenId}`);
+    if (!response.ok) {
+      throw new Error('Failed to fetch token metadata');
+    }
     
-    // Use a default image URL since we're working with video NFTs
-    const tokenImage = "https://placehold.co/600x400?text=NFT+Preview";
+    const metadata = await response.json();
+    console.log("Token metadata:", metadata);
 
-    console.log("NFT Metadata:", {
-      name,
-      symbol,
-      tokenId,
-      tokenImage
-    });
-
-    // Request MetaMask to watch the asset with proper params structure
+    // Request MetaMask to watch the asset
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: [{
@@ -97,7 +96,9 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
         options: {
           address: contractAddress,
           tokenId: tokenId,
-          image: tokenImage
+          image: metadata.image,
+          name: metadata.name,
+          description: metadata.description
         },
       }],
     });

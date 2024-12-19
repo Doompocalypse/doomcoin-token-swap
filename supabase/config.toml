@@ -1,4 +1,17 @@
 project_id = "ylzqjxfbtlkmlxdopita"
 
-[functions.process-eth-transaction]
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage"]
+
+[db]
+port = 54322
+
+[studio]
+enabled = true
+port = 54323
+
+[[functions]]
+name = "get-nft-metadata"
 verify_jwt = false
