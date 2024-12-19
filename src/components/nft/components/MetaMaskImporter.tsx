@@ -16,7 +16,6 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       tokenId
     });
 
-    // First verify the contract supports ERC721
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contract = new ethers.Contract(
       contractAddress,
@@ -54,7 +53,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
 
     console.log("Requesting NFT import to MetaMask...");
     
-    // Structure the request according to MetaMask's watchAsset API for ERC721
+    // MetaMask's wallet_watchAsset API expects a single params object
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: {
