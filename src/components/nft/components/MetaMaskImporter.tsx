@@ -53,16 +53,16 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
 
     console.log("Requesting NFT import to MetaMask...");
     
-    // MetaMask's wallet_watchAsset API expects a single params object
+    // MetaMask's wallet_watchAsset API for ERC721 tokens
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
-      params: {
+      params: [{
         type: 'ERC721',
         options: {
           address: contractAddress,
           tokenId: tokenId,
         },
-      },
+      }]
     });
 
     if (wasAdded) {
