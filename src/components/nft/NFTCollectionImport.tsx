@@ -5,6 +5,8 @@ import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
 import TokenIdInput from "./components/TokenIdInput";
 import ImportActions from "./components/ImportActions";
 import SupplyInfo from "./components/SupplyInfo";
+import NFTOwnershipVerifier from "./components/NFTOwnershipVerifier";
+import MetaMaskImporter from "./components/MetaMaskImporter";
 
 interface NFTCollectionImportProps {
   contractAddress: string;
@@ -47,45 +49,6 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     fetchTotalSupply();
   }, [contractAddress]);
 
-  const verifyOwnership = async (tokenId: string): Promise<boolean> => {
-    try {
-      const provider = new ethers.providers.Web3Provider(window.ethereum);
-      const contract = new ethers.Contract(
-        contractAddress,
-        CleopatraNFTContract.abi,
-        provider
-      );
-      
-      const accounts = await provider.listAccounts();
-      if (!accounts[0]) throw new Error("No wallet connected");
-      
-      // First check if the token exists
-      try {
-        await contract.ownerOf(tokenId);
-      } catch (error) {
-        console.error("Token does not exist:", error);
-        return false;
-      }
-      
-      // Then verify ownership
-      const owner = await contract.ownerOf(tokenId);
-      const currentAccount = accounts[0].toLowerCase();
-      const tokenOwner = owner.toLowerCase();
-      
-      console.log("NFT ownership check:", {
-        tokenId,
-        owner: tokenOwner,
-        currentAccount,
-        isOwner: tokenOwner === currentAccount
-      });
-      
-      return tokenOwner === currentAccount;
-    } catch (error) {
-      console.error("Error verifying ownership:", error);
-      return false;
-    }
-  };
-
   const handleImportToMetaMask = async () => {
     if (!window.ethereum) {
       toast({
@@ -108,7 +71,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     setIsChecking(true);
     try {
       console.log("Verifying NFT ownership before import...");
-      const isOwner = await verifyOwnership(tokenId);
+      const isOwner = await NFTOwnershipVerifier({ contractAddress, tokenId });
       
       if (!isOwner) {
         toast({
@@ -119,35 +82,9 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
         return;
       }
 
-      console.log("Requesting NFT import to MetaMask...", {
-        contractAddress,
-        tokenId
-      });
-      
-      const wasAdded = await window.ethereum.request({
-        method: 'wallet_watchAsset',
-        params: {
-          type: 'ERC721',
-          options: {
-            address: contractAddress,
-            tokenId: tokenId,
-          },
-        },
-      });
-
-      if (wasAdded) {
-        toast({
-          title: "Success",
-          description: "NFT added to MetaMask",
-        });
-      } else {
-        toast({
-          title: "Cancelled",
-          description: "User cancelled the import",
-        });
-      }
+      await MetaMaskImporter({ contractAddress, tokenId });
     } catch (error) {
-      console.error("Error importing NFT collection:", error);
+      console.error("Error in import process:", error);
       toast({
         title: "Import Failed",
         description: "Failed to import NFT to MetaMask. Please verify you own this NFT.",
