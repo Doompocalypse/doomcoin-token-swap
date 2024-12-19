@@ -25,11 +25,26 @@ export const useNFTMintHandler = (walletAddress?: string, contractAddress?: stri
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
       
+      // Get current total supply to determine which NFT will be minted next
       const contract = new ethers.Contract(
         contractAddress,
         CleopatraNFTContract.abi,
         signer
       );
+
+      const totalSupply = await contract.totalSupply();
+      const nextTokenId = totalSupply.toNumber() + 1;
+      console.log(`Next NFT to be minted will be Token ID: ${nextTokenId}`);
+
+      if (nextTokenId > 6) {
+        toast({
+          title: "Collection Limit Reached",
+          description: "All individual pieces (1-6) have been minted. Only the complete set (Token ID 7) remains.",
+          variant: "destructive",
+        });
+        setIsMinting(false);
+        return;
+      }
 
       console.log("Minting NFT...");
       const tx = await contract.mint();
