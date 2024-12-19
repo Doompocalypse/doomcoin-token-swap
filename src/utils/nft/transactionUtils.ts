@@ -5,7 +5,10 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
   console.log("Raw logs:", receipt.logs);
   
   // First try to find an event with the Transfer name
-  const transferEvent = receipt.events?.find(event => event.event === 'Transfer');
+  const transferEvent = receipt.events?.find(event => {
+    console.log("Checking event:", event);
+    return event.event === 'Transfer';
+  });
   
   if (transferEvent) {
     console.log("Found Transfer event by name:", transferEvent);
@@ -14,6 +17,8 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
   
   // If no named event found, look for an event with the Transfer topic
   const transferTopic = ethers.utils.id("Transfer(address,address,uint256)");
+  console.log("Looking for Transfer topic:", transferTopic);
+  
   const anonymousTransfer = receipt.events?.find(event => {
     console.log("Checking event topics:", event.topics);
     return event.topics && event.topics[0] === transferTopic;
@@ -29,26 +34,38 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
     console.log("Checking raw log:", log);
     if (log.topics[0] === transferTopic) {
       console.log("Found Transfer event in raw logs:", log);
-      const baseEvent = receipt.events![0]; // Use first event as base for methods
+      
+      // Ensure we have a base event to work with
+      const baseEvent = receipt.events?.[0];
+      if (!baseEvent) {
+        console.error("No base event found in receipt");
+        continue;
+      }
       
       // Parse the tokenId from the topics
       let tokenId;
       try {
         // The tokenId should be in the last topic for a Transfer event
-        tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
-        console.log("Parsed token ID from topics:", tokenId?.toString());
+        if (log.topics[3]) {
+          tokenId = ethers.BigNumber.from(log.topics[3]);
+          console.log("Successfully parsed token ID from topics:", tokenId.toString());
+        }
       } catch (error) {
         console.error("Error parsing token ID from topics:", error);
-        // Try parsing from data if not in topics
+      }
+      
+      // If tokenId not found in topics, try parsing from data
+      if (!tokenId) {
         try {
           const iface = new ethers.utils.Interface([
             "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
           ]);
           const parsed = iface.parseLog(log);
           tokenId = parsed.args.tokenId;
-          console.log("Parsed token ID from data:", tokenId?.toString());
+          console.log("Successfully parsed token ID from data:", tokenId.toString());
         } catch (parseError) {
           console.error("Error parsing token ID from data:", parseError);
+          continue;
         }
       }
       
@@ -57,10 +74,16 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
         continue;
       }
       
-      // Create a proper Result object for args
+      // Create a proper Result object for args that matches ethers.js requirements
       const args = Object.assign([] as unknown as ethers.utils.Result, {
         tokenId,
         __length__: 1,
+        length: 1,
+        // Add array methods required by Result type
+        slice: Array.prototype.slice,
+        concat: Array.prototype.concat,
+        join: Array.prototype.join,
+        toString: function() { return `[Result tokenId=${tokenId.toString()}]`; }
       });
       
       // Return a properly constructed Event object
@@ -86,6 +109,7 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
   }
 
   if (!transferEvent.args) {
+    console.error("Transfer event found but no args present:", transferEvent);
     try {
       const iface = new ethers.utils.Interface([
         "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
@@ -102,17 +126,26 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
       const args = Object.assign([] as unknown as ethers.utils.Result, {
         tokenId: decodedData.args.tokenId,
         __length__: 1,
+        length: 1,
+        // Add array methods required by Result type
+        slice: Array.prototype.slice,
+        concat: Array.prototype.concat,
+        join: Array.prototype.join,
+        toString: function() { return `[Result tokenId=${decodedData.args.tokenId.toString()}]`; }
       });
       
       transferEvent.args = args;
-      
-      return transferEvent;
     } catch (error) {
       console.error("Failed to decode Transfer event:", error);
       throw new Error(`Transaction succeeded but the token ID format was invalid. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: ${receipt.transactionHash}`);
     }
   }
 
-  console.log("Transfer event validation successful. Token ID:", transferEvent.args?.tokenId?.toString());
+  if (!transferEvent.args.tokenId) {
+    console.error("Transfer event has no token ID:", transferEvent);
+    throw new Error(`Transaction succeeded but token ID was undefined. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: ${receipt.transactionHash}`);
+  }
+
+  console.log("Transfer event validation successful. Token ID:", transferEvent.args.tokenId.toString());
   return transferEvent;
 };
