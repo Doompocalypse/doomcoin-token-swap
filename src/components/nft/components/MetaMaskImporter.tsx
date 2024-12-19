@@ -1,4 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
+import { ethers } from "ethers";
+import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
 
 interface MetaMaskImporterProps {
   contractAddress: string;
@@ -9,10 +11,48 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
   const { toast } = useToast();
 
   try {
-    console.log("Requesting NFT import to MetaMask...", {
+    console.log("Starting NFT import process...", {
       contractAddress,
       tokenId
     });
+
+    // First verify the contract supports ERC721
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    const contract = new ethers.Contract(
+      contractAddress,
+      CleopatraNFTContract.abi,
+      provider
+    );
+
+    // Verify ERC721 interface support
+    const isERC721 = await contract.supportsInterface('0x80ac58cd');
+    console.log("Contract ERC721 support:", isERC721);
+    
+    if (!isERC721) {
+      console.error("Contract does not support ERC721 interface");
+      toast({
+        title: "Import Failed",
+        description: "Contract does not support the ERC721 standard",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    // Get token URI to verify token exists
+    try {
+      const tokenURI = await contract.tokenURI(tokenId);
+      console.log("Token URI verified:", tokenURI);
+    } catch (error) {
+      console.error("Token URI verification failed:", error);
+      toast({
+        title: "Import Failed",
+        description: "This token ID does not exist",
+        variant: "destructive",
+      });
+      return false;
+    }
+
+    console.log("Requesting NFT import to MetaMask...");
     
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
@@ -44,7 +84,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     console.error("Error importing to MetaMask:", error);
     toast({
       title: "Import Failed",
-      description: "Failed to import NFT to MetaMask. Please verify you own this NFT.",
+      description: error.message || "Failed to import NFT to MetaMask",
       variant: "destructive",
     });
     return false;
