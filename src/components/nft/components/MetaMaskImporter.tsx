@@ -87,7 +87,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       tokenId
     });
 
-    // Request MetaMask to watch the asset
+    // Request MetaMask to watch the asset with proper params structure
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: [{
