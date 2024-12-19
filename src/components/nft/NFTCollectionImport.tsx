@@ -17,9 +17,13 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
 
   useEffect(() => {
     const fetchTotalSupply = async () => {
-      if (!window.ethereum) return;
+      if (!window.ethereum || !contractAddress) {
+        setIsLoading(false);
+        return;
+      }
       
       try {
+        console.log("Fetching total supply for contract:", contractAddress);
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const contract = new ethers.Contract(
           contractAddress,
@@ -28,8 +32,9 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
         );
         
         const supply = await contract.totalSupply();
-        console.log("Total NFT supply:", supply.toString());
-        setTotalSupply(supply.toNumber());
+        const supplyNumber = supply.toNumber();
+        console.log("Total NFT supply:", supplyNumber);
+        setTotalSupply(supplyNumber);
         setIsLoading(false);
       } catch (error) {
         console.error("Error fetching total supply:", error);
@@ -45,6 +50,16 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       toast({
         title: "MetaMask Required",
         description: "Please install MetaMask to import the NFT collection.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Only proceed if we have minted NFTs
+    if (totalSupply === 0) {
+      toast({
+        title: "No NFTs Available",
+        description: "There are no NFTs minted yet in this collection.",
         variant: "destructive",
       });
       return;
@@ -112,6 +127,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       <div className="space-y-2">
         {isLoading ? (
           <p className="text-green-300 text-sm">Loading available NFTs...</p>
+        ) : totalSupply === 0 ? (
+          <p className="text-green-300 text-sm">
+            No NFTs have been minted yet in this collection. Mint an NFT first to view it in MetaMask.
+          </p>
         ) : (
           <>
             <p className="text-green-300 text-sm">
@@ -135,6 +154,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
                 placeholder="Token ID"
                 min="1"
                 max={totalSupply}
+                disabled={totalSupply === 0}
               />
               <span className="text-sm text-green-300">← Enter your Token ID</span>
             </div>
@@ -146,7 +166,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           onClick={handleImportToMetaMask}
           className="text-green-400 border-green-400 hover:bg-green-400/20"
           variant="outline"
-          disabled={isLoading}
+          disabled={isLoading || totalSupply === 0}
         >
           Import to MetaMask
         </Button>
