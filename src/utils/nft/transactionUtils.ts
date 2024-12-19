@@ -28,14 +28,22 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
     console.log("Checking raw log:", log);
     if (log.topics[0] === transferTopic) {
       console.log("Found Transfer event in raw logs:", log);
-      // Convert the log to an Event object
-      return {
-        ...receipt.events![0], // Use the first event as base to get all Event interface methods
-        args: {
-          tokenId: log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined
-        },
-        ...log
-      };
+      const baseEvent = receipt.events![0]; // Use first event as base for methods
+      const tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
+      
+      // Create a proper Result object for args
+      const args = Object.assign([] as unknown as ethers.utils.Result, {
+        tokenId,
+        __length__: 1,
+      });
+      
+      // Return a properly constructed Event object
+      return Object.assign(baseEvent, {
+        ...log,
+        args,
+        event: 'Transfer',
+        eventSignature: 'Transfer(address,address,uint256)',
+      });
     }
   }
   
@@ -52,7 +60,6 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
   }
 
   if (!transferEvent.args) {
-    // Try to decode the event data if it's anonymous
     try {
       const iface = new ethers.utils.Interface([
         "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
@@ -65,10 +72,13 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
       
       console.log("Successfully decoded anonymous Transfer event:", decodedData);
       
-      // Update the event with decoded args while preserving the Event interface
-      transferEvent.args = {
-        tokenId: decodedData.args.tokenId
-      };
+      // Create a proper Result object for args
+      const args = Object.assign([] as unknown as ethers.utils.Result, {
+        tokenId: decodedData.args.tokenId,
+        __length__: 1,
+      });
+      
+      transferEvent.args = args;
       
       return transferEvent;
     } catch (error) {
@@ -77,6 +87,5 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
     }
   }
 
-  console.log("Transfer event validation successful. Token ID:", transferEvent.args?.tokenId?.toString());
   return transferEvent;
 };
