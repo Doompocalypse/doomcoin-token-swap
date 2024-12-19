@@ -1,6 +1,7 @@
 import { ethers } from "ethers";
 import { verifyDeployerBalance, logDeploymentParams } from "./utils/contractVerification";
 import { createAndDeployContract, handleDeploymentReceipt } from "./utils/deploymentHandler";
+import CleopatraNFTContract from "../contracts/CleopatraNecklaceNFT.json";
 
 export const deployCleopatraNFT = async (signer: ethers.Signer) => {
     try {
@@ -14,7 +15,15 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         await verifyDeployerBalance(signer);
         await logDeploymentParams(signer);
 
-        const contract = await createAndDeployContract(signer);
+        // Create contract factory with the updated ABI
+        const factory = new ethers.ContractFactory(
+            CleopatraNFTContract.abi,
+            CleopatraNFTContract.bytecode,
+            signer
+        );
+
+        console.log("Deploying contract with updated ABI...");
+        const contract = await factory.deploy();
         console.log("Transaction hash:", contract.deployTransaction.hash);
         
         console.log("\nWaiting for deployment confirmation...");
@@ -22,6 +31,17 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
         
         handleDeploymentReceipt(receipt);
         console.log("Contract deployed to:", contract.address);
+        
+        // Verify the contract works by calling basic functions
+        const name = await contract.name();
+        const symbol = await contract.symbol();
+        const totalSupply = await contract.totalSupply();
+        
+        console.log("Contract verification:", {
+            name,
+            symbol,
+            totalSupply: totalSupply.toString()
+        });
         
         return contract;
     } catch (error: any) {
@@ -37,25 +57,6 @@ export const deployCleopatraNFT = async (signer: ethers.Signer) => {
 
         if (error.message.includes("constructor")) {
             console.error("Contract initialization error. Check constructor parameters.");
-        }
-        
-        if (error.transaction) {
-            console.error("Failed transaction details:", {
-                from: error.transaction.from,
-                to: error.transaction.to,
-                data: error.transaction.data?.slice(0, 100) + "...",
-                gasLimit: error.transaction.gasLimit?.toString(),
-                value: error.transaction.value?.toString()
-            });
-        }
-        
-        if (error.receipt) {
-            console.error("Transaction receipt:", {
-                status: error.receipt.status,
-                gasUsed: error.receipt.gasUsed?.toString(),
-                blockNumber: error.receipt.blockNumber,
-                transactionHash: error.receipt.transactionHash
-            });
         }
         
         throw new Error(`Contract deployment failed: ${error.message}`);
