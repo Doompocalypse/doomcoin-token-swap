@@ -64,10 +64,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    if (!/^\d{2}[A-Z]$/.test(tokenId)) {
+    if (!/^\d{2}[AB]$/.test(tokenId)) {
       toast({
         title: "Invalid Token ID",
-        description: "Please enter a valid token ID (2 numbers followed by 1 letter, e.g. 01A)",
+        description: "Please enter a valid token ID (2 numbers followed by A for Tier NFTs or B for Collection NFTs, e.g. 01A or 02B)",
         variant: "destructive",
       });
       return;
@@ -151,10 +151,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
                 className="w-20 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
                 placeholder="01A"
                 maxLength={3}
-                pattern="\d{2}[A-Z]"
+                pattern="\d{2}[AB]"
                 disabled={totalSupply === 0}
               />
-              <span className="text-sm text-green-300">← Enter your Token ID (e.g. 01A)</span>
+              <span className="text-sm text-green-300">← Enter your Token ID (01A for Tier NFTs, 01B for Collection NFTs)</span>
             </div>
           </>
         )}

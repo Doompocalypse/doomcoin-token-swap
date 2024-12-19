@@ -1,8 +1,6 @@
-const LETTERS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-
-export const generateAlphanumericId = (length: number = 2): string => {
+export const generateAlphanumericId = (isTier: boolean = false): string => {
   const number = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-  const letter = LETTERS.charAt(Math.floor(Math.random() * LETTERS.length));
+  const letter = isTier ? 'A' : 'B';
   return `${number}${letter}`;
 };
 
