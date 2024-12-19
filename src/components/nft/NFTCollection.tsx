@@ -3,6 +3,7 @@ import { ethers } from 'ethers';
 import { useToast } from "@/components/ui/use-toast";
 import ErrorDisplay from './components/ErrorDisplay';
 import { useNFTContract } from '@/hooks/nft/useNFTContract';
+import { verifyContractDeployment } from '@/utils/contractVerification';
 
 interface NFTCollectionProps {
   contractAddress?: string;
@@ -12,6 +13,7 @@ interface NFTCollectionProps {
 const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) => {
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [error, setError] = useState<string>("");
+  const [isVerifying, setIsVerifying] = useState(false);
   const { toast } = useToast();
   const { getContract } = useNFTContract();
 
@@ -21,32 +23,48 @@ const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) =
       return;
     }
 
+    setIsVerifying(true);
+    setError("");
+
     try {
-      console.log("Fetching total supply for contract:", contractAddress);
+      console.log("Verifying contract at address:", contractAddress);
       const provider = new ethers.providers.Web3Provider(window.ethereum);
+      
+      // First verify the contract is deployed and valid
+      const isValid = await verifyContractDeployment(contractAddress, provider);
+      if (!isValid) {
+        throw new Error("Contract verification failed. The contract might not be deployed correctly.");
+      }
+
+      console.log("Contract verified, fetching total supply...");
       const signer = provider.getSigner();
       const contract = getContract(contractAddress, signer);
 
       console.log("Calling totalSupply on contract...");
       const supply = await contract.totalSupply();
       console.log("Total supply fetched:", supply.toString());
+      
       setTotalSupply(supply.toNumber());
       setError("");
     } catch (err: any) {
-      console.error("Error fetching total supply:", err);
+      console.error("Error in NFTCollection:", err);
       
       // Handle specific error cases
       if (err.code === 'CALL_EXCEPTION') {
         setError("Unable to connect to the NFT contract. The contract might not be deployed correctly.");
+      } else if (err.code === -32603) {
+        setError("Internal JSON-RPC error. Please check your wallet connection.");
       } else {
         setError(err.message || "Failed to fetch NFT collection data");
       }
       
       toast({
         title: "Error",
-        description: "Failed to load NFT collection data. Please try again later.",
+        description: "Failed to load NFT collection data. Please check the contract address and try again.",
         variant: "destructive",
       });
+    } finally {
+      setIsVerifying(false);
     }
   };
 
