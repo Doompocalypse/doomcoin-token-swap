@@ -53,9 +53,9 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
             );
           },
           removeListener: () => {},
-          getBlock: () => log.getBlock(),
-          getTransaction: () => log.getTransaction(),
-          getTransactionReceipt: () => log.getTransactionReceipt(),
+          getBlock: async () => provider.getBlock(log.blockNumber),
+          getTransaction: async () => provider.getTransaction(log.transactionHash),
+          getTransactionReceipt: async () => provider.getTransactionReceipt(log.transactionHash),
         };
 
         console.log("Created custom event:", customEvent);
@@ -91,3 +91,6 @@ export const validateTransferEvent = (transferEvent: CustomTransferEvent | undef
   console.log("Transfer event validation successful. Token ID:", transferEvent.args.tokenId.toString());
   return transferEvent;
 };
+
+// Get provider instance for block/transaction lookups
+const provider = new ethers.providers.Web3Provider(window.ethereum);
