@@ -4,6 +4,12 @@ import { useNFTStorage } from "@/hooks/nft/useNFTStorage";
 import { useNFTContract } from "@/hooks/nft/useNFTContract";
 import { findTransferEvent, validateTransferEvent } from "@/utils/nft/transactionUtils";
 import CopyToast from "@/components/nft/components/CopyToast";
+import React from 'react';
+
+interface MintError extends Error {
+  code?: string;
+  transactionHash?: string;
+}
 
 export const useMintNFT = (connectedAccount?: string, contractAddress?: string) => {
   const { toast } = useToast();
@@ -53,7 +59,10 @@ export const useMintNFT = (connectedAccount?: string, contractAddress?: string) 
 
       toast({
         title: "Transaction Pending",
-        description: <CopyToast message="Please wait while your NFT is being minted..." hash={tx.hash} />,
+        description: React.createElement(CopyToast, {
+          message: "Please wait while your NFT is being minted...",
+          hash: tx.hash
+        })
       });
 
       const receipt = await tx.wait();
@@ -73,17 +82,23 @@ export const useMintNFT = (connectedAccount?: string, contractAddress?: string) 
 
       toast({
         title: "NFT Minted Successfully",
-        description: <CopyToast message={`Token ID: ${tokenId}`} hash={tokenId} />,
+        description: React.createElement(CopyToast, {
+          message: `Token ID: ${tokenId}`,
+          hash: tokenId
+        })
       });
 
       return tokenId;
-    } catch (error: any) {
-      console.error("Minting error:", error);
+    } catch (error: unknown) {
+      const mintError = error as MintError;
+      console.error("Minting error:", mintError);
       
-      if (error.code === "ACTION_REJECTED") {
+      if (mintError.code === "ACTION_REJECTED") {
         toast({
           title: "Transaction Cancelled",
-          description: <CopyToast message="You cancelled the transaction. No NFT was minted." />,
+          description: React.createElement(CopyToast, {
+            message: "You cancelled the transaction. No NFT was minted."
+          }),
           variant: "destructive",
         });
         return;
@@ -91,13 +106,13 @@ export const useMintNFT = (connectedAccount?: string, contractAddress?: string) 
 
       toast({
         title: "Minting Failed",
-        description: <CopyToast 
-          message={error.message || "Failed to mint NFT. Please try again."} 
-          hash={error.transactionHash} 
-        />,
+        description: React.createElement(CopyToast, {
+          message: mintError.message || "Failed to mint NFT. Please try again.",
+          hash: mintError.transactionHash
+        }),
         variant: "destructive",
       });
-      throw error;
+      throw mintError;
     }
   };
 
