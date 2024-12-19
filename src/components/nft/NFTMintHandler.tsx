@@ -50,11 +50,16 @@ export const useNFTMintHandler = (walletAddress?: string, contractAddress?: stri
       const tokenId = mintEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
-      // Record the mint in Supabase
+      // Generate a UUID for Supabase storage
+      const uuid = crypto.randomUUID();
+      console.log("Generated UUID for storage:", uuid);
+
+      // Record the mint in Supabase using the generated UUID
       const { error: dbError } = await supabase
         .from('mock_purchases')
         .insert([{ 
-          nft_id: tokenId,
+          id: uuid,  // Use the generated UUID as the primary key
+          nft_id: uuid,  // Use the same UUID for nft_id
           buyer_address: walletAddress,
           contract_address: contractAddress
         }]);
