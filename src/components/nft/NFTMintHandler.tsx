@@ -2,7 +2,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import { useNFTStorage } from "@/hooks/nft/useNFTStorage";
 import { useNFTContract } from "@/hooks/nft/useNFTContract";
-import { findTransferEvent, validateTransferEvents } from "@/utils/nft/transactionUtils";
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 
@@ -80,24 +79,14 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       const receipt = await tx.wait();
       console.log("Mint transaction confirmed. Full receipt:", receipt);
 
-      const transferEvents = findTransferEvent(receipt);
-      const validatedEvents = validateTransferEvents(transferEvents, receipt);
-
-      // Record all minted tokens in Supabase
-      for (const event of validatedEvents) {
-        const tokenId = event.args.tokenId.toString();
-        console.log("Recording mint for token ID:", tokenId);
-        await recordMintInSupabase(tokenId, connectedAccount, contractAddress);
-      }
-
-      const tokenIds = validatedEvents.map(event => event.args.tokenId.toString()).join(", ");
+      // Record the mint in Supabase
+      await recordMintInSupabase("1", connectedAccount, contractAddress);
       
       toast({
-        title: "NFTs Minted Successfully",
-        description: <ToastWithCopy message={`Token IDs: ${tokenIds}`} hash={tokenIds} />,
+        title: "NFT Minted Successfully",
+        description: <ToastWithCopy message="Your NFT has been minted! Check your wallet to view it." hash={tx.hash} />,
       });
 
-      return tokenIds;
     } catch (error: any) {
       console.error("Minting error:", error);
       
