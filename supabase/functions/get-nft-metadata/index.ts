@@ -48,8 +48,8 @@ serve(async (req) => {
     const metadata = {
       name: nft.name,
       description: nft.description,
-      image: nft.video_url, // Using video URL as preview image
-      animation_url: nft.video_url, // Actual video content
+      image: nft.image_url,
+      animation_url: nft.video_url,
       attributes: [
         {
           trait_type: "Collection",
