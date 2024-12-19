@@ -83,10 +83,6 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       const transferEvent = findTransferEvent(receipt);
       validateTransferEvent(transferEvent, receipt);
 
-      if (!transferEvent?.args?.tokenId) {
-        throw new Error(`Transaction succeeded but token ID was not found. Transaction Hash: ${receipt.transactionHash}`);
-      }
-
       const tokenId = transferEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
@@ -101,7 +97,6 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
     } catch (error: any) {
       console.error("Minting error:", error);
       
-      // Handle user rejection specifically
       if (error.code === "ACTION_REJECTED") {
         toast({
           title: "Transaction Cancelled",
@@ -111,7 +106,6 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
         return;
       }
 
-      // Handle other errors
       toast({
         title: "Minting Failed",
         description: <ToastWithCopy 
