@@ -1,4 +1,4 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ethers } from "ethers";
 import { useNFTStorage } from "@/hooks/nft/useNFTStorage";
 import { useNFTContract } from "@/hooks/nft/useNFTContract";
@@ -50,6 +50,11 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       const tx = await contract.mint();
       console.log("Mint transaction sent:", tx.hash);
 
+      toast({
+        title: "Transaction Pending",
+        description: "Please wait while your NFT is being minted...",
+      });
+
       const receipt = await tx.wait();
       console.log("Mint transaction confirmed. Full receipt:", receipt);
 
@@ -69,6 +74,18 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       return tokenId;
     } catch (error: any) {
       console.error("Minting error:", error);
+      
+      // Handle user rejection specifically
+      if (error.code === "ACTION_REJECTED") {
+        toast({
+          title: "Transaction Cancelled",
+          description: "You cancelled the transaction. No NFT was minted.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Handle other errors
       toast({
         title: "Minting Failed",
         description: error.message || "Failed to mint NFT. Please try again.",
