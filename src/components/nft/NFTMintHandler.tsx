@@ -1,115 +1,86 @@
-import { useToast } from "@/hooks/use-toast";
+import { useState } from "react";
+import { useToast } from "@/components/ui/use-toast";
 import { ethers } from "ethers";
-import { useNFTStorage } from "@/hooks/nft/useNFTStorage";
-import { useNFTContract } from "@/hooks/nft/useNFTContract";
-import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
+import { supabase } from "@/integrations/supabase/client";
 
-const ToastWithCopy = ({ message, hash }: { message: string; hash?: string }) => {
-  const handleCopy = () => {
-    navigator.clipboard.writeText(hash || message);
-  };
-
-  return (
-    <div className="flex items-start justify-between gap-2">
-      <p className="break-all select-text">{message}</p>
-      <Button 
-        variant="outline" 
-        size="icon"
-        onClick={handleCopy}
-        className="h-6 w-6 shrink-0"
-      >
-        <Copy className="h-4 w-4" />
-      </Button>
-    </div>
-  );
-};
-
-export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: string) => {
+export const useNFTMintHandler = (walletAddress?: string, contractAddress?: string) => {
+  const [isMinting, setIsMinting] = useState(false);
   const { toast } = useToast();
-  const { recordMintInSupabase } = useNFTStorage();
-  const { getContract } = useNFTContract();
 
   const handleMint = async () => {
-    console.log("Starting NFT minting process...");
-    console.log("Connected account:", connectedAccount);
-    console.log("Contract address:", contractAddress);
-
-    if (!connectedAccount) {
-      toast({
-        title: "Wallet Required",
-        description: "Please connect your wallet to mint NFTs",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!contractAddress) {
-      toast({
-        title: "Contract Required",
-        description: "No contract address found. Please deploy the contract first.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    if (!window.ethereum) {
+    if (!walletAddress || !contractAddress) {
       toast({
         title: "Error",
-        description: "MetaMask is required to mint NFTs",
+        description: "Please connect your wallet and ensure contract is deployed",
         variant: "destructive",
       });
       return;
     }
 
+    setIsMinting(true);
     try {
+      console.log("Starting NFT minting process...");
       const provider = new ethers.providers.Web3Provider(window.ethereum);
       const signer = provider.getSigner();
-      const contract = getContract(contractAddress, signer);
+      
+      const contract = new ethers.Contract(
+        contractAddress,
+        CleopatraNFTContract.abi,
+        signer
+      );
 
-      console.log("Initiating mint transaction...");
+      console.log("Minting NFT...");
       const tx = await contract.mint();
       console.log("Mint transaction sent:", tx.hash);
 
-      toast({
-        title: "Transaction Pending",
-        description: <ToastWithCopy message="Please wait while your NFT is being minted..." hash={tx.hash} />,
-      });
-
       const receipt = await tx.wait();
-      console.log("Mint transaction confirmed. Full receipt:", receipt);
+      console.log("Mint transaction confirmed:", receipt);
+
+      // Get the token ID from the mint event
+      const mintEvent = receipt.events?.find(
+        (event: any) => event.event === "Transfer" && 
+        event.args.from === ethers.constants.AddressZero
+      );
+
+      if (!mintEvent) {
+        throw new Error("Could not find mint event in transaction");
+      }
+
+      const tokenId = mintEvent.args.tokenId.toString();
+      console.log("Minted token ID:", tokenId);
 
       // Record the mint in Supabase
-      await recordMintInSupabase("1", connectedAccount, contractAddress);
-      
-      toast({
-        title: "NFT Minted Successfully",
-        description: <ToastWithCopy message="Your NFT has been minted! Check your wallet to view it." hash={tx.hash} />,
-      });
+      const { error: dbError } = await supabase
+        .from('mock_purchases')
+        .insert([{ 
+          nft_id: tokenId,
+          buyer_address: walletAddress,
+          contract_address: contractAddress
+        }]);
 
-    } catch (error: any) {
-      console.error("Minting error:", error);
-      
-      if (error.code === "ACTION_REJECTED") {
-        toast({
-          title: "Transaction Cancelled",
-          description: <ToastWithCopy message="You cancelled the transaction. No NFT was minted." />,
-          variant: "destructive",
-        });
-        return;
+      if (dbError) {
+        console.error('Error recording mint:', dbError);
+        // Don't throw here as the NFT was successfully minted
       }
 
       toast({
-        title: "Minting Failed",
-        description: <ToastWithCopy 
-          message={error.message || "Failed to mint NFT. Please try again."} 
-          hash={error.transactionHash} 
-        />,
+        title: "Success",
+        description: `Successfully minted NFT with ID: ${tokenId}`,
+      });
+
+      return tokenId;
+    } catch (error: any) {
+      console.error("Minting error:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to mint NFT",
         variant: "destructive",
       });
-      throw error;
+    } finally {
+      setIsMinting(false);
     }
   };
 
-  return { handleMint };
+  return { handleMint, isMinting };
 };
