@@ -4,7 +4,7 @@ interface TransferEventResult extends ethers.utils.Result {
   tokenId: ethers.BigNumber;
 }
 
-interface CustomTransferEvent extends Omit<ethers.Event, 'args'> {
+interface CustomTransferEvent extends ethers.Event {
   args: TransferEventResult;
 }
 
@@ -15,13 +15,16 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
   console.log("Transfer topic hash:", transferTopic);
 
   // First try to find a named Transfer event
-  const transferEvent = receipt.events?.find(event => event.event === 'Transfer');
+  const transferEvent = receipt.events?.find(event => 
+    event.event === 'Transfer' && event.args && event.args.length >= 3
+  );
+
   if (transferEvent) {
     console.log("Found named Transfer event:", transferEvent);
     return transferEvent as CustomTransferEvent;
   }
 
-  // Look through logs for Transfer topic
+  // If no named event found, look through logs for Transfer topic
   for (const log of receipt.logs) {
     console.log("Checking log:", log);
     if (log.topics[0] === transferTopic) {
@@ -33,25 +36,29 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
         const parsedLog = iface.parseLog(log);
         console.log("Successfully parsed log:", parsedLog);
         
-        const tokenId = parsedLog.args.tokenId;
-        console.log("Extracted token ID:", tokenId.toString());
-
         // Create a properly typed event object
         const customEvent: CustomTransferEvent = {
           ...log,
           args: {
-            tokenId,
             ...parsedLog.args,
-          },
+            tokenId: parsedLog.args.tokenId,
+          } as TransferEventResult,
           event: 'Transfer',
           eventSignature: parsedLog.signature,
-          decode: transferEvent?.decode ?? (() => {}),
+          decode: (data: string, topics?: Array<string>) => {
+            return iface.decodeEventLog(
+              'Transfer',
+              data,
+              topics
+            );
+          },
           removeListener: () => {},
-          getBlock: () => Promise.resolve({} as ethers.providers.Block),
-          getTransaction: () => Promise.resolve({} as ethers.providers.TransactionResponse),
-          getTransactionReceipt: () => Promise.resolve({} as ethers.providers.TransactionReceipt),
+          getBlock: () => log.getBlock(),
+          getTransaction: () => log.getTransaction(),
+          getTransactionReceipt: () => log.getTransactionReceipt(),
         };
 
+        console.log("Created custom event:", customEvent);
         return customEvent;
       } catch (error) {
         console.error("Error parsing Transfer event from log:", error);
@@ -63,12 +70,12 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
   return undefined;
 };
 
-export const validateTransferEvent = (transferEvent: CustomTransferEvent | undefined, receipt: ethers.ContractReceipt) => {
+export const validateTransferEvent = (transferEvent: CustomTransferEvent | undefined, receipt: ethers.ContractReceipt): CustomTransferEvent => {
   console.log("Validating transfer event...");
   
   if (!transferEvent) {
     console.error("No Transfer event found in transaction receipt:", receipt);
-    throw new Error(`Transaction succeeded but we couldn't find the token ID. Transaction hash: ${receipt.transactionHash}`);
+    throw new Error(`Transaction succeeded but we couldn't find the token ID. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: ${receipt.transactionHash}`);
   }
 
   if (!transferEvent.args) {

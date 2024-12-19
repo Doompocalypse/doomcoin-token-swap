@@ -81,9 +81,9 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       console.log("Mint transaction confirmed. Full receipt:", receipt);
 
       const transferEvent = findTransferEvent(receipt);
-      validateTransferEvent(transferEvent, receipt);
+      const validatedEvent = validateTransferEvent(transferEvent, receipt);
 
-      const tokenId = transferEvent.args.tokenId.toString();
+      const tokenId = validatedEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
       await recordMintInSupabase(tokenId, connectedAccount, contractAddress);
