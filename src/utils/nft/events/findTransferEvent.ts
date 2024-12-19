@@ -11,9 +11,21 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
 
   // First try to find named Transfer events
   receipt.events?.forEach(event => {
-    console.log("Checking event:", event);
-    if (event.event === 'Transfer' && event.args && event.args.length >= 3) {
+    console.log("Checking event:", {
+      name: event.event,
+      args: event.args,
+      topics: event.topics
+    });
+    
+    if (event.event === 'Transfer') {
       console.log("Found named Transfer event:", event);
+      if (event.args) {
+        console.log("Event args:", {
+          from: event.args[0],
+          to: event.args[1],
+          tokenId: event.args[2]?.toString()
+        });
+      }
       transferEvents.push(event as CustomTransferEvent);
     }
   });
@@ -25,8 +37,10 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
 
   // If no named events found, look through logs for Transfer topic
   receipt.logs.forEach(log => {
-    console.log("Checking log:", log);
-    console.log("Log topics:", log.topics);
+    console.log("Checking log:", {
+      topics: log.topics,
+      data: log.data
+    });
     
     if (log.topics[0] === transferTopic) {
       try {
@@ -35,14 +49,18 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
         ]);
         
         const parsedLog = iface.parseLog(log);
-        console.log("Successfully parsed log:", parsedLog);
-        console.log("Parsed token ID:", parsedLog.args.tokenId.toString());
+        console.log("Successfully parsed log:", {
+          from: parsedLog.args.from,
+          to: parsedLog.args.to,
+          tokenId: parsedLog.args.tokenId.toString()
+        });
         
         // Create a properly typed event object
         const customEvent: CustomTransferEvent = {
           ...log,
           args: {
-            ...parsedLog.args,
+            from: parsedLog.args.from,
+            to: parsedLog.args.to,
             tokenId: parsedLog.args.tokenId,
           },
           event: 'Transfer',
@@ -69,7 +87,7 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
     }
   });
   
-  console.log("Found total transfer events:", transferEvents.length);
+  console.log("Total transfer events found:", transferEvents.length);
   return transferEvents;
 };
 
