@@ -1,9 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { useNFTMintHandler } from "./NFTMintHandler";
-import NFTCollectionImport from "./NFTCollectionImport";
-import { useEffect, useState } from "react";
-import { ethers } from "ethers";
-import CleopatraNFTContract from "@/contracts/CleopatraNecklaceNFT.json";
+import React, { useEffect, useState } from 'react';
+import { ethers } from 'ethers';
+import { useToast } from "@/components/ui/use-toast";
+import ErrorDisplay from './components/ErrorDisplay';
+import { useNFTContract } from '@/hooks/nft/useNFTContract';
 
 interface NFTCollectionProps {
   contractAddress?: string;
@@ -12,131 +11,69 @@ interface NFTCollectionProps {
 
 const NFTCollection = ({ contractAddress, walletAddress }: NFTCollectionProps) => {
   const [totalSupply, setTotalSupply] = useState<number>(0);
-  console.log("NFTCollection rendered with props:", { contractAddress, walletAddress });
-  
-  const { handleMint } = useNFTMintHandler(walletAddress, contractAddress);
+  const [error, setError] = useState<string>("");
+  const { toast } = useToast();
+  const { contract } = useNFTContract(contractAddress);
 
-  // Check local storage for previously deployed contract
-  const savedContract = localStorage.getItem('nft_deployment_status');
-  const savedContractAddress = savedContract ? JSON.parse(savedContract).contractAddress : null;
-  
-  console.log("Saved contract address:", savedContractAddress);
-  console.log("Current contract address:", contractAddress);
+  const fetchTotalSupply = async () => {
+    if (!contract || !contractAddress) {
+      console.log("No contract available for total supply check");
+      return;
+    }
 
-  const effectiveContractAddress = contractAddress || savedContractAddress;
+    try {
+      console.log("Fetching total supply...");
+      const supply = await contract.totalSupply();
+      console.log("Total supply fetched:", supply.toString());
+      setTotalSupply(supply.toNumber());
+      setError("");
+    } catch (err: any) {
+      console.error("Error fetching total supply:", err);
+      
+      // Handle specific error cases
+      if (err.code === 'CALL_EXCEPTION') {
+        setError("Unable to connect to the NFT contract. The contract might not be deployed correctly.");
+      } else {
+        setError(err.message || "Failed to fetch NFT collection data");
+      }
+      
+      toast({
+        title: "Error",
+        description: "Failed to load NFT collection data. Please try again later.",
+        variant: "destructive",
+      });
+    }
+  };
 
   useEffect(() => {
-    const fetchTotalSupply = async () => {
-      if (!window.ethereum || !effectiveContractAddress) return;
-      
-      try {
-        const provider = new ethers.providers.Web3Provider(window.ethereum);
-        const contract = new ethers.Contract(
-          effectiveContractAddress,
-          CleopatraNFTContract.abi,
-          provider
-        );
-        
-        const supply = await contract.totalSupply();
-        setTotalSupply(supply.toNumber());
-      } catch (error) {
-        console.error("Error fetching total supply:", error);
-      }
-    };
+    if (contractAddress) {
+      fetchTotalSupply();
+    }
+  }, [contractAddress, contract]);
 
-    fetchTotalSupply();
-    // Refresh every 10 seconds to catch new mints
-    const interval = setInterval(fetchTotalSupply, 10000);
-    return () => clearInterval(interval);
-  }, [effectiveContractAddress]);
+  if (error) {
+    return <ErrorDisplay errorMessage={error} />;
+  }
 
-  if (!effectiveContractAddress) {
+  if (!contractAddress) {
     return (
-      <div className="p-4 bg-black/20 rounded-lg space-y-4">
-        <h2 className="text-xl font-bold text-white">Cleopatra's Necklace NFT Collection</h2>
-        <p className="text-white">
-          Deploy the contract first to mint NFTs
+      <div className="p-4 bg-black/20 rounded-lg">
+        <p className="text-center text-gray-400">
+          No NFT collection has been deployed yet.
         </p>
       </div>
     );
   }
-
-  if (!walletAddress) {
-    return (
-      <div className="p-4 bg-black/20 rounded-lg space-y-4">
-        <h2 className="text-xl font-bold text-white">Cleopatra's Necklace NFT Collection</h2>
-        <p className="text-white">
-          Connect your wallet to mint NFTs
-        </p>
-      </div>
-    );
-  }
-
-  const canMintCompleteSet = totalSupply === 6;
 
   return (
     <div className="p-4 bg-black/20 rounded-lg space-y-4">
-      <h2 className="text-xl font-bold text-white">Cleopatra's Necklace NFT Collection</h2>
-      <div className="space-y-2">
-        <p className="text-white">
-          Mint your unique Cleopatra's Necklace NFT. Each NFT is one-of-a-kind and represents a piece of ancient Egyptian history.
-        </p>
-        
-        <div className="bg-black/20 p-4 rounded-lg">
-          <h3 className="text-lg font-semibold text-white mb-2">Collection Status</h3>
-          <div className="grid grid-cols-3 md:grid-cols-6 gap-2">
-            {[1, 2, 3, 4, 5, 6].map((tokenId) => (
-              <div 
-                key={tokenId}
-                className={`p-2 rounded-lg text-center ${
-                  tokenId <= totalSupply ? 'bg-green-500/20 text-green-400' : 'bg-gray-500/20 text-gray-400'
-                }`}
-              >
-                #{tokenId}
-                <div className="text-xs">
-                  {tokenId <= totalSupply ? 'Minted' : 'Available'}
-                </div>
-              </div>
-            ))}
-          </div>
-          <div className={`mt-4 p-2 rounded-lg text-center ${
-            canMintCompleteSet ? 'bg-purple-500/20 text-purple-400' : 'bg-gray-500/20 text-gray-400'
-          }`}>
-            #7 - Complete Set
-            <div className="text-xs">
-              {canMintCompleteSet ? 'Available to Mint' : 'Unlock by minting pieces 1-6'}
-            </div>
-          </div>
-          <p className="text-sm text-gray-400 mt-2">
-            {totalSupply}/6 pieces minted
-            {canMintCompleteSet && " - Complete set (Token #7) is now available!"}
-          </p>
+      <h2 className="text-xl font-bold">NFT Collection</h2>
+      <div className="grid gap-4">
+        <div className="flex justify-between items-center p-3 bg-black/40 rounded">
+          <span>Total Supply</span>
+          <span>{totalSupply}</span>
         </div>
       </div>
-      
-      {canMintCompleteSet ? (
-        <div className="space-y-4">
-          <Button 
-            onClick={handleMint}
-            className="w-full bg-purple-500 text-white hover:bg-purple-600"
-          >
-            Mint Complete Set (Token #7)
-          </Button>
-          <p className="text-sm text-purple-400 text-center">
-            All individual pieces have been minted. You can now mint the complete set (Token #7)!
-          </p>
-        </div>
-      ) : (
-        <Button 
-          onClick={handleMint}
-          className="w-full bg-white text-black hover:bg-white/90"
-          disabled={totalSupply >= 6}
-        >
-          {totalSupply >= 6 ? "Individual Pieces Sold Out" : "Mint NFT"}
-        </Button>
-      )}
-      
-      <NFTCollectionImport contractAddress={effectiveContractAddress} />
     </div>
   );
 };
