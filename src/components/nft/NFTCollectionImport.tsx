@@ -55,7 +55,6 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    // Only proceed if we have minted NFTs
     if (totalSupply === 0) {
       toast({
         title: "No NFTs Available",
@@ -65,11 +64,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    const tokenIdNum = tokenId.toUpperCase();
-    if (!/^[A-Z0-9]{6}$/.test(tokenIdNum)) {
+    if (!/^\d{2}[A-Z]$/.test(tokenId)) {
       toast({
         title: "Invalid Token ID",
-        description: `Please enter a valid token ID (6 characters, alphanumeric)`,
+        description: "Please enter a valid token ID (2 numbers followed by 1 letter, e.g. 01A)",
         variant: "destructive",
       });
       return;
@@ -87,7 +85,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           type: 'ERC721',
           options: {
             address: contractAddress,
-            tokenId: tokenIdNum,
+            tokenId: tokenId,
           },
         }],
       });
@@ -150,13 +148,13 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
                 type="text"
                 value={tokenId}
                 onChange={(e) => setTokenId(e.target.value.toUpperCase())}
-                className="w-32 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
-                placeholder="Enter Token ID"
-                maxLength={6}
-                pattern="[A-Z0-9]*"
+                className="w-20 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
+                placeholder="01A"
+                maxLength={3}
+                pattern="\d{2}[A-Z]"
                 disabled={totalSupply === 0}
               />
-              <span className="text-sm text-green-300">← Enter your Token ID (e.g. ABC123)</span>
+              <span className="text-sm text-green-300">← Enter your Token ID (e.g. 01A)</span>
             </div>
           </>
         )}
