@@ -6,9 +6,9 @@ import { findTransferEvent, validateTransferEvent } from "@/utils/nft/transactio
 import { Button } from "@/components/ui/button";
 import { Copy } from "lucide-react";
 
-const ToastWithCopy = ({ message }: { message: string }) => {
+const ToastWithCopy = ({ message, hash }: { message: string; hash?: string }) => {
   const handleCopy = () => {
-    navigator.clipboard.writeText(message);
+    navigator.clipboard.writeText(hash || message);
   };
 
   return (
@@ -74,7 +74,7 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
 
       toast({
         title: "Transaction Pending",
-        description: "Please wait while your NFT is being minted...",
+        description: <ToastWithCopy message="Please wait while your NFT is being minted..." hash={tx.hash} />,
       });
 
       const receipt = await tx.wait();
@@ -83,6 +83,10 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       const transferEvent = findTransferEvent(receipt);
       validateTransferEvent(transferEvent, receipt);
 
+      if (!transferEvent?.args?.tokenId) {
+        throw new Error(`Transaction succeeded but token ID was not found. Transaction Hash: ${receipt.transactionHash}`);
+      }
+
       const tokenId = transferEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
@@ -90,7 +94,7 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
 
       toast({
         title: "NFT Minted Successfully",
-        description: `Token ID: ${tokenId}`,
+        description: <ToastWithCopy message={`Token ID: ${tokenId}`} hash={tokenId} />,
       });
 
       return tokenId;
@@ -110,7 +114,10 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
       // Handle other errors
       toast({
         title: "Minting Failed",
-        description: <ToastWithCopy message={error.message || "Failed to mint NFT. Please try again."} />,
+        description: <ToastWithCopy 
+          message={error.message || "Failed to mint NFT. Please try again."} 
+          hash={error.transactionHash} 
+        />,
         variant: "destructive",
       });
       throw error;
