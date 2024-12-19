@@ -13,13 +13,30 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
   
   // If no named event found, look for an event with the Transfer topic
   const transferTopic = ethers.utils.id("Transfer(address,address,uint256)");
-  const anonymousTransfer = receipt.events?.find(event => 
-    event.topics && event.topics[0] === transferTopic
-  );
+  const anonymousTransfer = receipt.events?.find(event => {
+    console.log("Checking event topics:", event.topics);
+    return event.topics && event.topics[0] === transferTopic;
+  });
   
   if (anonymousTransfer) {
     console.log("Found Transfer event by topic:", anonymousTransfer);
     return anonymousTransfer;
+  }
+  
+  // If still no event found, try to parse the logs directly
+  for (const log of receipt.logs) {
+    console.log("Checking raw log:", log);
+    if (log.topics[0] === transferTopic) {
+      console.log("Found Transfer event in raw logs:", log);
+      // Parse the tokenId from the last topic (it's the third parameter in the Transfer event)
+      const tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
+      return {
+        ...log,
+        args: {
+          tokenId
+        }
+      };
+    }
   }
   
   console.log("No Transfer event found in receipt");
@@ -40,15 +57,27 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
       const iface = new ethers.utils.Interface([
         "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
       ]);
-      const decodedData = iface.parseLog(transferEvent);
-      console.log("Successfully decoded anonymous Transfer event:", decodedData);
-      return transferEvent;
+      
+      // If we have raw log data, try to decode it
+      if ('data' in transferEvent) {
+        const decodedData = iface.parseLog({
+          topics: transferEvent.topics || [],
+          data: transferEvent.data
+        });
+        console.log("Successfully decoded anonymous Transfer event:", decodedData);
+        return {
+          ...transferEvent,
+          args: {
+            tokenId: decodedData.args.tokenId
+          }
+        };
+      }
     } catch (error) {
       console.error("Failed to decode Transfer event:", error);
       throw new Error("Transaction succeeded but the token ID format was invalid. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: " + receipt.transactionHash);
     }
   }
 
-  console.log("Transfer event validation successful. Token ID:", transferEvent.args.tokenId.toString());
+  console.log("Transfer event validation successful. Token ID:", transferEvent.args?.tokenId?.toString());
   return transferEvent;
 };
