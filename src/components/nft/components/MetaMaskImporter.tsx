@@ -7,6 +7,18 @@ interface MetaMaskImporterProps {
   tokenId: string;
 }
 
+// Define the type for wallet_watchAsset parameters
+interface WatchAssetParams {
+  type: 'ERC721';
+  options: {
+    address: string;
+    tokenId: string;
+    image: string;
+    name: string;
+    description: string;
+  };
+}
+
 const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterProps) => {
   const { toast } = useToast();
 
@@ -88,19 +100,21 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     const metadata = await response.json();
     console.log("Token metadata:", metadata);
 
-    // Request MetaMask to watch the asset
+    // Request MetaMask to watch the asset with proper typing
+    const watchAssetParams: WatchAssetParams = {
+      type: 'ERC721',
+      options: {
+        address: contractAddress,
+        tokenId: tokenId,
+        image: metadata.image,
+        name: metadata.name,
+        description: metadata.description
+      },
+    };
+
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
-      params: {
-        type: 'ERC721',
-        options: {
-          address: contractAddress,
-          tokenId: tokenId,
-          image: metadata.image,
-          name: metadata.name,
-          description: metadata.description
-        },
-      },
+      params: watchAssetParams,
     });
 
     if (wasAdded) {
