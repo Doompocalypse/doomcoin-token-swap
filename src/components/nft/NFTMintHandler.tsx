@@ -35,7 +35,21 @@ export const useNFTMintHandler = (walletAddress?: string, contractAddress?: stri
       console.log("Mint transaction sent:", tx.hash);
 
       const receipt = await tx.wait();
-      console.log("Mint transaction confirmed:", receipt);
+      console.log("Mint transaction confirmed. Full receipt:", receipt);
+      console.log("Number of events in receipt:", receipt.events?.length);
+      
+      // Log all events for debugging
+      receipt.events?.forEach((event, index) => {
+        console.log(`Event ${index}:`, {
+          event: event.event,
+          args: event.args,
+          topics: event.topics,
+          data: event.data
+        });
+      });
+
+      // Log all transaction logs
+      console.log("Transaction logs:", receipt.logs);
 
       // Look for Transfer event in all events
       const transferEvent = receipt.events?.find(event => {
@@ -52,6 +66,8 @@ export const useNFTMintHandler = (walletAddress?: string, contractAddress?: stri
       if (!transferEvent) {
         console.log("No Transfer event found in events, checking logs...");
         const transferTopic = ethers.utils.id("Transfer(address,address,uint256)");
+        console.log("Transfer topic hash:", transferTopic);
+        
         const log = receipt.logs.find(log => log.topics[0] === transferTopic);
         
         if (!log) {
