@@ -1,4 +1,5 @@
 import { ethers } from "ethers";
+import { formatTokenId } from "./idGenerator";
 
 const logEventDetails = (event: any) => {
   if (!event.event || !event.args) {
@@ -27,7 +28,7 @@ const logTransferEventStatus = (transferEvent: any, receipt: ethers.ContractRece
     console.log("Found Transfer event:", {
       from: transferEvent.args.from,
       to: transferEvent.args.to,
-      tokenId: transferEvent.args.tokenId?.toString()
+      tokenId: formatTokenId(transferEvent.args.tokenId)
     });
   }
 };
@@ -77,7 +78,7 @@ const validateTokenId = (transferEvent: any) => {
 };
 
 export const validateTransferEvent = (
-  transferEvent: any, 
+  transferEvent: any,
   receipt: ethers.ContractReceipt
 ) => {
   console.log("Validating Transfer event");
@@ -87,10 +88,8 @@ export const validateTransferEvent = (
   validateTokenId(transferEvent);
 
   console.log("Transfer event validation successful:", {
-    tokenId: transferEvent.args.tokenId.toString(),
+    tokenId: formatTokenId(transferEvent.args.tokenId),
     from: transferEvent.args.from,
     to: transferEvent.args.to
   });
-
-  return transferEvent;
 };

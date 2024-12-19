@@ -11,7 +11,7 @@ interface NFTCollectionImportProps {
 
 const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
   const { toast } = useToast();
-  const [tokenId, setTokenId] = useState("1");
+  const [tokenId, setTokenId] = useState("");
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -65,11 +65,11 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    const tokenIdNum = parseInt(tokenId);
-    if (isNaN(tokenIdNum) || tokenIdNum < 1 || tokenIdNum > totalSupply) {
+    const tokenIdNum = tokenId.toUpperCase();
+    if (!/^[A-Z0-9]{6}$/.test(tokenIdNum)) {
       toast({
         title: "Invalid Token ID",
-        description: `Please enter a valid token ID between 1 and ${totalSupply}`,
+        description: `Please enter a valid token ID (6 characters, alphanumeric)`,
         variant: "destructive",
       });
       return;
@@ -87,7 +87,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
           type: 'ERC721',
           options: {
             address: contractAddress,
-            tokenId: tokenId,
+            tokenId: tokenIdNum,
           },
         }],
       });
@@ -140,23 +140,23 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
               To view your NFTs in MetaMask:
             </p>
             <ol className="list-decimal list-inside space-y-1 text-sm text-green-200">
-              <li>Enter your Token ID below (between 1 and {totalSupply})</li>
+              <li>Enter your Token ID below</li>
               <li>Click "Import to MetaMask" to add your NFT</li>
               <li>Open MetaMask and go to the NFTs tab</li>
               <li>Your NFT will appear there</li>
             </ol>
             <div className="flex items-center gap-2">
               <input
-                type="number"
+                type="text"
                 value={tokenId}
-                onChange={(e) => setTokenId(e.target.value)}
-                className="w-24 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
-                placeholder="Token ID"
-                min="1"
-                max={totalSupply}
+                onChange={(e) => setTokenId(e.target.value.toUpperCase())}
+                className="w-32 px-2 py-1 text-sm bg-black/20 border border-green-400/20 rounded text-green-400"
+                placeholder="Enter Token ID"
+                maxLength={6}
+                pattern="[A-Z0-9]*"
                 disabled={totalSupply === 0}
               />
-              <span className="text-sm text-green-300">← Enter your Token ID</span>
+              <span className="text-sm text-green-300">← Enter your Token ID (e.g. ABC123)</span>
             </div>
           </>
         )}
