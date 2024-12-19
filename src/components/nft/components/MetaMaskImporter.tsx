@@ -38,7 +38,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       return false;
     }
 
-    // Get token URI to verify token exists
+    // Get token URI to verify token exists and get metadata
     try {
       const tokenURI = await contract.tokenURI(tokenId);
       console.log("Token URI verified:", tokenURI);
@@ -54,7 +54,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
 
     console.log("Requesting NFT import to MetaMask...");
     
-    // MetaMask's wallet_watchAsset API for ERC721 tokens
+    // MetaMask's wallet_watchAsset API for ERC721 tokens with complete parameters
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: [{
@@ -62,6 +62,9 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
         options: {
           address: contractAddress,
           tokenId: tokenId,
+          name: await contract.name(),
+          symbol: await contract.symbol(),
+          tokenURI: await contract.tokenURI(tokenId),
         },
       }]
     });
