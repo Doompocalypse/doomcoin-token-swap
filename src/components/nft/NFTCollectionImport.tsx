@@ -15,6 +15,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
   const [tokenId, setTokenId] = useState("");
   const [totalSupply, setTotalSupply] = useState<number>(0);
   const [isLoading, setIsLoading] = useState(true);
+  const [isChecking, setIsChecking] = useState(false);
 
   useEffect(() => {
     const fetchTotalSupply = async () => {
@@ -46,6 +47,29 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
     fetchTotalSupply();
   }, [contractAddress]);
 
+  const verifyOwnership = async (tokenId: string): Promise<boolean> => {
+    try {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const contract = new ethers.Contract(
+        contractAddress,
+        CleopatraNFTContract.abi,
+        provider
+      );
+      
+      const accounts = await provider.listAccounts();
+      if (!accounts[0]) throw new Error("No wallet connected");
+      
+      const owner = await contract.ownerOf(tokenId);
+      console.log("NFT owner:", owner);
+      console.log("Current account:", accounts[0]);
+      
+      return owner.toLowerCase() === accounts[0].toLowerCase();
+    } catch (error) {
+      console.error("Error verifying ownership:", error);
+      return false;
+    }
+  };
+
   const handleImportToMetaMask = async () => {
     if (!window.ethereum) {
       toast({
@@ -74,7 +98,20 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
+    setIsChecking(true);
     try {
+      console.log("Verifying NFT ownership before import...");
+      const isOwner = await verifyOwnership(tokenId);
+      
+      if (!isOwner) {
+        toast({
+          title: "Ownership Verification Failed",
+          description: "You don't own this NFT. Please check the Token ID and try again.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       console.log("Requesting NFT import to MetaMask...", {
         contractAddress,
         tokenId
@@ -106,9 +143,11 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       console.error("Error importing NFT collection:", error);
       toast({
         title: "Import Failed",
-        description: "Failed to import NFT to MetaMask",
+        description: "Failed to import NFT to MetaMask. Please verify you own this NFT.",
         variant: "destructive",
       });
+    } finally {
+      setIsChecking(false);
     }
   };
 
@@ -137,7 +176,7 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
         onImport={handleImportToMetaMask}
         onCopy={copyAddress}
         contractAddress={contractAddress}
-        disabled={isLoading || totalSupply === 0}
+        disabled={isLoading || totalSupply === 0 || isChecking}
       />
     </div>
   );
