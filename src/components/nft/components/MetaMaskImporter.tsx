@@ -13,7 +13,8 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
   try {
     console.log("Starting NFT import process...", {
       contractAddress,
-      tokenId
+      tokenId,
+      timestamp: new Date().toISOString()
     });
 
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -56,13 +57,13 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     // MetaMask's wallet_watchAsset API for ERC721 tokens
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
-      params: [{
+      params: {
         type: 'ERC721',
         options: {
           address: contractAddress,
           tokenId: tokenId,
         },
-      }]
+      }
     });
 
     if (wasAdded) {
@@ -81,7 +82,13 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       return false;
     }
   } catch (error) {
-    console.error("Error importing to MetaMask:", error);
+    console.error("Error importing to MetaMask:", {
+      error,
+      contractAddress,
+      tokenId,
+      timestamp: new Date().toISOString()
+    });
+    
     toast({
       title: "Import Failed",
       description: error.message || "Failed to import NFT to MetaMask",
