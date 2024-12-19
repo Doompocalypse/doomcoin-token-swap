@@ -20,13 +20,18 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
     if (event.event === 'Transfer') {
       console.log("Found named Transfer event:", event);
       if (event.args) {
-        console.log("Event args:", {
-          from: event.args[0],
-          to: event.args[1],
-          tokenId: event.args[2]?.toString()
-        });
+        const transferEvent = {
+          ...event,
+          args: {
+            from: event.args[0],
+            to: event.args[1],
+            tokenId: event.args[2]
+          }
+        } as CustomTransferEvent;
+        
+        console.log("Created transfer event with args:", transferEvent.args);
+        transferEvents.push(transferEvent);
       }
-      transferEvents.push(event as CustomTransferEvent);
     }
   });
 
@@ -55,7 +60,8 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
           tokenId: parsedLog.args.tokenId.toString()
         });
         
-        // Create a properly typed event object
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        
         const customEvent: CustomTransferEvent = {
           ...log,
           args: {
@@ -70,12 +76,12 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
               'Transfer',
               data,
               topics
-            );
+            ) as unknown as TransferEventResult;
           },
           removeListener: () => {},
-          getBlock: async () => provider.getBlock(log.blockNumber),
-          getTransaction: async () => provider.getTransaction(log.transactionHash),
-          getTransactionReceipt: async () => provider.getTransactionReceipt(log.transactionHash),
+          getBlock: () => provider.getBlock(log.blockNumber),
+          getTransaction: () => provider.getTransaction(log.transactionHash),
+          getTransactionReceipt: () => provider.getTransactionReceipt(log.transactionHash),
         };
 
         console.log("Created custom event:", customEvent);
@@ -90,6 +96,3 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
   console.log("Total transfer events found:", transferEvents.length);
   return transferEvents;
 };
-
-// Get provider instance for block/transaction lookups
-const provider = new ethers.providers.Web3Provider(window.ethereum);

@@ -6,6 +6,9 @@ export interface TransferEventResult {
   tokenId: ethers.BigNumber;
 }
 
-export interface CustomTransferEvent extends ethers.Event {
+export interface CustomTransferEvent extends Omit<ethers.Event, 'args'> {
   args: TransferEventResult;
+  event: string;
+  eventSignature: string;
+  decode: (data: string, topics?: Array<string>) => TransferEventResult;
 }
