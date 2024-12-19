@@ -8,28 +8,30 @@ interface CustomTransferEvent extends ethers.Event {
   args: TransferEventResult;
 }
 
-export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransferEvent | undefined => {
-  console.log("Looking for Transfer event in receipt:", receipt);
+export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransferEvent[] => {
+  console.log("Looking for Transfer events in receipt:", receipt);
   console.log("Number of events in receipt:", receipt.events?.length);
-  console.log("All events:", receipt.events);
-  console.log("All logs:", receipt.logs);
   
+  const transferEvents: CustomTransferEvent[] = [];
   const transferTopic = ethers.utils.id("Transfer(address,address,uint256)");
   console.log("Transfer topic hash:", transferTopic);
 
-  // First try to find a named Transfer event
-  const transferEvent = receipt.events?.find(event => {
+  // First try to find named Transfer events
+  receipt.events?.forEach(event => {
     console.log("Checking event:", event);
-    return event.event === 'Transfer' && event.args && event.args.length >= 3;
+    if (event.event === 'Transfer' && event.args && event.args.length >= 3) {
+      console.log("Found named Transfer event:", event);
+      transferEvents.push(event as CustomTransferEvent);
+    }
   });
 
-  if (transferEvent) {
-    console.log("Found named Transfer event:", transferEvent);
-    return transferEvent as CustomTransferEvent;
+  if (transferEvents.length > 0) {
+    console.log("Found", transferEvents.length, "named Transfer events");
+    return transferEvents;
   }
 
-  // If no named event found, look through logs for Transfer topic
-  for (const log of receipt.logs) {
+  // If no named events found, look through logs for Transfer topic
+  receipt.logs.forEach(log => {
     console.log("Checking log:", log);
     console.log("Log topics:", log.topics);
     
@@ -66,38 +68,47 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt): CustomTransf
         };
 
         console.log("Created custom event:", customEvent);
-        return customEvent;
+        transferEvents.push(customEvent);
       } catch (error) {
         console.error("Error parsing Transfer event from log:", error);
         console.error("Log that caused error:", log);
       }
     }
-  }
+  });
   
-  console.log("No Transfer event found in receipt");
-  return undefined;
+  console.log("Found total transfer events:", transferEvents.length);
+  return transferEvents;
 };
 
-export const validateTransferEvent = (transferEvent: CustomTransferEvent | undefined, receipt: ethers.ContractReceipt): CustomTransferEvent => {
-  console.log("Validating transfer event...");
+export const validateTransferEvents = (transferEvents: CustomTransferEvent[], receipt: ethers.ContractReceipt): CustomTransferEvent[] => {
+  console.log("Validating transfer events...");
   
-  if (!transferEvent) {
-    console.error("No Transfer event found in transaction receipt:", receipt);
-    throw new Error(`Transaction succeeded but we couldn't find the token ID. Transaction hash: ${receipt.transactionHash}. Please check Etherscan to verify the NFT was minted: https://sepolia.etherscan.io/tx/${receipt.transactionHash}`);
+  if (transferEvents.length === 0) {
+    console.error("No Transfer events found in transaction receipt:", receipt);
+    throw new Error(`Transaction succeeded but we couldn't find any token IDs. Please check Etherscan: https://sepolia.etherscan.io/tx/${receipt.transactionHash}`);
   }
 
-  if (!transferEvent.args) {
-    console.error("Transfer event found but no args present:", transferEvent);
-    throw new Error(`Transaction succeeded but the token ID format was invalid. Please check Etherscan: https://sepolia.etherscan.io/tx/${receipt.transactionHash}`);
+  const validEvents = transferEvents.filter(event => {
+    if (!event.args) {
+      console.error("Transfer event found but no args present:", event);
+      return false;
+    }
+
+    if (!event.args.tokenId) {
+      console.error("Transfer event has no token ID:", event);
+      return false;
+    }
+
+    console.log("Valid transfer event found. Token ID:", event.args.tokenId.toString());
+    return true;
+  });
+
+  if (validEvents.length === 0) {
+    throw new Error(`Transaction succeeded but no valid token IDs were found. Please check Etherscan: https://sepolia.etherscan.io/tx/${receipt.transactionHash}`);
   }
 
-  if (!transferEvent.args.tokenId) {
-    console.error("Transfer event has no token ID:", transferEvent);
-    throw new Error(`Transaction succeeded but token ID was undefined. Please check Etherscan: https://sepolia.etherscan.io/tx/${receipt.transactionHash}`);
-  }
-
-  console.log("Transfer event validation successful. Token ID:", transferEvent.args.tokenId.toString());
-  return transferEvent;
+  console.log("Transfer event validation successful. Found", validEvents.length, "valid events");
+  return validEvents;
 };
 
 // Get provider instance for block/transaction lookups
