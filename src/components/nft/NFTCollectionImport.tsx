@@ -65,10 +65,10 @@ const NFTCollectionImport = ({ contractAddress }: NFTCollectionImportProps) => {
       return;
     }
 
-    if (!/^\d{2}[AB]$/.test(tokenId)) {
+    if (!tokenId || isNaN(Number(tokenId)) || Number(tokenId) <= 0) {
       toast({
         title: "Invalid Token ID",
-        description: "Please enter a valid token ID (2 numbers followed by A for Tier NFTs or B for Collection NFTs, e.g. 01A or 02B)",
+        description: "Please enter a valid numeric Token ID",
         variant: "destructive",
       });
       return;
