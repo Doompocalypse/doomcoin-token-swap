@@ -34,7 +34,11 @@ class ErrorBoundary extends Component<Props, State> {
               <h2 className="text-lg font-semibold mb-2">Something went wrong</h2>
               <p className="break-all select-text">{this.state.error.message}</p>
             </div>
-            <CopyButton text={this.state.error.message} />
+            <CopyButton 
+              text={this.state.error.message} 
+              description="Error message copied to clipboard"
+              className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
+            />
           </div>
         </div>
       );

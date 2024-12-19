@@ -13,6 +13,7 @@ const FailureMessage = ({ failureReason }: FailureMessageProps) => {
       <CopyButton 
         text={failureReason}
         description="Error message copied to clipboard"
+        className="text-red-400 hover:text-red-300 hover:bg-red-900/20"
       />
     </div>
   );
