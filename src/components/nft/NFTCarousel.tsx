@@ -19,13 +19,23 @@ const NFTCarousel = memo(({ connectedAccount }: { connectedAccount?: string }) =
     name: 'nft-carousel'
   });
 
-  console.log('NFTCarousel render - nfts:', nfts);
-  console.log('NFTCarousel render - purchasedNfts:', purchasedNfts);
+  console.log('NFTCarousel render - Available NFTs:', nfts);
+  console.log('NFTCarousel render - Purchased NFTs:', purchasedNfts);
 
-  if (!nfts) return null;
+  if (!nfts || nfts.length === 0) {
+    return (
+      <div className="w-full max-w-5xl mx-auto px-4 text-center py-8">
+        <p className="text-white text-lg">
+          Loading NFTs from the collection...
+          {!connectedAccount && " Please connect your wallet to view and mint NFTs."}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 relative">
+      <h2 className="text-2xl font-bold text-white mb-6">Available NFTs</h2>
       <Carousel
         className="w-full"
         setApi={setApi}

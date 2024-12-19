@@ -6,6 +6,7 @@ import CollectionInfo from "@/components/nft/CollectionInfo";
 import OwnedNFTs from "@/components/nft/OwnedNFTs";
 import TransactionHistory from "@/components/nft/TransactionHistory";
 import NFTCollection from "@/components/nft/NFTCollection";
+import NFTCarousel from "@/components/nft/NFTCarousel";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useNavigate } from "react-router-dom";
 import ContractInfo from "@/components/exchange/ContractInfo";
@@ -111,6 +112,9 @@ const DMCTokenDeployment = () => {
                                 contractAddress={contractAddress}
                                 walletAddress={connectedAccount}
                             />
+                            
+                            {/* Add NFTCarousel here */}
+                            <NFTCarousel connectedAccount={connectedAccount} />
                             
                             <OwnedNFTs walletAddress={connectedAccount} />
                             <TransactionHistory />
