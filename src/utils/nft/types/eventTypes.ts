@@ -1,6 +1,8 @@
 import { ethers } from "ethers";
 
-export interface TransferEventResult extends ethers.utils.Result {
+export interface TransferEventResult {
+  from: string;
+  to: string;
   tokenId: ethers.BigNumber;
 }
 
