@@ -7,7 +7,7 @@ interface FailureMessageProps {
 const FailureMessage = ({ failureReason }: FailureMessageProps) => {
   return (
     <div className="flex justify-between items-start gap-2">
-      <p className="text-red-400">
+      <p className="text-red-400 break-all select-text">
         Failure Reason: {failureReason}
       </p>
       <CopyButton 
