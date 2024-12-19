@@ -54,6 +54,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
 
     console.log("Requesting NFT import to MetaMask...");
     
+    // Structure the request according to MetaMask's ERC721 watchAsset API
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
       params: {
@@ -69,7 +70,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       console.log("NFT successfully added to MetaMask");
       toast({
         title: "Success",
-        description: "NFT added to MetaMask",
+        description: "NFT added to MetaMask. Check your NFTs tab to view it.",
       });
       return true;
     } else {
