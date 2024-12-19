@@ -55,19 +55,30 @@ export const useNFTMintHandler = (connectedAccount?: string, contractAddress?: s
 
       // Wait for transaction confirmation
       const receipt = await tx.wait();
-      console.log("Mint transaction confirmed:", receipt);
+      console.log("Mint transaction confirmed. Full receipt:", receipt);
+      
+      // Log all events for debugging
+      console.log("Transaction events:", receipt.events);
 
-      // Get the token ID from the event logs
-      const mintEvent = receipt.events?.find(
-        (event: any) => event.event === "Transfer" && 
-        event.args.from === ethers.constants.AddressZero
+      // Find the Transfer event
+      const transferEvent = receipt.events?.find(
+        (event: any) => {
+          console.log("Checking event:", event);
+          return event.event === "Transfer" && 
+                 event.args && 
+                 event.args.from && 
+                 event.args.from.toLowerCase() === ethers.constants.AddressZero.toLowerCase();
+        }
       );
 
-      if (!mintEvent) {
-        throw new Error("Could not find mint event in transaction logs");
+      console.log("Found transfer event:", transferEvent);
+
+      if (!transferEvent || !transferEvent.args) {
+        console.error("Transfer event not found or invalid. Events:", receipt.events);
+        throw new Error("Mint transaction succeeded but token details could not be retrieved. Please check your wallet for the minted NFT.");
       }
 
-      const tokenId = mintEvent.args.tokenId.toString();
+      const tokenId = transferEvent.args.tokenId.toString();
       console.log("Minted token ID:", tokenId);
 
       // Record the mint in Supabase
