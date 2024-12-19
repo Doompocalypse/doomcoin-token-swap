@@ -26,12 +26,14 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     });
 
     if (wasAdded) {
+      console.log("NFT successfully added to MetaMask");
       toast({
         title: "Success",
         description: "NFT added to MetaMask",
       });
       return true;
     } else {
+      console.log("User cancelled the NFT import");
       toast({
         title: "Cancelled",
         description: "User cancelled the import",
@@ -42,7 +44,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     console.error("Error importing to MetaMask:", error);
     toast({
       title: "Import Failed",
-      description: "Failed to import NFT to MetaMask",
+      description: "Failed to import NFT to MetaMask. Please verify you own this NFT.",
       variant: "destructive",
     });
     return false;

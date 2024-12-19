@@ -8,6 +8,11 @@ interface NFTOwnershipVerifierProps {
 
 const NFTOwnershipVerifier = async ({ contractAddress, tokenId }: NFTOwnershipVerifierProps) => {
   try {
+    console.log("Verifying NFT ownership...", {
+      contractAddress,
+      tokenId
+    });
+
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     const contract = new ethers.Contract(
       contractAddress,
@@ -15,32 +20,34 @@ const NFTOwnershipVerifier = async ({ contractAddress, tokenId }: NFTOwnershipVe
       provider
     );
     
-    const accounts = await provider.listAccounts();
-    if (!accounts[0]) throw new Error("No wallet connected");
+    // First check if the token exists by trying to get its owner
+    const owner = await contract.ownerOf(tokenId);
+    console.log("Token owner:", owner);
     
-    // First check if the token exists
-    try {
-      await contract.ownerOf(tokenId);
-    } catch (error) {
-      console.error("Token does not exist:", error);
+    // Get the current connected account
+    const accounts = await provider.listAccounts();
+    if (!accounts[0]) {
+      console.log("No wallet connected");
       return false;
     }
     
-    // Then verify ownership
-    const owner = await contract.ownerOf(tokenId);
     const currentAccount = accounts[0].toLowerCase();
     const tokenOwner = owner.toLowerCase();
     
-    console.log("NFT ownership check:", {
+    const isOwner = tokenOwner === currentAccount;
+    console.log("NFT ownership verification:", {
       tokenId,
       owner: tokenOwner,
       currentAccount,
-      isOwner: tokenOwner === currentAccount
+      isOwner
     });
     
-    return tokenOwner === currentAccount;
+    return isOwner;
   } catch (error) {
     console.error("Error verifying ownership:", error);
+    if (error.code === 'CALL_EXCEPTION') {
+      console.log("Token does not exist or other contract error");
+    }
     return false;
   }
 };
