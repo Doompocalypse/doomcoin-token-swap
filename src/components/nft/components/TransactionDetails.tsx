@@ -25,6 +25,16 @@ const TransactionDetails = ({
         });
     };
 
+    const copyFailureReason = () => {
+        if (failureReason) {
+            navigator.clipboard.writeText(failureReason);
+            toast({
+                title: "Copied",
+                description: "Error message copied to clipboard",
+            });
+        }
+    };
+
     const getEtherscanUrl = () => {
         return `https://sepolia.etherscan.io/tx/${transactionHash}`;
     };
@@ -40,9 +50,19 @@ const TransactionDetails = ({
                     {confirmations > 0 && ` (${confirmations} confirmations)`}
                 </p>
                 {status === "Failed" && failureReason && (
-                    <p className="text-red-400">
-                        Failure Reason: {failureReason}
-                    </p>
+                    <div className="flex justify-between items-start gap-2">
+                        <p className="text-red-400">
+                            Failure Reason: {failureReason}
+                        </p>
+                        <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={copyFailureReason}
+                            className="shrink-0"
+                        >
+                            <Copy className="h-4 w-4" />
+                        </Button>
+                    </div>
                 )}
                 <div className="flex gap-2">
                     <Button
