@@ -78,28 +78,28 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
     // Get token metadata
     const name = await contract.name();
     const symbol = await contract.symbol();
-    const tokenURI = await contract.tokenURI(tokenId);
     
+    // Use a default image URL since we're working with video NFTs
+    const tokenImage = "https://placehold.co/600x400?text=NFT+Preview";
+
     console.log("NFT Metadata:", {
       name,
       symbol,
-      tokenURI,
-      tokenId
+      tokenId,
+      tokenImage
     });
 
     // Request MetaMask to watch the asset with proper params structure
     const wasAdded = await window.ethereum.request({
       method: 'wallet_watchAsset',
-      params: [{
+      params: {
         type: 'ERC721',
         options: {
           address: contractAddress,
           tokenId: tokenId,
-          name: name,
-          symbol: symbol,
-          tokenURI: tokenURI
+          image: tokenImage
         },
-      }]
+      },
     });
 
     if (wasAdded) {
@@ -117,7 +117,7 @@ const MetaMaskImporter = async ({ contractAddress, tokenId }: MetaMaskImporterPr
       });
       return false;
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error importing to MetaMask:", {
       error,
       contractAddress,
