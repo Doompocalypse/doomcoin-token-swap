@@ -28,13 +28,13 @@ export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
     console.log("Checking raw log:", log);
     if (log.topics[0] === transferTopic) {
       console.log("Found Transfer event in raw logs:", log);
-      // Parse the tokenId from the last topic (it's the third parameter in the Transfer event)
-      const tokenId = log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined;
+      // Convert the log to an Event object
       return {
-        ...log,
+        ...receipt.events![0], // Use the first event as base to get all Event interface methods
         args: {
-          tokenId
-        }
+          tokenId: log.topics[3] ? ethers.BigNumber.from(log.topics[3]) : undefined
+        },
+        ...log
       };
     }
   }
@@ -48,7 +48,7 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
   
   if (!transferEvent) {
     console.error("No Transfer event found in transaction receipt:", receipt);
-    throw new Error("Transaction succeeded but we couldn't find the token ID. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: " + receipt.transactionHash);
+    throw new Error(`Transaction succeeded but we couldn't find the token ID. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: ${receipt.transactionHash}`);
   }
 
   if (!transferEvent.args) {
@@ -58,23 +58,22 @@ export const validateTransferEvent = (transferEvent: ethers.Event | undefined, r
         "event Transfer(address indexed from, address indexed to, uint256 indexed tokenId)"
       ]);
       
-      // If we have raw log data, try to decode it
-      if ('data' in transferEvent) {
-        const decodedData = iface.parseLog({
-          topics: transferEvent.topics || [],
-          data: transferEvent.data
-        });
-        console.log("Successfully decoded anonymous Transfer event:", decodedData);
-        return {
-          ...transferEvent,
-          args: {
-            tokenId: decodedData.args.tokenId
-          }
-        };
-      }
+      const decodedData = iface.parseLog({
+        topics: transferEvent.topics || [],
+        data: transferEvent.data
+      });
+      
+      console.log("Successfully decoded anonymous Transfer event:", decodedData);
+      
+      // Update the event with decoded args while preserving the Event interface
+      transferEvent.args = {
+        tokenId: decodedData.args.tokenId
+      };
+      
+      return transferEvent;
     } catch (error) {
       console.error("Failed to decode Transfer event:", error);
-      throw new Error("Transaction succeeded but the token ID format was invalid. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: " + receipt.transactionHash);
+      throw new Error(`Transaction succeeded but the token ID format was invalid. Please check your wallet in MetaMask to verify the NFT was minted. The transaction hash is: ${receipt.transactionHash}`);
     }
   }
 
