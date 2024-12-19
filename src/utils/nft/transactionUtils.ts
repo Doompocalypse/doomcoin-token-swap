@@ -23,7 +23,12 @@ const isTransferFromZeroAddress = (event: any) => {
 const logTransferEventStatus = (transferEvent: any, receipt: ethers.ContractReceipt) => {
   if (!transferEvent) {
     console.log("No Transfer event found from zero address");
-    console.log("Available events:", receipt.events);
+    console.log("All events in receipt:", receipt.events?.map(e => ({
+      event: e.event,
+      args: e.args,
+      address: e.address,
+      topics: e.topics
+    })));
   } else {
     console.log("Found Transfer event:", {
       from: transferEvent.args.from,
@@ -35,44 +40,68 @@ const logTransferEventStatus = (transferEvent: any, receipt: ethers.ContractRece
 
 export const findTransferEvent = (receipt: ethers.ContractReceipt) => {
   console.log("Searching for Transfer event in transaction receipt");
+  console.log("Transaction hash:", receipt.transactionHash);
+  console.log("Block number:", receipt.blockNumber);
+  console.log("Gas used:", receipt.gasUsed.toString());
+  
   console.log("All events:", receipt.events?.map(e => ({
     event: e.event,
     args: e.args,
     address: e.address
   })));
 
+  // First try to find a Transfer event from zero address
   const transferEvent = receipt.events?.find(event => {
     logEventDetails(event);
     return isTransferFromZeroAddress(event);
   });
 
-  logTransferEventStatus(transferEvent, receipt);
-  return transferEvent;
+  // If not found, look for any Transfer event as fallback
+  const anyTransferEvent = !transferEvent ? receipt.events?.find(event => event.event === "Transfer") : null;
+
+  logTransferEventStatus(transferEvent || anyTransferEvent, receipt);
+  return transferEvent || anyTransferEvent;
 };
 
 const validateTransferEventExists = (transferEvent: any, receipt: ethers.ContractReceipt) => {
   if (!transferEvent) {
-    console.error("Transfer event not found in receipt. Full receipt:", receipt);
+    console.error("Transfer event details:", {
+      hash: receipt.transactionHash,
+      blockNumber: receipt.blockNumber,
+      events: receipt.events?.map(e => e.event),
+      logs: receipt.logs.map(log => ({
+        topics: log.topics,
+        data: log.data
+      }))
+    });
+    
     throw new Error(
-      "Transaction was successful but the minting event wasn't found in the logs. Your NFT should still be in your wallet - please check MetaMask to verify."
+      "Transaction succeeded but the minting event wasn't found. This can happen if the blockchain is experiencing delays. Your NFT should appear in your wallet shortly - please check MetaMask in a few minutes."
     );
   }
 };
 
 const validateTransferEventArgs = (transferEvent: any) => {
   if (!transferEvent.args) {
-    console.error("Transfer event has invalid format:", transferEvent);
+    console.error("Invalid Transfer event format:", {
+      event: transferEvent.event,
+      topics: transferEvent.topics,
+      data: transferEvent.data
+    });
     throw new Error(
-      "Transaction succeeded but event data was invalid. Please check your wallet to verify the NFT was minted."
+      "Transaction succeeded but event data was invalid. Please check your wallet in a few minutes to verify the NFT was minted."
     );
   }
 };
 
 const validateTokenId = (transferEvent: any) => {
   if (!transferEvent.args.tokenId) {
-    console.error("Transfer event missing tokenId:", transferEvent.args);
+    console.error("Missing tokenId in Transfer event:", {
+      args: transferEvent.args,
+      topics: transferEvent.topics
+    });
     throw new Error(
-      "Transaction succeeded but token ID was not found. Please check your wallet to verify the NFT was minted."
+      "Transaction succeeded but token ID was not found. Please check your wallet in a few minutes to verify the NFT was minted."
     );
   }
 };
