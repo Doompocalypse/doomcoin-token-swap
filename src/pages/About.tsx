@@ -59,9 +59,6 @@ const About = () => {
                   <DropdownMenuItem onClick={() => navigate("/token-deployment-test")} className="cursor-pointer hover:bg-gray-100">
                     Token Deployment Test
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/dmc-token-deployment")} className="cursor-pointer hover:bg-gray-100">
-                    DMC Token Deployment
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">

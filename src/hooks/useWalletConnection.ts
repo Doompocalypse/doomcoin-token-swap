@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -49,13 +49,6 @@ export const useWalletConnection = (
     const handleChainUpdate = async (newChainId: string) => {
       console.log("Chain ID updated:", newChainId);
       setChainId(newChainId);
-      
-      // Disconnect if not on Sepolia
-      if (newChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
-        console.log("Not on Sepolia network, disconnecting");
-        setAccounts([]);
-        onConnect(false);
-      }
     };
 
     if (window.ethereum) {

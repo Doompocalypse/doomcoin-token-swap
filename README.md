@@ -1,4 +1,4 @@
-# DMC Token Deployment Project
+# Welcome to your Lovable project
 
 ## Project info
 

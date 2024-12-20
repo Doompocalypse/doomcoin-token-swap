@@ -9,27 +9,11 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      app_settings: {
-        Row: {
-          key: string
-          value: string
-        }
-        Insert: {
-          key: string
-          value: string
-        }
-        Update: {
-          key?: string
-          value?: string
-        }
-        Relationships: []
-      }
       mock_nfts: {
         Row: {
           created_at: string
           description: string | null
           id: string
-          image_url: string
           name: string
           price: number
           video_url: string
@@ -38,7 +22,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          image_url: string
           name: string
           price: number
           video_url: string
@@ -47,7 +30,6 @@ export type Database = {
           created_at?: string
           description?: string | null
           id?: string
-          image_url?: string
           name?: string
           price?: number
           video_url?: string
@@ -57,21 +39,18 @@ export type Database = {
       mock_purchases: {
         Row: {
           buyer_address: string
-          contract_address: string
           id: string
           nft_id: string
           purchase_date: string
         }
         Insert: {
           buyer_address: string
-          contract_address: string
           id?: string
           nft_id: string
           purchase_date?: string
         }
         Update: {
           buyer_address?: string
-          contract_address?: string
           id?: string
           nft_id?: string
           purchase_date?: string
@@ -91,12 +70,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      get_secret: {
-        Args: {
-          secret_name: string
-        }
-        Returns: string
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

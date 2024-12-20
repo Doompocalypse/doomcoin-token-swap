@@ -7,7 +7,6 @@ import { Suspense } from "react";
 import Index from "./pages/Index";
 import NFTMarketplace from "./pages/About";
 import TokenDeploymentTest from "./pages/TokenDeploymentTest";
-import DMCTokenDeployment from "./pages/DMCTokenDeployment";
 
 const queryClient = new QueryClient();
 
@@ -28,7 +27,6 @@ const App = () => (
             <Route path="/" element={<Index />} />
             <Route path="/about" element={<NFTMarketplace />} />
             <Route path="/token-deployment-test" element={<TokenDeploymentTest />} />
-            <Route path="/dmc-token-deployment" element={<DMCTokenDeployment />} />
           </Routes>
         </BrowserRouter>
       </Suspense>

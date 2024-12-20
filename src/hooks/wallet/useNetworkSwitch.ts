@@ -1,33 +1,36 @@
-import { validateCurrentNetwork } from "./network/networkValidation";
-import { addSepoliaNetwork, switchToSepoliaNetwork } from "./network/networkOperations";
-import { getInfuraConfig } from "./network/networkConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useNetworkSwitch = () => {
-  const switchToSepolia = async (provider: any) => {
-    try {
-      const { currentChainId, isCorrectNetwork } = await validateCurrentNetwork(provider);
-      
-      if (!isCorrectNetwork) {
-        try {
-          await switchToSepoliaNetwork(provider);
-        } catch (switchError: any) {
-          console.error("Network switch error:", switchError);
-          
-          if (switchError.code === 4902) {
-            const infuraProjectId = await getInfuraConfig();
-            await addSepoliaNetwork(provider, infuraProjectId);
-          } else {
-            throw switchError;
-          }
+  const switchToArbitrum = async (provider: any) => {
+    const currentChainId = await provider.request({
+      method: 'eth_chainId'
+    });
+    
+    if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+      try {
+        await provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: ARBITRUM_CHAIN_ID }],
+        });
+      } catch (switchError: any) {
+        console.error("Network switch error:", switchError);
+        if (switchError.code === 4902) {
+          await provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [{
+              chainId: ARBITRUM_CHAIN_ID,
+              chainName: 'Arbitrum One',
+              nativeCurrency: { name: 'ETH', symbol: 'ETH', decimals: 18 },
+              rpcUrls: ['https://arb1.arbitrum.io/rpc'],
+              blockExplorerUrls: ['https://arbiscan.io/']
+            }]
+          });
+        } else {
+          throw switchError;
         }
-      } else {
-        console.log("Already on Sepolia network");
       }
-    } catch (error: any) {
-      console.error("Error in switchToSepolia:", error);
-      throw error;
     }
   };
 
-  return { switchToSepolia };
+  return { switchToArbitrum };
 };

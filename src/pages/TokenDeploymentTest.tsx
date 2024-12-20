@@ -1,19 +1,19 @@
 import { useToast } from "@/components/ui/use-toast";
 import WalletConnect from "@/components/WalletConnect";
 import VideoBackground from "@/components/VideoBackground";
+import NFTCarousel from "@/components/nft/NFTCarousel";
 import ErrorBoundary from "@/components/ErrorBoundary";
-import NFTDeployment from "@/components/nft/NFTDeployment";
+import CountdownTimer from "@/components/CountdownTimer";
+import ProductSlider from "@/components/products/ProductSlider";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Menu, ExternalLink } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Menu } from "lucide-react";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
@@ -21,11 +21,16 @@ const LoadingFallback = () => (
   </div>
 );
 
+const ErrorFallback = () => (
+  <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
+    <div className="text-white text-lg">Something went wrong loading the NFTs. Please try refreshing the page.</div>
+  </div>
+);
+
 const TokenDeploymentTest = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [connectedAccount, setConnectedAccount] = useState<string>();
-  const isMobile = useIsMobile();
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Connection status:", connected, "Account:", account);
@@ -54,9 +59,6 @@ const TokenDeploymentTest = () => {
                   <DropdownMenuItem onClick={() => navigate("/token-deployment-test")} className="cursor-pointer hover:bg-gray-100">
                     Token Deployment Test
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => navigate("/dmc-token-deployment")} className="cursor-pointer hover:bg-gray-100">
-                    DMC Token Deployment
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
               <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
@@ -71,41 +73,34 @@ const TokenDeploymentTest = () => {
 
         {/* Main Content */}
         <main className="pt-24 pb-12 px-4">
-          <div className="w-full max-w-3xl mx-auto space-y-8">
-            <Alert className="bg-blue-900/20 text-blue-100 border-blue-800">
-              <AlertDescription className="flex flex-col gap-2">
-                <p>Need test ETH for deployment? Get Sepolia ETH from these faucets:</p>
-                <div className="flex flex-col gap-1">
-                  <a 
-                    href="https://sepoliafaucet.com/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                  >
-                    Alchemy Faucet <ExternalLink className="h-4 w-4" />
-                  </a>
-                  <a 
-                    href="https://www.infura.io/faucet/sepolia" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                  >
-                    Infura Faucet <ExternalLink className="h-4 w-4" />
-                  </a>
-                  <a 
-                    href="https://faucet.quicknode.com/ethereum/sepolia" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-2 text-blue-300 hover:text-blue-200"
-                  >
-                    QuickNode Faucet <ExternalLink className="h-4 w-4" />
-                  </a>
-                </div>
-              </AlertDescription>
-            </Alert>
-            <ErrorBoundary fallback={<div>Error loading NFT deployment interface</div>}>
-              <NFTDeployment isMobile={isMobile} />
+          <div className="w-full max-w-5xl mx-auto space-y-16">
+            <CountdownTimer />
+            <div className="text-center space-y-4">
+              <h2 className="text-3xl font-bold text-white">Choose your Rank</h2>
+              <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
+                Claim your badge now to breach the portal into the Doompocalypse.
+                <br className="hidden sm:block" />
+                Unlock exclusive perks, bonus resources, and classified intel –
+                <br className="hidden sm:block" />
+                Will you survive the revolution?
+              </p>
+            </div>
+            <ErrorBoundary fallback={<ErrorFallback />}>
+              <NFTCarousel connectedAccount={connectedAccount} />
             </ErrorBoundary>
+
+            {/* Product Slider Section */}
+            <div className="space-y-8">
+              <div className="text-center space-y-4">
+                <h2 className="text-3xl font-bold text-white">Featured Equipment</h2>
+                <p className="text-gray-300 max-w-2xl mx-auto leading-relaxed tracking-wide px-4">
+                  Gear up with cutting-edge technology and equipment.
+                  <br className="hidden sm:block" />
+                  Each item has been field-tested and approved for combat readiness.
+                </p>
+              </div>
+              <ProductSlider />
+            </div>
           </div>
         </main>
       </div>

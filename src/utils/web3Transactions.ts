@@ -1,67 +1,62 @@
-import { queueTransaction } from "./queue/transactionQueue";
-
 const BOT_WALLET = "0x2088891D40e755d83e1990d70fdb7e65a384e9B0";
+const CONTRACT_ADDRESS = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
 
 export const handleTokenExchange = async (userAccount: string, ethValue: string, usdAmount: string) => {
-  console.log("Queueing token exchange transaction...");
+  console.log("Initiating token exchange...");
   console.log("User wallet address:", userAccount);
   console.log("ETH amount to send:", ethValue);
   console.log("USD value (DMC tokens to receive):", usdAmount);
   
-  return queueTransaction(async () => {
-    try {
-      const ethAmount = parseFloat(ethValue);
-      if (isNaN(ethAmount) || ethAmount <= 0) {
-        throw new Error("Invalid ETH amount");
-      }
+  // Convert ETH amount to Wei (1 ETH = 10^18 Wei)
+  const weiValue = BigInt(Math.floor(Number(ethValue) * 1e18)).toString(16);
+  
+  try {
+    // User sends ETH to Bot Wallet with exact amount
+    const transactionParameters = {
+      to: BOT_WALLET,
+      from: userAccount,
+      value: `0x${weiValue}`,
+      data: "0x",
+      // Add gas parameters to ensure transaction uses exact amount
+      gas: undefined,
+      gasPrice: undefined
+    };
 
-      const weiValue = BigInt(Math.floor(ethAmount * 1e18));
-      console.log("Wei value for transaction:", weiValue.toString());
-      
-      const hexValue = weiValue.toString(16);
-      console.log("Hex value for transaction:", hexValue);
+    console.log("Transaction parameters:", transactionParameters);
+    
+    // Send ETH transaction with exact amount
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [transactionParameters],
+    });
 
-      const transactionParameters = {
-        to: BOT_WALLET,
-        from: userAccount,
-        value: `0x${hexValue}`,
-        data: "0x",
-      };
+    console.log("ETH Transaction hash:", txHash);
 
-      console.log("Transaction parameters:", transactionParameters);
-      
-      const txHash = await window.ethereum.request({
-        method: 'eth_sendTransaction',
-        params: [transactionParameters],
-      });
+    // Call our Edge Function to process the DMC token transfer using the correct URL format
+    const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        buyerAddress: userAccount,
+        ethAmount: ethValue,
+        dmcAmount: usdAmount,
+      }),
+    });
 
-      console.log("ETH Transaction hash:", txHash);
-
-      const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/process-eth-transaction', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          buyerAddress: userAccount,
-          ethAmount: ethValue,
-          dmcAmount: usdAmount,
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("Edge function error:", errorData);
-        throw new Error(errorData.message || 'Failed to process DMC token transfer');
-      }
-
-      const result = await response.json();
-      console.log("DMC transfer result:", result);
-
-      return { txHash };
-    } catch (error) {
-      console.error("Transaction error:", error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      console.error("Edge function error:", errorData);
+      throw new Error(errorData.message || 'Failed to process DMC token transfer');
     }
-  });
+
+    const result = await response.json();
+    console.log("DMC transfer result:", result);
+
+    return { txHash };
+  } catch (error) {
+    console.error("Transaction error:", error);
+    throw error;
+  }
 };
