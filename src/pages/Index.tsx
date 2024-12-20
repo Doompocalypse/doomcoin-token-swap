@@ -64,9 +64,6 @@ const Index = () => {
                     <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer hover:bg-gray-100">
                       NFT Marketplace
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/token-deployment-test")} className="cursor-pointer hover:bg-gray-100">
-                      Token Deployment Test
-                    </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
                 <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
