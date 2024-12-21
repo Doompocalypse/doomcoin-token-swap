@@ -43,6 +43,7 @@ const NFTCarousel = memo(({ connectedAccount }: { connectedAccount?: string }) =
                 imageUrl={nft.image_url}
                 onPurchase={handlePurchase}
                 isPurchased={purchasedNfts?.includes(nft.id) ?? false}
+                connectedAccount={connectedAccount}
               />
             </CarouselItem>
           ))}

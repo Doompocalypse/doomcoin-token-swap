@@ -14,6 +14,7 @@ interface NFTCardProps {
   imageUrl: string;
   isPurchased: boolean;
   onPurchase: (id: string) => void;
+  connectedAccount?: string;
 }
 
 const NFTCard = memo(({ 
@@ -24,7 +25,8 @@ const NFTCard = memo(({
   videoUrl,
   imageUrl, 
   isPurchased, 
-  onPurchase 
+  onPurchase,
+  connectedAccount
 }: NFTCardProps) => {
   console.log(`Rendering NFTCard: ${name}`);
   
@@ -55,6 +57,7 @@ const NFTCard = memo(({
           discountedPrice={discountedPrice}
           isPurchased={isPurchased}
           onPurchase={handlePurchase}
+          connectedAccount={connectedAccount}
         />
       </div>
     </Card>
