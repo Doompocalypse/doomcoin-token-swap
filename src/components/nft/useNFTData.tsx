@@ -7,6 +7,7 @@ export interface NFT {
   description: string | null;
   price: number;
   video_url: string;
+  image_url: string;
 }
 
 export const useNFTData = (connectedAccount?: string) => {
