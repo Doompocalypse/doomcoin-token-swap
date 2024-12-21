@@ -1,10 +1,14 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { getDMCBalance } from "@/utils/web3Transactions";
 
-export const useNFTPurchaseHandler = (connectedAccount?: string) => {
+export const useNFTPurchaseHandler = (
+  connectedAccount?: string,
+  onInsufficientBalance?: () => void
+) => {
   const { toast } = useToast();
 
-  const handlePurchase = async (nftId: string) => {
+  const handlePurchase = async (nftId: string, price: number) => {
     if (!connectedAccount) {
       toast({
         title: "Wallet Required",
@@ -15,12 +19,22 @@ export const useNFTPurchaseHandler = (connectedAccount?: string) => {
     }
 
     try {
+      // Check DMC balance
+      const balance = await getDMCBalance(connectedAccount);
+      console.log("User DMC balance:", balance, "Required:", price);
+      
+      if (balance < price) {
+        console.log("Insufficient DMC balance");
+        onInsufficientBalance?.();
+        return;
+      }
+
       const { error } = await supabase
         .from('mock_purchases')
         .insert({
           nft_id: nftId,
           buyer_address: connectedAccount,
-          contract_address: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073" // Default contract address
+          contract_address: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073"
         });
 
       if (error) throw error;
