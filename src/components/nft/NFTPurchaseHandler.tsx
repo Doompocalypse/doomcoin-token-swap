@@ -17,9 +17,11 @@ export const useNFTPurchaseHandler = (connectedAccount?: string) => {
     try {
       const { error } = await supabase
         .from('mock_purchases')
-        .insert([
-          { nft_id: nftId, buyer_address: connectedAccount }
-        ]);
+        .insert({
+          nft_id: nftId,
+          buyer_address: connectedAccount,
+          contract_address: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073" // Default contract address
+        });
 
       if (error) throw error;
 

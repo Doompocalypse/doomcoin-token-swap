@@ -7,6 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import NFTCard from './NFTCard';
+import { MysteryBox } from './MysteryBox';
 import { useNFTData } from './useNFTData';
 import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
 import { useCarouselRotation } from '@/hooks/useCarouselRotation';
@@ -26,6 +27,9 @@ const NFTCarousel = memo(({ connectedAccount }: { connectedAccount?: string }) =
 
   return (
     <div className="w-full max-w-5xl mx-auto px-4 relative">
+      <div className="mb-8">
+        <MysteryBox connectedAccount={connectedAccount} />
+      </div>
       <Carousel
         className="w-full"
         setApi={setApi}
