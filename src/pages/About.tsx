@@ -4,7 +4,7 @@ import VideoBackground from "@/components/VideoBackground";
 import NFTCarousel from "@/components/nft/NFTCarousel";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import CountdownTimer from "@/components/CountdownTimer";
-import ProductSlider from "@/components/products/ProductSlider";
+import { MysteryBox } from "@/components/nft/MysteryBox";
 import { Suspense, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -86,7 +86,7 @@ const About = () => {
               <NFTCarousel connectedAccount={connectedAccount} />
             </ErrorBoundary>
 
-            {/* Product Slider Section */}
+            {/* Mystery Box Section (Formerly Product Slider) */}
             <div className="space-y-8">
               <div className="text-center space-y-4">
                 <h2 className="text-3xl font-bold text-white">Fragmented Masterpieces: A Post-Apocalyptic NFT Collection</h2>
@@ -94,7 +94,9 @@ const About = () => {
                   Salvage remnants of the doomed world's most iconic art collections. Gather all the scattered fragments to restore your pieces back to priceless condition. Claim your place among the elite collectors of the post-apocalyptic era or capitalize on your finds.
                 </p>
               </div>
-              <ProductSlider />
+              <div className="w-full max-w-3xl mx-auto px-4">
+                <MysteryBox connectedAccount={connectedAccount} />
+              </div>
             </div>
           </div>
         </main>
