@@ -12,7 +12,7 @@ const LoadingFallback = () => (
   </div>
 );
 
-const About = () => {
+const NFTMarketplace = () => {
   const { toast } = useToast();
   const [connectedAccount, setConnectedAccount] = useState<string>();
 
@@ -38,4 +38,4 @@ const About = () => {
   );
 };
 
-export default About;
+export default NFTMarketplace;
