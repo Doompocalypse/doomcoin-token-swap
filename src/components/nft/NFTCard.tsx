@@ -32,11 +32,8 @@ const NFTCard = memo(({
     onPurchase(id);
   };
 
-  // Calculate discounted price (20% off)
-  const discountedPrice = Math.floor(price * 0.8);
-  
-  // Mock time left (24 hours from now)
-  const timeLeft = "in 24 hours";
+  // Calculate discounted price (50% off)
+  const discountedPrice = Math.floor(price * 0.5);
 
   return (
     <Card className="w-full max-w-[400px] mx-auto bg-black/40 border-[#8E9196]/20">
@@ -56,7 +53,6 @@ const NFTCard = memo(({
         <PriceSection
           originalPrice={price}
           discountedPrice={discountedPrice}
-          timeLeft={timeLeft}
           isPurchased={isPurchased}
           onPurchase={handlePurchase}
         />

@@ -4,7 +4,6 @@ import { useToast } from "@/components/ui/use-toast";
 interface PriceSectionProps {
   originalPrice: number;
   discountedPrice: number;
-  timeLeft: string;
   isPurchased: boolean;
   onPurchase: () => void;
 }
@@ -12,7 +11,6 @@ interface PriceSectionProps {
 const PriceSection = ({ 
   originalPrice, 
   discountedPrice, 
-  timeLeft, 
   isPurchased, 
   onPurchase 
 }: PriceSectionProps) => {
@@ -34,7 +32,6 @@ const PriceSection = ({
 
   return (
     <div className="mt-2 border-t border-gray-700 pt-2">
-      <div className="text-sm text-yellow-400 mb-1">Sale ends {timeLeft}</div>
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
           <span className="text-gray-400 line-through text-sm">${formattedOriginalPrice} DMC</span>
