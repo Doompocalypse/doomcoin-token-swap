@@ -30,9 +30,9 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
     // Start animation sequence
     setTimeout(() => {
       setShowNFT(true);
-      // After showing NFT, trigger purchase with both id and price
+      // After showing NFT, trigger purchase
       if (randomNFT) {
-        handlePurchase(randomNFT.id, randomNFT.price);
+        handlePurchase(randomNFT.id);
       }
     }, 3000); // Wait for animation to complete
   };

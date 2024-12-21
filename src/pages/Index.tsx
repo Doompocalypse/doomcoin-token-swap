@@ -49,6 +49,7 @@ const Index = () => {
       <Suspense fallback={<LoadingFallback />}>
         <VideoBackground />
         <div className="relative min-h-screen">
+          {/* Header */}
           <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
               <div className="flex items-center gap-4">
@@ -60,7 +61,7 @@ const Index = () => {
                     <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                       Token Swap
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
+                    <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer hover:bg-gray-100">
                       NFT Marketplace
                     </DropdownMenuItem>
                   </DropdownMenuContent>
@@ -73,6 +74,7 @@ const Index = () => {
             </div>
           </header>
 
+          {/* Main Content */}
           <main className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
             <div className="w-full max-w-2xl mx-auto">
               <TokenExchange 
