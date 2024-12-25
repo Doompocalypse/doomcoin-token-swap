@@ -27,7 +27,7 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
         <Button 
           onClick={onMint}
           disabled={!isConnected}
-          className="bg-white hover:bg-white/90 text-white mt-4"
+          className="bg-white hover:bg-white/90 text-black mt-4"
         >
           Mint Random NFT
         </Button>
