@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { useNFTData } from './useNFTData';
 import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
+import VideoPlayer from './VideoPlayer';
 
 interface MysteryBoxProps {
   connectedAccount?: string;
@@ -12,23 +13,26 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
   const [isOpening, setIsOpening] = useState(false);
   const [selectedNFT, setSelectedNFT] = useState<any>(null);
   const [showNFT, setShowNFT] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
   const { nfts } = useNFTData(connectedAccount);
   const handlePurchase = useNFTPurchaseHandler(connectedAccount);
 
   const selectRandomNFT = () => {
     if (!nfts || nfts.length === 0) return null;
-    const availableNFTs = nfts.filter(nft => !nft.name.includes('[Restored]')); // Exclude restored NFTs
+    const availableNFTs = nfts.filter(nft => !nft.name.includes('[Restored]'));
     const randomIndex = Math.floor(Math.random() * availableNFTs.length);
     return availableNFTs[randomIndex];
   };
 
   const handleMysteryMint = async () => {
     setIsOpening(true);
+    setShowVideo(true);
     const randomNFT = selectRandomNFT();
     setSelectedNFT(randomNFT);
     
     // Start animation sequence
     setTimeout(() => {
+      setShowVideo(false);
       setShowNFT(true);
       // After showing NFT, trigger purchase with both id and price
       if (randomNFT) {
@@ -40,6 +44,7 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
   useEffect(() => {
     if (!isOpening) {
       setShowNFT(false);
+      setShowVideo(false);
       setSelectedNFT(null);
     }
   }, [isOpening]);
@@ -80,6 +85,11 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
             }}
             className="relative aspect-square bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-lg shadow-2xl border border-zinc-700 overflow-hidden"
           >
+            {showVideo && (
+              <div className="absolute inset-0">
+                <VideoPlayer videoUrl="https://vimeo.com/1042150904" />
+              </div>
+            )}
             {showNFT && selectedNFT && (
               <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/80 backdrop-blur-sm">
                 <h3 className="text-2xl font-bold text-white mb-2">{selectedNFT.name}</h3>
