@@ -11,7 +11,7 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
     initial={{ scale: 1 }}
     animate={{ scale: [1, 1.02, 1] }}
     transition={{ repeat: Infinity, duration: 2 }}
-    className="relative aspect-square bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-lg shadow-2xl border border-zinc-700"
+    className="relative aspect-square rounded-lg shadow-2xl"
   >
     <div className="absolute inset-0">
       <img 
