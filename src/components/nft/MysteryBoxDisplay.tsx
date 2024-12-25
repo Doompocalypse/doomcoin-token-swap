@@ -15,12 +15,12 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
   >
     <div className="absolute inset-0">
       <img 
-        src="/lovable-uploads/b308780d-5958-4293-8455-a5764a72141d.png" 
+        src="/lovable-uploads/42fc647d-a273-4c0f-8093-833efae8bc9c.png" 
         alt="Mystery Box"
-        className="w-full h-full object-contain p-8"
+        className="w-full h-full object-fill"
       />
     </div>
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-transparent backdrop-blur-sm">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-transparent">
       <h3 className="text-2xl font-bold text-white mb-4">Mystery NFT Box</h3>
       <p className="text-white mb-6">Mint a random NFT from the collection</p>
       <Button 
