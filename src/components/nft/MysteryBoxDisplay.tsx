@@ -22,14 +22,14 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
     </div>
     <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-transparent">
       <h3 className="text-2xl font-bold text-white mb-4">Mystery NFT Box</h3>
+      <p className="text-white mt-4">Mint a random NFT from the collection</p>
       <Button 
         onClick={onMint}
         disabled={!isConnected}
-        className="bg-white hover:bg-white/90 text-white mb-4"
+        className="bg-white hover:bg-white/90 text-white mt-4"
       >
         Mint Mystery NFT
       </Button>
-      <p className="text-white mt-4">Mint a random NFT from the collection</p>
     </div>
   </motion.div>
 );
