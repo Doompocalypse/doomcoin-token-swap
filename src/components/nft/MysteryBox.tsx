@@ -30,7 +30,7 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
     const randomNFT = selectRandomNFT();
     setSelectedNFT(randomNFT);
     
-    // Start animation sequence
+    // Start animation sequence with longer duration (8 seconds)
     setTimeout(() => {
       setShowVideo(false);
       setShowNFT(true);
@@ -38,7 +38,7 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
       if (randomNFT) {
         handlePurchase(randomNFT.id, randomNFT.price);
       }
-    }, 3000); // Wait for animation to complete
+    }, 8000); // Increased to 8 seconds to match video duration
   };
 
   useEffect(() => {
@@ -87,7 +87,7 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
           >
             {showVideo && (
               <div className="absolute inset-0">
-                <VideoPlayer videoUrl="https://vimeo.com/1042150904" />
+                <VideoPlayer videoUrl="https://player.vimeo.com/video/1042150904" />
               </div>
             )}
             {showNFT && selectedNFT && (
