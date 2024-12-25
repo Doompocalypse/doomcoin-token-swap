@@ -20,9 +20,9 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
         className="w-full h-full object-contain p-8"
       />
     </div>
-    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-sm">
+    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-transparent backdrop-blur-sm">
       <h3 className="text-2xl font-bold text-white mb-4">Mystery NFT Box</h3>
-      <p className="text-zinc-400 mb-6">Mint a random NFT from the collection</p>
+      <p className="text-white mb-6">Mint a random NFT from the collection</p>
       <Button 
         onClick={onMint}
         disabled={!isConnected}
