@@ -12,6 +12,12 @@ Deno.serve(async (req) => {
   }
 
   try {
+    // Verify authorization header is present
+    const authHeader = req.headers.get('Authorization')
+    if (!authHeader) {
+      throw new Error('Missing authorization header')
+    }
+
     const { address } = await req.json()
     console.log('Checking DMC balance for address:', address)
 
@@ -38,7 +44,7 @@ Deno.serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
+        status: error.message.includes('authorization') ? 401 : 500,
       }
     )
   }

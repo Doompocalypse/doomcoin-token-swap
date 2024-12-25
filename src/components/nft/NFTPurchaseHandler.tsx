@@ -1,6 +1,5 @@
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { getDMCBalance } from "@/utils/web3Transactions";
 
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
@@ -19,8 +18,17 @@ export const useNFTPurchaseHandler = (
     }
 
     try {
-      // Check DMC balance
-      const balance = await getDMCBalance(connectedAccount);
+      // Check DMC balance using Supabase function invoke
+      const { data, error: balanceError } = await supabase.functions.invoke('get-dmc-balance', {
+        body: { address: connectedAccount }
+      });
+      
+      if (balanceError) {
+        console.error("Error fetching DMC balance:", balanceError);
+        throw balanceError;
+      }
+
+      const balance = data.balance;
       console.log("User DMC balance:", balance, "Required:", price);
       
       if (balance < price) {
