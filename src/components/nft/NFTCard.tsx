@@ -2,7 +2,6 @@ import { memo } from 'react';
 import { Card } from "@/components/ui/card";
 import Description from "./Description";
 import PriceSection from "./PriceSection";
-import VideoPlayer from "./VideoPlayer";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 
 interface NFTCardProps {
@@ -21,7 +20,6 @@ const NFTCard = memo(({
   name, 
   description, 
   price, 
-  videoUrl,
   imageUrl, 
   isPurchased, 
   onPurchase 
@@ -41,11 +39,8 @@ const NFTCard = memo(({
         <img 
           src={imageUrl} 
           alt={name}
-          className="absolute inset-0 w-full h-full object-cover z-10"
+          className="w-full h-full object-cover"
         />
-        <div className="absolute inset-0 z-0">
-          <VideoPlayer videoUrl={videoUrl} />
-        </div>
       </AspectRatio>
       <div className="p-6">
         <h3 className="text-2xl font-bold text-white mb-4">{name}</h3>
