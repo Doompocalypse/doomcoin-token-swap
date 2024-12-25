@@ -29,7 +29,7 @@ const MysteryBoxDisplay = ({ onMint, isConnected }: MysteryBoxDisplayProps) => (
           disabled={!isConnected}
           className="bg-white hover:bg-white/90 text-white mt-4"
         >
-          Mint Mystery NFT
+          Mint Random NFT
         </Button>
       </div>
     </div>
