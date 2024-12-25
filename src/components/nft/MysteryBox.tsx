@@ -30,15 +30,13 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
     const randomNFT = selectRandomNFT();
     setSelectedNFT(randomNFT);
     
-    // Start animation sequence with longer duration (8 seconds)
     setTimeout(() => {
       setShowVideo(false);
       setShowNFT(true);
-      // After showing NFT, trigger purchase with both id and price
       if (randomNFT) {
         handlePurchase(randomNFT.id, randomNFT.price);
       }
-    }, 8000); // Increased to 8 seconds to match video duration
+    }, 8000);
   };
 
   useEffect(() => {
@@ -59,7 +57,14 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
             transition={{ repeat: Infinity, duration: 2 }}
             className="relative aspect-square bg-gradient-to-b from-zinc-800 to-zinc-900 rounded-lg shadow-2xl border border-zinc-700"
           >
-            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center">
+            <div className="absolute inset-0">
+              <img 
+                src="/lovable-uploads/b308780d-5958-4293-8455-a5764a72141d.png" 
+                alt="Mystery Box"
+                className="w-full h-full object-contain p-8"
+              />
+            </div>
+            <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center bg-black/40 backdrop-blur-sm">
               <h3 className="text-2xl font-bold text-white mb-4">Mystery NFT Box</h3>
               <p className="text-zinc-400 mb-6">Mint a random NFT from the collection</p>
               <Button 
