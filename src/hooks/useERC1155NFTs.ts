@@ -30,7 +30,7 @@ const NFT_METADATA = {
     name: "STRATEGIST",
     description: "Strategic planning tier with advanced features. Strategists gain:\n• All Commander benefits\n• Strategy development participation\n• Exclusive game mode access\n• Unique tactical advantages",
     price: 100,
-    imageUrl: "/lovable-uploads/b308780d-5958-4293-8455-a5764a72141d.png"
+    imageUrl: "/lovable-uploads/8191419d-f56c-42f6-9a49-f24545a0f96d.png"
   },
   4: {
     name: "VANGUARD",
