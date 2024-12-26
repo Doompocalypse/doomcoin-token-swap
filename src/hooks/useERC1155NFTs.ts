@@ -30,25 +30,25 @@ const NFT_METADATA = {
     name: "STRATEGIST",
     description: "Strategic planning tier with advanced features. Strategists gain:\n• All Commander benefits\n• Strategy development participation\n• Exclusive game mode access\n• Unique tactical advantages",
     price: 100,
-    imageUrl: "/lovable-uploads/8191419d-f56c-42f6-9a49-f24545a0f96d.png"
+    imageUrl: "/lovable-uploads/891b743e-2062-4c3b-80c1-45227469d7d1.png"
   },
   4: {
     name: "VANGUARD",
     description: "Elite combat tier with special privileges. Vanguards unlock:\n• All Strategist benefits\n• First access to new features\n• Custom character skins\n• Special combat abilities",
     price: 1000,
-    imageUrl: "/lovable-uploads/e44b3548-ea37-46f5-8dad-d5f813973c93.png"
+    imageUrl: "/lovable-uploads/8191419d-f56c-42f6-9a49-f24545a0f96d.png"
   },
   5: {
     name: "ARCHITECT",
     description: "Master builder tier with creative powers. Architects receive:\n• All Vanguard benefits\n• World building privileges\n• Custom structure designs\n• Resource generation boost",
     price: 100000,
-    imageUrl: "/lovable-uploads/08dbf822-7596-48b7-9f0f-f0ea7a4ae93b.png"
+    imageUrl: "/lovable-uploads/e44b3548-ea37-46f5-8dad-d5f813973c93.png"
   },
   6: {
     name: "VISIONARY",
     description: "The highest tier with ultimate benefits. Visionaries gain:\n• All Architect benefits\n• Game development input\n• Exclusive NFT airdrops\n• Legendary status in-game\n• Revenue sharing opportunities",
     price: 1000000,
-    imageUrl: "/lovable-uploads/891b743e-2062-4c3b-80c1-45227469d7d1.png"
+    imageUrl: "/lovable-uploads/e44b3548-ea37-46f5-8dad-d5f813973c93.png"
   }
 };
 
