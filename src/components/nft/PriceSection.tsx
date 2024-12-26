@@ -15,8 +15,12 @@ const PriceSection = ({
   onPurchase 
 }: PriceSectionProps) => {
   const { toast } = useToast();
-  const formattedOriginalPrice = new Intl.NumberFormat('en-US').format(originalPrice);
-  const formattedDiscountedPrice = new Intl.NumberFormat('en-US').format(discountedPrice);
+  const formattedOriginalPrice = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(originalPrice);
+  const formattedDiscountedPrice = new Intl.NumberFormat('en-US', {
+    maximumFractionDigits: 0
+  }).format(discountedPrice);
 
   const handlePurchase = () => {
     if (isPurchased) {
@@ -34,8 +38,8 @@ const PriceSection = ({
     <div className="mt-2 border-t border-gray-700 pt-2">
       <div className="flex justify-between items-center">
         <div className="flex flex-col">
-          <span className="text-gray-400 line-through text-sm">${formattedOriginalPrice} DMC</span>
-          <span className="text-white font-bold">${formattedDiscountedPrice} DMC</span>
+          <span className="text-gray-400 line-through text-sm">{formattedOriginalPrice} DMC</span>
+          <span className="text-white font-bold">{formattedDiscountedPrice} DMC</span>
         </div>
         <Button 
           onClick={handlePurchase}
