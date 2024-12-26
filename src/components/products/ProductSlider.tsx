@@ -58,13 +58,15 @@ const products = [
     imageUrl: "/lovable-uploads/0c37c47b-cfd2-4cc0-9cbe-c285a6d4ff34.png",
     price: 249.99
   }
-];
+].sort((a, b) => a.price - b.price);
 
 const ProductSlider = memo(() => {
   const { setApi } = useCarouselRotation({ 
     itemsLength: products.length,
     name: 'product-slider'
   });
+
+  console.log('Rendering ProductSlider with sorted products:', products);
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 relative">
