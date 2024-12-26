@@ -18,7 +18,7 @@ const NFT_METADATA = {
     name: "SURVIVOR",
     description: "The foundation tier of the Doom-POCalypse universe. Survivors get:\n• Early access to game testing\n• Community discord access\n• Basic in-game rewards",
     price: 100,
-    imageUrl: "/lovable-uploads/487e5911-d4ae-44d8-82fb-363df9cc1eff.png"
+    imageUrl: "/lovable-uploads/d89c3541-c973-4fc0-9fe9-7adf6ad0a40c.png"
   },
   2: {
     name: "COMMANDER",
