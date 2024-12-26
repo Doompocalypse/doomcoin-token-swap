@@ -18,7 +18,7 @@ const NFT_METADATA = {
     name: "SURVIVOR",
     description: "The foundation tier of the Doom-POCalypse universe. Survivors get:\n• Early access to game testing\n• Community discord access\n• Basic in-game rewards",
     price: 100,
-    imageUrl: "/lovable-uploads/d89c3541-c973-4fc0-9fe9-7adf6ad0a40c.png"
+    imageUrl: "/lovable-uploads/487e5911-d4ae-44d8-82fb-363df9cc1eff.png"
   },
   2: {
     name: "COMMANDER",
@@ -27,7 +27,7 @@ const NFT_METADATA = {
     imageUrl: "/lovable-uploads/b782cb08-ff38-49a9-a223-199ae309434f.png"
   },
   3: {
-    name: "STRATEGIST",
+    name: "STRATEGIST", 
     description: "Strategic planning tier with advanced features. Strategists gain:\n• All Commander benefits\n• Strategy development participation\n• Exclusive game mode access\n• Unique tactical advantages",
     price: 400,
     imageUrl: "/lovable-uploads/f8c3764a-5c61-450a-8fff-4f7daf9d6b24.png"
