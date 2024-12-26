@@ -1,5 +1,4 @@
 import NFTCarousel from "@/components/nft/NFTCarousel";
-import ProductSlider from "@/components/products/ProductSlider";
 
 interface NFTSectionProps {
   connectedAccount?: string;
@@ -15,8 +14,6 @@ const NFTSection = ({ connectedAccount, onInsufficientBalance }: NFTSectionProps
           Choose your tier to gain early access and exclusive rewards in the Doom-POCalypse universe
         </p>
       </div>
-      
-      <ProductSlider />
       
       <div className="pt-8">
         <NFTCarousel 
