@@ -24,10 +24,13 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
     name: 'nft-carousel'
   });
 
-  console.log('NFTCarousel render - nfts:', nfts);
+  // Sort NFTs by price if they exist
+  const sortedNfts = nfts?.sort((a, b) => a.price - b.price);
+  
+  console.log('NFTCarousel render - nfts:', sortedNfts);
 
   if (isLoading) return <div>Loading NFTs...</div>;
-  if (!nfts) return null;
+  if (!sortedNfts) return null;
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 relative">
@@ -40,7 +43,7 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
         }}
       >
         <CarouselContent className="-ml-4">
-          {nfts.map((nft) => (
+          {sortedNfts.map((nft) => (
             <CarouselItem key={nft.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
               <div className="p-1">
                 <NFTCard
