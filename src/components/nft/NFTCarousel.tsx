@@ -30,7 +30,7 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
   if (!nfts) return null;
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 relative">
+    <div className="w-full max-w-6xl mx-auto px-4 relative">
       <Carousel
         className="w-full"
         setApi={setApi}
@@ -41,12 +41,14 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
       >
         <CarouselContent className="-ml-4">
           {nfts.map((nft) => (
-            <CarouselItem key={nft.id} className="pl-4 basis-auto md:basis-1/2 lg:basis-1/3">
-              <NFTCard
-                {...nft}
-                onPurchase={() => handlePurchase(nft.id, nft.price)}
-                isPurchased={purchasedNfts?.includes(nft.id) ?? false}
-              />
+            <CarouselItem key={nft.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+              <div className="p-1">
+                <NFTCard
+                  {...nft}
+                  onPurchase={() => handlePurchase(nft.id, nft.price)}
+                  isPurchased={purchasedNfts?.includes(nft.id) ?? false}
+                />
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
