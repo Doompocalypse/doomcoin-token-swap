@@ -18,37 +18,37 @@ const NFT_METADATA = {
     name: "SURVIVOR",
     description: "The foundation tier of the Doom-POCalypse universe. Survivors get:\n• Early access to game testing\n• Community discord access\n• Basic in-game rewards",
     price: 0.0069,
-    imageUrl: "https://i.seadn.io/gcs/files/c2c3c5f4b5d8e6f7a8b9c0d1e2f3a4b5.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/8f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   },
   2: {
     name: "COMMANDER",
     description: "A leadership tier with enhanced benefits. Commanders receive:\n• All Survivor benefits\n• Priority game testing access\n• Exclusive Commander-only events\n• Special in-game cosmetics",
     price: 0.0169,
-    imageUrl: "https://i.seadn.io/gcs/files/d3c4e5f6g7h8i9j0k1l2m3n4o5p6q7.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/9f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   },
   3: {
     name: "STRATEGIST",
     description: "Strategic planning tier with advanced features. Strategists gain:\n• All Commander benefits\n• Strategy development participation\n• Exclusive game mode access\n• Unique tactical advantages",
     price: 0.0269,
-    imageUrl: "https://i.seadn.io/gcs/files/e4f5g6h7i8j9k0l1m2n3o4p5q6r7s8.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/7f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   },
   4: {
     name: "VANGUARD",
     description: "Elite combat tier with special privileges. Vanguards unlock:\n• All Strategist benefits\n• First access to new features\n• Custom character skins\n• Special combat abilities",
     price: 0.0369,
-    imageUrl: "https://i.seadn.io/gcs/files/f5g6h7i8j9k0l1m2n3o4p5q6r7s8t9.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/6f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   },
   5: {
     name: "ARCHITECT",
     description: "Master builder tier with creative powers. Architects receive:\n• All Vanguard benefits\n• World building privileges\n• Custom structure designs\n• Resource generation boost",
     price: 0.0469,
-    imageUrl: "https://i.seadn.io/gcs/files/g6h7i8j9k0l1m2n3o4p5q6r7s8t9u0.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/5f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   },
   6: {
     name: "VISIONARY",
     description: "The highest tier with ultimate benefits. Visionaries gain:\n• All Architect benefits\n• Game development input\n• Exclusive NFT airdrops\n• Legendary status in-game\n• Revenue sharing opportunities",
     price: 0.0569,
-    imageUrl: "https://i.seadn.io/gcs/files/h7i8j9k0l1m2n3o4p5q6r7s8t9u0v1.png?auto=format&w=1000"
+    imageUrl: "https://i.seadn.io/gcs/files/4f7d86c8e9f8c0c0f7f9f8c0c0f7f9f8.png?auto=format&dpr=1&w=1000"
   }
 };
 
