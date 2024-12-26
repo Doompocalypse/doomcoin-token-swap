@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import NFTCard from './NFTCard';
-import { useNFTData } from './useNFTData';
+import { useRealNFTData } from '@/hooks/useRealNFTData';
 import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
 import { useCarouselRotation } from '@/hooks/useCarouselRotation';
 
@@ -17,7 +17,7 @@ interface NFTCarouselProps {
 }
 
 const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarouselProps) => {
-  const { nfts, purchasedNfts } = useNFTData(connectedAccount);
+  const { nfts, purchasedNfts } = useRealNFTData(connectedAccount);
   const handlePurchase = useNFTPurchaseHandler(connectedAccount, onInsufficientBalance);
   const { setApi } = useCarouselRotation({ 
     itemsLength: nfts?.length || 0,
@@ -44,8 +44,6 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
             <CarouselItem key={nft.id} className="pl-4 basis-auto md:basis-1/2 lg:basis-1/3">
               <NFTCard
                 {...nft}
-                videoUrl={nft.video_url}
-                imageUrl={nft.image_url}
                 onPurchase={() => handlePurchase(nft.id, nft.price)}
                 isPurchased={purchasedNfts?.includes(nft.id) ?? false}
               />

@@ -86,6 +86,56 @@ export type Database = {
           },
         ]
       }
+      real_nft_purchases: {
+        Row: {
+          buyer_address: string
+          id: string
+          purchase_date: string
+          token_id: string
+          transaction_hash: string | null
+        }
+        Insert: {
+          buyer_address: string
+          id?: string
+          purchase_date?: string
+          token_id: string
+          transaction_hash?: string | null
+        }
+        Update: {
+          buyer_address?: string
+          id?: string
+          purchase_date?: string
+          token_id?: string
+          transaction_hash?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "real_nft_purchases_token_id_fkey"
+            columns: ["token_id"]
+            isOneToOne: false
+            referencedRelation: "real_nfts"
+            referencedColumns: ["token_id"]
+          },
+        ]
+      }
+      real_nfts: {
+        Row: {
+          created_at: string
+          metadata: Json
+          token_id: string
+        }
+        Insert: {
+          created_at?: string
+          metadata: Json
+          token_id: string
+        }
+        Update: {
+          created_at?: string
+          metadata?: Json
+          token_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
