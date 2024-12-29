@@ -31,10 +31,29 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
 
   if (nftsError) {
     console.error('Error loading NFTs:', nftsError);
-    return <div className="text-white">Error loading NFTs. Please try again later.</div>;
+    return (
+      <div className="text-white text-center p-4">
+        <p className="text-xl font-semibold mb-2">Error loading NFTs</p>
+        <p className="text-gray-400">Please check your network connection and try again later.</p>
+      </div>
+    );
   }
   
-  if (!sortedNfts) return <div className="text-white">Loading NFTs...</div>;
+  if (!sortedNfts) {
+    return (
+      <div className="text-white text-center p-4">
+        <p className="text-xl">Loading NFTs...</p>
+      </div>
+    );
+  }
+
+  if (sortedNfts.length === 0) {
+    return (
+      <div className="text-white text-center p-4">
+        <p className="text-xl">No NFTs available at the moment</p>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 relative">

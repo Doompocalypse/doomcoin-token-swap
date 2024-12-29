@@ -4,10 +4,10 @@ import { ethers } from "ethers";
 import { NFT, NFTMetadata } from "@/types/nft";
 
 const NFT_ABI = [
-  "function tokenURI(uint256 tokenId) view returns (string)",
-  "function totalSupply() view returns (uint256)",
-  "function ownerOf(uint256 tokenId) view returns (address)",
-  "function tokenByIndex(uint256 index) view returns (uint256)",
+  "function uri(uint256 id) view returns (string)",
+  "function balanceOf(address account, uint256 id) view returns (uint256)",
+  "function totalSupply(uint256 id) view returns (uint256)",
+  "function exists(uint256 id) view returns (bool)"
 ];
 
 export const useRealNFTData = (connectedAccount?: string) => {
@@ -29,45 +29,49 @@ export const useRealNFTData = (connectedAccount?: string) => {
       const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
       const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
       
-      try {
-        const totalSupply = await contract.totalSupply();
-        console.log('Total NFT supply:', totalSupply);
-        
-        const nftData: NFT[] = [];
-        for (let i = 0; i < totalSupply; i++) {
-          const tokenId = await contract.tokenByIndex(i);
-          const tokenURI = await contract.tokenURI(tokenId);
-          
-          // Fetch metadata from tokenURI
-          const response = await fetch(tokenURI);
-          const metadata = await response.json();
-          
-          // Store metadata in Supabase
-          await supabase.from('nft_metadata').upsert({
-            token_id: tokenId.toString(),
-            name: metadata.name,
-            description: metadata.description,
-            image_url: metadata.image,
-            attributes: metadata.attributes
-          } as NFTMetadata, {
-            onConflict: 'token_id'
-          });
-          
-          nftData.push({
-            id: tokenId.toString(),
-            name: metadata.name,
-            description: metadata.description,
-            price: metadata.price || 0,
-            imageUrl: metadata.image,
-            videoUrl: metadata.animation_url || ''
-          });
-        }
-        
-        return nftData;
-      } catch (error) {
-        console.error('Error fetching NFTs:', error);
-        throw error;
+      // Fetch NFTs from metadata table
+      const { data: metadataRows, error: metadataError } = await supabase
+        .from('nft_metadata')
+        .select('*')
+        .order('token_id');
+      
+      if (metadataError) {
+        console.error('Error fetching NFT metadata:', metadataError);
+        throw metadataError;
       }
+
+      const nftData: NFT[] = [];
+      
+      for (const metadata of metadataRows) {
+        try {
+          // Check if token exists
+          const exists = await contract.exists(metadata.token_id);
+          if (!exists) continue;
+
+          // Get token balance if connected
+          let balance = 0;
+          if (connectedAccount) {
+            balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
+          }
+
+          nftData.push({
+            id: metadata.token_id,
+            name: metadata.name,
+            description: metadata.description,
+            price: 1000, // Default price in DMC tokens
+            imageUrl: metadata.image_url,
+            videoUrl: '', // We don't store videos in metadata currently
+            balance
+          });
+        } catch (error) {
+          console.error(`Error processing NFT ${metadata.token_id}:`, error);
+          // Continue with next NFT instead of failing completely
+          continue;
+        }
+      }
+      
+      console.log('Processed NFT data:', nftData);
+      return nftData;
     }
   });
 
