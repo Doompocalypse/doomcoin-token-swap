@@ -1,8 +1,10 @@
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from "@/components/ui/use-toast";
 import VideoBackground from "@/components/VideoBackground";
 import CountdownTimer from "@/components/CountdownTimer";
 import { Suspense, useState } from "react";
 import Header from "@/components/layout/Header";
+import NFTSection from "@/components/sections/NFTSection";
+import MysteryBoxSection from "@/components/sections/MysteryBoxSection";
 import { useNavigate } from "react-router-dom";
 
 const NFTMarketplace = () => {
@@ -15,24 +17,6 @@ const NFTMarketplace = () => {
     setConnectedAccount(account);
   };
 
-  const handleInsufficientBalance = () => {
-    toast({
-      title: "Insufficient DMC Balance",
-      description: (
-        <div className="space-y-2">
-          <p>You don't have enough DMC tokens to mint this NFT.</p>
-          <button
-            onClick={() => navigate("/")}
-            className="text-blue-500 hover:text-blue-600 underline"
-          >
-            Click here to swap tokens
-          </button>
-        </div>
-      ),
-      variant: "destructive",
-    });
-  };
-
   return (
     <Suspense fallback={<LoadingFallback />}>
       <VideoBackground />
@@ -41,10 +25,27 @@ const NFTMarketplace = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            <div className="text-center text-white">
-              <h2 className="text-3xl font-bold mb-4">NFT Marketplace</h2>
-              <p>New NFT display coming soon!</p>
-            </div>
+            <NFTSection 
+              connectedAccount={connectedAccount} 
+              onInsufficientBalance={() => {
+                toast({
+                  title: "Insufficient DMC Balance",
+                  description: (
+                    <div className="space-y-2">
+                      <p>You don't have enough DMC tokens to mint this NFT.</p>
+                      <button
+                        onClick={() => navigate("/")}
+                        className="text-blue-500 hover:text-blue-600 underline"
+                      >
+                        Click here to swap tokens
+                      </button>
+                    </div>
+                  ),
+                  variant: "destructive",
+                });
+              }}
+            />
+            <MysteryBoxSection connectedAccount={connectedAccount} />
           </div>
         </main>
       </div>

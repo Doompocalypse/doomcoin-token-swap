@@ -9,6 +9,7 @@ interface NFTCardProps {
   name: string;
   description: string;
   price: number;
+  videoUrl: string;
   imageUrl: string;
   isPurchased: boolean;
   balance?: number;
@@ -25,7 +26,7 @@ const NFTCard = memo(({
   balance = 0,
   onPurchase 
 }: NFTCardProps) => {
-  console.log(`Rendering NFTCard: ${name}, Price: ${price} DMC`);
+  console.log(`Rendering NFTCard: ${name}, Balance: ${balance}`);
   
   const handlePurchase = () => {
     onPurchase(id);
@@ -52,7 +53,7 @@ const NFTCard = memo(({
         <Description description={description} />
         <PriceSection
           originalPrice={price}
-          discountedPrice={price} // No discount for NFTs
+          discountedPrice={Math.floor(price * 0.5)}
           isPurchased={isPurchased}
           onPurchase={handlePurchase}
         />
