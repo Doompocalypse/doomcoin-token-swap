@@ -41,7 +41,10 @@ const NFTMarketplace = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            {/* NFT display section will be implemented later */}
+            <div className="text-center text-white">
+              <h2 className="text-3xl font-bold mb-4">NFT Marketplace</h2>
+              <p>New NFT display coming soon!</p>
+            </div>
           </div>
         </main>
       </div>
