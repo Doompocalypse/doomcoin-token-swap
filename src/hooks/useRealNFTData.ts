@@ -1,20 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ethers } from "ethers";
-import { NFT, NFTMetadata } from "@/types/nft";
+import { NFT } from "@/types/nft";
 
 const NFT_ABI = [
-  "function uri(uint256 id) view returns (string)",
   "function balanceOf(address account, uint256 id) view returns (uint256)",
-  "function totalSupply(uint256 id) view returns (uint256)",
   "function exists(uint256 id) view returns (bool)"
 ];
+
+interface NFTAttributes {
+  price: number;
+  [key: string]: any;
+}
 
 export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
     queryKey: ['real_nfts', connectedAccount],
     queryFn: async () => {
-      // Fetch NFTs from metadata table
+      console.log('Fetching NFT metadata from Supabase');
       const { data: metadataRows, error: metadataError } = await supabase
         .from('nft_metadata')
         .select('*')
@@ -55,12 +58,14 @@ export const useRealNFTData = (connectedAccount?: string) => {
             }
           }
 
-          const price = metadata.attributes?.price || 1000;
+          // Safely parse attributes and get price
+          const attributes = metadata.attributes as NFTAttributes | null;
+          const price = attributes?.price || 1000; // Default price if not set
           
           nftData.push({
             id: metadata.token_id,
             name: metadata.name,
-            description: metadata.description,
+            description: metadata.description || '',
             price: price,
             imageUrl: metadata.image_url,
             videoUrl: '', // We don't store videos in metadata currently
