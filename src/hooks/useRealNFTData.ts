@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ethers } from "ethers";
+import { NFT, NFTMetadata } from "@/types/nft";
 
 const NFT_ABI = [
   "function tokenURI(uint256 tokenId) view returns (string)",
@@ -10,35 +11,29 @@ const NFT_ABI = [
 ];
 
 export const useRealNFTData = (connectedAccount?: string) => {
-  const { data: contractAddress } = useQuery({
-    queryKey: ['nft_contract_address'],
+  const { data: nfts, error: nftsError } = useQuery({
+    queryKey: ['real_nfts', connectedAccount],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: contractAddress } = await supabase
         .from('app_settings')
         .select('value')
         .eq('key', 'nft_contract_address')
         .single();
       
-      if (error) throw error;
-      return data.value;
-    }
-  });
-
-  const { data: nfts, error: nftsError } = useQuery({
-    queryKey: ['real_nfts', contractAddress],
-    queryFn: async () => {
-      if (!contractAddress) return [];
+      if (!contractAddress) {
+        throw new Error('NFT contract address not found');
+      }
       
-      console.log('Fetching NFTs from contract:', contractAddress);
+      console.log('Fetching NFTs from contract:', contractAddress.value);
       
       const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
-      const contract = new ethers.Contract(contractAddress, NFT_ABI, provider);
+      const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
       
       try {
         const totalSupply = await contract.totalSupply();
         console.log('Total NFT supply:', totalSupply);
         
-        const nftData = [];
+        const nftData: NFT[] = [];
         for (let i = 0; i < totalSupply; i++) {
           const tokenId = await contract.tokenByIndex(i);
           const tokenURI = await contract.tokenURI(tokenId);
@@ -54,7 +49,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
             description: metadata.description,
             image_url: metadata.image,
             attributes: metadata.attributes
-          }, {
+          } as NFTMetadata, {
             onConflict: 'token_id'
           });
           
@@ -73,8 +68,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.error('Error fetching NFTs:', error);
         throw error;
       }
-    },
-    enabled: !!contractAddress
+    }
   });
 
   const { data: purchasedNfts } = useQuery({
