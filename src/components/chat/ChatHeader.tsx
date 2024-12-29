@@ -10,7 +10,7 @@ const ChatHeader = ({ onMinimize, onClose }: ChatHeaderProps) => (
   <div className="flex items-center justify-between p-4 border-b border-[#8E9196]/10 bg-gradient-to-r from-cyan-500/10 to-purple-600/10">
     <span className="font-medium text-[#F1F1F1] flex items-center gap-2">
       <span className="w-2 h-2 rounded-full bg-gradient-to-r from-cyan-500 to-purple-600 animate-pulse"></span>
-      Doomy
+      RAVEN
     </span>
     <div className="flex gap-2">
       <Button

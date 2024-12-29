@@ -7,12 +7,12 @@ import ChatMessages from "./chat/ChatMessages";
 import { Message } from "./chat/types";
 import { generateResponse } from "@/utils/chatResponses";
 
-const Doomy = () => {
+const Raven = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
   const [messages, setMessages] = useState<Message[]>([
     { 
-      text: "👋 Hello! I'm Doomy, your friendly crypto assistant. I'm here to help you with:\n\n" +
+      text: "👋 Hello! I'm RAVEN, your friendly crypto assistant. I'm here to help you with:\n\n" +
             "[Connect your wallet](https://metamask.io/download/)\n" +
             "[Making token swaps](https://ethereum.org/en/defi/)\n" +
             "[Checking exchange rates](https://coinmarketcap.com/)\n" +
@@ -92,4 +92,4 @@ const Doomy = () => {
   );
 };
 
-export default Doomy;
+export default Raven;

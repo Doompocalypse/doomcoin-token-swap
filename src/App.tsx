@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import Index from "./pages/Index";
 import NFTMarketplace from "./pages/NFTMarketplace";
 import AffiliateProgram from "./pages/AffiliateProgram";
+import Raven from "./components/Raven";
 
 const queryClient = new QueryClient();
 
@@ -30,6 +31,7 @@ const App = () => (
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
+        <Raven />
       </Suspense>
     </TooltipProvider>
   </QueryClientProvider>
