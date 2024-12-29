@@ -1,10 +1,10 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import VideoBackground from "@/components/VideoBackground";
 import CountdownTimer from "@/components/CountdownTimer";
 import { Suspense, useState } from "react";
 import Header from "@/components/layout/Header";
-import NFTSection from "@/components/sections/NFTSection";
 import { useNavigate } from "react-router-dom";
+import ProductSlider from "@/components/products/ProductSlider";
 
 const NFTMarketplace = () => {
   const { toast } = useToast();
@@ -16,6 +16,24 @@ const NFTMarketplace = () => {
     setConnectedAccount(account);
   };
 
+  const handleInsufficientBalance = () => {
+    toast({
+      title: "Insufficient DMC Balance",
+      description: (
+        <div className="space-y-2">
+          <p>You don't have enough DMC tokens to mint this NFT.</p>
+          <button
+            onClick={() => navigate("/")}
+            className="text-blue-500 hover:text-blue-600 underline"
+          >
+            Click here to swap tokens
+          </button>
+        </div>
+      ),
+      variant: "destructive",
+    });
+  };
+
   return (
     <Suspense fallback={<LoadingFallback />}>
       <VideoBackground />
@@ -24,25 +42,9 @@ const NFTMarketplace = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            <NFTSection 
-              connectedAccount={connectedAccount} 
-              onInsufficientBalance={() => {
-                toast({
-                  title: "Insufficient DMC Balance",
-                  description: (
-                    <div className="space-y-2">
-                      <p>You don't have enough DMC tokens to mint this NFT.</p>
-                      <button
-                        onClick={() => navigate("/")}
-                        className="text-blue-500 hover:text-blue-600 underline"
-                      >
-                        Click here to swap tokens
-                      </button>
-                    </div>
-                  ),
-                  variant: "destructive",
-                });
-              }}
+            <ProductSlider 
+              connectedAccount={connectedAccount}
+              onInsufficientBalance={handleInsufficientBalance}
             />
           </div>
         </main>

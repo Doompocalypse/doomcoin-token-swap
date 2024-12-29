@@ -6,81 +6,96 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-import ProductCard from "./ProductCard";
+import { useRealNFTData } from '@/hooks/useRealNFTData';
+import { useNFTPurchaseHandler } from '@/components/nft/NFTPurchaseHandler';
 import { useCarouselRotation } from '@/hooks/useCarouselRotation';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { Coins } from "lucide-react";
 
-const products = [
-  {
-    id: "1",
-    name: "Survivor Tier",
-    description: "Early access, digital badge (NFT), and exclusive in-game perks",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/f461441e-2978-4f00-8198-2e5938a97d5b.png",
-    price: 10
-  },
-  {
-    id: "2",
-    name: "Strategist Tier",
-    description: "All Survivor Tier rewards, plus in-game currency, exclusive faction NFT, and badge perks",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/592b8080-ac57-446d-b218-2e9ecc071b98.png",
-    price: 100
-  },
-  {
-    id: "3",
-    name: "Vanguard Tier",
-    description: "All Strategist Tier rewards, plus founding member title, physical merch bundle, exclusive beta access, and premium badge perks",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/38239f3c-03f5-4bb0-b193-43e728dadabc.png",
-    price: 1000
-  },
-  {
-    id: "4",
-    name: "Commander Tier",
-    description: "All Vanguard Tier rewards, plus faction leadership NFT, premium merch package, personalized message, and commander badge perks",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/4982d180-059b-40a6-beb6-92032eb2a62a.png",
-    price: 10000
-  },
-  {
-    id: "5",
-    name: "Architect Tier",
-    description: "All Commander Tier rewards, plus world builder NFT, private developer roundtable, lifetime VIP access, and architect badge perks",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/84deb4fb-7810-4688-8eb5-2dc2827c2dbd.png",
-    price: 100000
-  },
-  {
-    id: "6",
-    name: "Visionary Tier",
-    description: "All Architect Tier rewards, plus co-creator credit NFT, in-game monument NFT, custom merchandise package, and exclusive experience",
-    videoUrl: "",
-    imageUrl: "/lovable-uploads/8b332fe2-0b91-4907-b27f-ec42ef8ab9c4.png",
-    price: 1000000
-  }
-];
+interface ProductSliderProps {
+  connectedAccount?: string;
+  onInsufficientBalance?: () => void;
+}
 
-const ProductSlider = memo(() => {
+const ProductSlider = memo(({ connectedAccount, onInsufficientBalance }: ProductSliderProps) => {
+  const { nfts, purchasedNfts, nftsError } = useRealNFTData(connectedAccount);
+  const { handlePurchase, ReferralDialog } = useNFTPurchaseHandler(connectedAccount, onInsufficientBalance);
   const { setApi } = useCarouselRotation({ 
-    itemsLength: products.length,
+    itemsLength: nfts?.length || 0,
     name: 'product-slider'
   });
 
-  console.log('Rendering ProductSlider with products:', products);
+  // Sort NFTs by price if they exist
+  const sortedNfts = nfts?.sort((a, b) => a.price - b.price);
+  
+  console.log('ProductSlider render - nfts:', sortedNfts);
+
+  if (nftsError) {
+    console.error('Error loading NFTs:', nftsError);
+    return (
+      <div className="text-white text-center p-4">
+        <p className="text-xl font-semibold mb-2">Error loading NFTs</p>
+        <p className="text-gray-400">Please check your network connection and try again later.</p>
+      </div>
+    );
+  }
+  
+  if (!sortedNfts || sortedNfts.length === 0) {
+    return (
+      <div className="text-white text-center p-4">
+        <p className="text-xl">Loading NFTs...</p>
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full max-w-3xl mx-auto px-4 relative">
+    <div className="w-full max-w-6xl mx-auto px-4 relative">
+      {ReferralDialog}
       <Carousel
+        className="w-full"
+        setApi={setApi}
         opts={{
-          align: "center",
+          align: "start",
           loop: true,
         }}
-        setApi={setApi}
       >
-        <CarouselContent>
-          {products.map((product) => (
-            <CarouselItem key={product.id}>
-              <ProductCard {...product} />
+        <CarouselContent className="-ml-4">
+          {sortedNfts.map((nft) => (
+            <CarouselItem key={nft.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3">
+              <div className="p-1">
+                <Card className="w-full max-w-[400px] mx-auto bg-black/40 border-[#8E9196]/20">
+                  <AspectRatio ratio={1}>
+                    <img 
+                      src={nft.imageUrl}
+                      alt={nft.name}
+                      className="w-full h-full object-cover rounded-t-lg"
+                    />
+                  </AspectRatio>
+                  <div className="p-6">
+                    <h3 className="text-2xl font-bold text-white mb-4">{nft.name}</h3>
+                    <p className="text-gray-300 text-sm mb-6">{nft.description}</p>
+                    <div className="flex justify-between items-center">
+                      <div className="flex items-center gap-2">
+                        <Coins className="w-5 h-5 text-white" />
+                        <span className="text-white font-bold">{nft.price} DMC</span>
+                      </div>
+                      <Button 
+                        onClick={() => handlePurchase(nft.id, nft.price)}
+                        disabled={purchasedNfts?.includes(nft.id)}
+                        className={`${
+                          purchasedNfts?.includes(nft.id) 
+                            ? 'bg-gray-500' 
+                            : 'bg-white hover:bg-white/90'
+                        } text-black`}
+                      >
+                        {purchasedNfts?.includes(nft.id) ? "Owned" : "Mint NFT"}
+                      </Button>
+                    </div>
+                  </div>
+                </Card>
+              </div>
             </CarouselItem>
           ))}
         </CarouselContent>
