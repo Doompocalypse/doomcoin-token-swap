@@ -8,6 +8,11 @@ const NFT_ABI = [
   "function exists(uint256 id) view returns (bool)"
 ];
 
+interface NFTAttributes {
+  price: number;
+  [key: string]: any;
+}
+
 export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
     queryKey: ['real_nfts', connectedAccount],
@@ -53,7 +58,9 @@ export const useRealNFTData = (connectedAccount?: string) => {
             }
           }
 
-          const price = metadata.attributes?.price || 1000;
+          // Safely parse attributes and get price
+          const attributes = metadata.attributes as NFTAttributes | null;
+          const price = attributes?.price || 1000; // Default price if not set
           
           nftData.push({
             id: metadata.token_id,
