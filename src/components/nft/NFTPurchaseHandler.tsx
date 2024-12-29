@@ -1,11 +1,18 @@
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useState } from "react";
+import ReferralCodeDialog from "./ReferralCodeDialog";
 
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
   onInsufficientBalance?: () => void
 ) => {
   const { toast } = useToast();
+  const [showReferralDialog, setShowReferralDialog] = useState(false);
+  const [pendingPurchase, setPendingPurchase] = useState<{
+    nftId: string;
+    price: number;
+  } | null>(null);
 
   const handlePurchase = async (nftId: string, price: number) => {
     if (!connectedAccount) {
@@ -16,6 +23,14 @@ export const useNFTPurchaseHandler = (
       });
       return;
     }
+
+    setPendingPurchase({ nftId, price });
+    setShowReferralDialog(true);
+  };
+
+  const processPurchase = async () => {
+    if (!pendingPurchase || !connectedAccount) return;
+    const { nftId, price } = pendingPurchase;
 
     try {
       // Check DMC balance using Supabase function invoke
@@ -58,8 +73,24 @@ export const useNFTPurchaseHandler = (
         description: "Failed to purchase NFT. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setPendingPurchase(null);
     }
   };
 
-  return handlePurchase;
+  const handleReferralComplete = async (isValid: boolean) => {
+    await processPurchase();
+  };
+
+  return {
+    handlePurchase,
+    ReferralDialog: showReferralDialog && connectedAccount ? (
+      <ReferralCodeDialog
+        isOpen={showReferralDialog}
+        onClose={() => setShowReferralDialog(false)}
+        onSubmit={handleReferralComplete}
+        userAddress={connectedAccount}
+      />
+    ) : null,
+  };
 };

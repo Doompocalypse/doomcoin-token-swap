@@ -163,6 +163,62 @@ export type Database = {
         }
         Relationships: []
       }
+      referral_code_uses: {
+        Row: {
+          faithcoin_bonus_paid: boolean
+          id: string
+          referral_code_id: string
+          used_at: string
+          user_address: string
+        }
+        Insert: {
+          faithcoin_bonus_paid?: boolean
+          id?: string
+          referral_code_id: string
+          used_at?: string
+          user_address: string
+        }
+        Update: {
+          faithcoin_bonus_paid?: boolean
+          id?: string
+          referral_code_id?: string
+          used_at?: string
+          user_address?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referral_code_uses_referral_code_id_fkey"
+            columns: ["referral_code_id"]
+            isOneToOne: false
+            referencedRelation: "referral_codes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      referral_codes: {
+        Row: {
+          code: string
+          created_at: string
+          created_by: string
+          id: string
+          uses: number
+        }
+        Insert: {
+          code: string
+          created_at?: string
+          created_by: string
+          id?: string
+          uses?: number
+        }
+        Update: {
+          code?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          uses?: number
+        }
+        Relationships: []
+      }
       referrals: {
         Row: {
           commission_paid: number
