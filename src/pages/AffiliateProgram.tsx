@@ -8,7 +8,7 @@ import type { Database } from "@/integrations/supabase/types";
 
 const AffiliateProgram = () => {
   const [walletAddress, setWalletAddress] = useState<string>("");
-  const [referralLink, setReferralLink] = useState<string>("");
+  const [referralCode, setReferralCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -23,23 +23,39 @@ const AffiliateProgram = () => {
 
   const checkExistingAffiliate = async (address: string) => {
     try {
-      const { data: affiliate } = await supabase
+      console.log("Checking existing affiliate for address:", address);
+      const { data: affiliate, error } = await supabase
         .from('affiliates')
-        .select('referral_code')
+        .select('referral_code, total_referrals, total_earnings')
         .eq('user_address', address)
         .single();
 
+      if (error) {
+        console.error("Error checking affiliate:", error);
+        return;
+      }
+
       if (affiliate?.referral_code) {
-        const baseUrl = window.location.origin;
-        setReferralLink(`${baseUrl}?ref=${affiliate.referral_code}`);
+        console.log("Found existing affiliate with code:", affiliate.referral_code);
+        setReferralCode(affiliate.referral_code);
+        toast({
+          title: "Welcome Back!",
+          description: `Your referral code is: ${affiliate.referral_code}. You have ${affiliate.total_referrals} referrals and earned ${affiliate.total_earnings} DMC.`,
+        });
       }
     } catch (error) {
       console.error("Error checking affiliate status:", error);
     }
   };
 
-  const generateReferralCode = (address: string) => {
-    return `${address.substring(2, 8).toLowerCase()}${Date.now().toString(36)}`;
+  const generateUniqueCode = () => {
+    // Generate a 6-character alphanumeric code
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   };
 
   const handleSignUp = async () => {
@@ -54,25 +70,38 @@ const AffiliateProgram = () => {
 
     setIsLoading(true);
     try {
-      const referralCode = generateReferralCode(walletAddress);
+      // Generate a unique code and check if it exists
+      let isUnique = false;
+      let newCode = '';
+      
+      while (!isUnique) {
+        newCode = generateUniqueCode();
+        const { data } = await supabase
+          .from('affiliates')
+          .select('referral_code')
+          .eq('referral_code', newCode);
+        
+        isUnique = !data || data.length === 0;
+      }
+
       const { error } = await supabase
         .from('affiliates')
         .insert([
           {
             user_address: walletAddress,
-            referral_code: referralCode,
+            referral_code: newCode,
+            total_referrals: 0,
+            total_earnings: 0
           },
         ]);
 
       if (error) throw error;
 
-      const baseUrl = window.location.origin;
-      const newReferralLink = `${baseUrl}?ref=${referralCode}`;
-      setReferralLink(newReferralLink);
+      setReferralCode(newCode);
       
       toast({
         title: "Success!",
-        description: "You're now registered as an affiliate. Share your referral link to start earning!",
+        description: `You're now registered as an affiliate. Your referral code is: ${newCode}`,
       });
     } catch (error) {
       console.error("Error creating affiliate:", error);
@@ -88,16 +117,16 @@ const AffiliateProgram = () => {
 
   const copyToClipboard = async () => {
     try {
-      await navigator.clipboard.writeText(referralLink);
+      await navigator.clipboard.writeText(referralCode);
       toast({
         title: "Copied!",
-        description: "Referral link copied to clipboard",
+        description: "Referral code copied to clipboard",
       });
     } catch (err) {
       console.error("Failed to copy:", err);
       toast({
         title: "Error",
-        description: "Failed to copy referral link",
+        description: "Failed to copy referral code",
         variant: "destructive",
       });
     }
@@ -111,18 +140,18 @@ const AffiliateProgram = () => {
           <h1 className="text-4xl font-bold mb-6">Affiliate Program</h1>
           <p className="text-lg mb-8 text-gray-300">
             Join our affiliate program and earn rewards for referring new users to our NFT marketplace.
-            Earn a percentage of each successful purchase made through your referral link!
+            Share your unique referral code and earn DMC tokens for each successful referral!
           </p>
 
-          {!referralLink ? (
+          {!referralCode ? (
             <div className="space-y-6">
               <div className="bg-black/30 p-6 rounded-lg">
                 <h2 className="text-xl font-semibold mb-4">How it works:</h2>
                 <ul className="list-disc list-inside space-y-2 text-gray-300">
                   <li>Connect your wallet to sign up as an affiliate</li>
-                  <li>Get your unique referral link</li>
-                  <li>Share your link with potential buyers</li>
-                  <li>Earn rewards when they make purchases</li>
+                  <li>Get your unique referral code</li>
+                  <li>Share your code with potential buyers</li>
+                  <li>Earn DMC tokens when they make purchases</li>
                 </ul>
               </div>
 
@@ -136,20 +165,17 @@ const AffiliateProgram = () => {
             </div>
           ) : (
             <div className="bg-black/30 p-6 rounded-lg space-y-4">
-              <h2 className="text-xl font-semibold">Your Referral Link:</h2>
+              <h2 className="text-xl font-semibold">Your Referral Code:</h2>
               <div className="flex items-center gap-4">
-                <input
-                  type="text"
-                  value={referralLink}
-                  readOnly
-                  className="flex-1 bg-black/50 border border-gray-700 rounded px-4 py-2 text-sm"
-                />
+                <div className="flex-1 bg-black/50 border border-gray-700 rounded px-4 py-2 text-xl font-mono">
+                  {referralCode}
+                </div>
                 <Button onClick={copyToClipboard} variant="secondary">
-                  Copy Link
+                  Copy Code
                 </Button>
               </div>
               <p className="text-sm text-gray-400">
-                Share this link with potential buyers. You'll earn rewards for each successful purchase!
+                Share this code with potential buyers. You'll earn DMC tokens for each successful referral!
               </p>
             </div>
           )}
