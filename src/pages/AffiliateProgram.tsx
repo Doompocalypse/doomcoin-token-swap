@@ -2,16 +2,36 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import type { Database } from "@/integrations/supabase/types";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+
+interface AffiliateStats {
+  referralCode: string;
+  totalReferrals: number;
+  totalEarnings: number;
+  commission: number;
+}
 
 const AffiliateProgram = () => {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [referralCode, setReferralCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
+  const [stats, setStats] = useState<AffiliateStats | null>(null);
   const { toast } = useToast();
   const navigate = useNavigate();
+
+  const calculateCommissionRate = (referralCount: number): number => {
+    if (referralCount >= 20) return 0.20;
+    if (referralCount >= 10) return 0.15;
+    return 0.10;
+  };
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Wallet connection status:", connected, "Account:", account);
@@ -21,12 +41,36 @@ const AffiliateProgram = () => {
     }
   };
 
+  const fetchAffiliateStats = async (affiliateId: string) => {
+    try {
+      const { data: referrals, error: referralsError } = await supabase
+        .from('referrals')
+        .select('*')
+        .eq('referrer_id', affiliateId);
+
+      if (referralsError) throw referralsError;
+
+      const totalReferrals = referrals?.length || 0;
+      const commission = calculateCommissionRate(totalReferrals);
+      const totalEarnings = referrals?.reduce((sum, ref) => sum + Number(ref.commission_paid), 0) || 0;
+
+      return {
+        totalReferrals,
+        totalEarnings,
+        commission: commission * 100 // Convert to percentage
+      };
+    } catch (error) {
+      console.error("Error fetching affiliate stats:", error);
+      return null;
+    }
+  };
+
   const checkExistingAffiliate = async (address: string) => {
     try {
       console.log("Checking existing affiliate for address:", address);
       const { data: affiliate, error } = await supabase
         .from('affiliates')
-        .select('referral_code, total_referrals, total_earnings')
+        .select('*')
         .eq('user_address', address)
         .single();
 
@@ -38,9 +82,19 @@ const AffiliateProgram = () => {
       if (affiliate?.referral_code) {
         console.log("Found existing affiliate with code:", affiliate.referral_code);
         setReferralCode(affiliate.referral_code);
+        
+        // Fetch and set stats
+        const stats = await fetchAffiliateStats(affiliate.id);
+        if (stats) {
+          setStats({
+            referralCode: affiliate.referral_code,
+            ...stats
+          });
+        }
+
         toast({
           title: "Welcome Back!",
-          description: `Your referral code is: ${affiliate.referral_code}. You have ${affiliate.total_referrals} referrals and earned ${affiliate.total_earnings} DMC.`,
+          description: `Your referral code is: ${affiliate.referral_code}`,
         });
       }
     } catch (error) {
@@ -49,7 +103,6 @@ const AffiliateProgram = () => {
   };
 
   const generateUniqueCode = () => {
-    // Generate a 6-character alphanumeric code
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
     let code = '';
     for (let i = 0; i < 6; i++) {
@@ -70,7 +123,6 @@ const AffiliateProgram = () => {
 
     setIsLoading(true);
     try {
-      // Generate a unique code and check if it exists
       let isUnique = false;
       let newCode = '';
       
@@ -84,7 +136,7 @@ const AffiliateProgram = () => {
         isUnique = !data || data.length === 0;
       }
 
-      const { error } = await supabase
+      const { data: newAffiliate, error } = await supabase
         .from('affiliates')
         .insert([
           {
@@ -93,11 +145,19 @@ const AffiliateProgram = () => {
             total_referrals: 0,
             total_earnings: 0
           },
-        ]);
+        ])
+        .select()
+        .single();
 
       if (error) throw error;
 
       setReferralCode(newCode);
+      setStats({
+        referralCode: newCode,
+        totalReferrals: 0,
+        totalEarnings: 0,
+        commission: 10 // Starting commission rate
+      });
       
       toast({
         title: "Success!",
@@ -136,13 +196,9 @@ const AffiliateProgram = () => {
     <div className="min-h-screen bg-[#221F26] text-white">
       <Header onConnect={handleConnect} />
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-2xl mx-auto">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-6">Affiliate Program</h1>
-          <p className="text-lg mb-8 text-gray-300">
-            Join our affiliate program and earn rewards for referring new users to our NFT marketplace.
-            Share your unique referral code and earn DMC tokens for each successful referral!
-          </p>
-
+          
           {!referralCode ? (
             <div className="space-y-6">
               <div className="bg-black/30 p-6 rounded-lg">
@@ -152,7 +208,17 @@ const AffiliateProgram = () => {
                   <li>Get your unique referral code</li>
                   <li>Share your code with potential buyers</li>
                   <li>Earn DMC tokens when they make purchases</li>
+                  <li>Increase your commission rate by referring more users</li>
                 </ul>
+                
+                <div className="mt-6 p-4 bg-purple-900/30 rounded-lg">
+                  <h3 className="font-semibold mb-2">Commission Tiers:</h3>
+                  <ul className="space-y-1 text-gray-300">
+                    <li>1-9 referrals: 10% commission</li>
+                    <li>10-19 referrals: 15% commission</li>
+                    <li>20+ referrals: 20% commission</li>
+                  </ul>
+                </div>
               </div>
 
               <Button
@@ -164,19 +230,56 @@ const AffiliateProgram = () => {
               </Button>
             </div>
           ) : (
-            <div className="bg-black/30 p-6 rounded-lg space-y-4">
-              <h2 className="text-xl font-semibold">Your Referral Code:</h2>
-              <div className="flex items-center gap-4">
-                <div className="flex-1 bg-black/50 border border-gray-700 rounded px-4 py-2 text-xl font-mono">
-                  {referralCode}
+            <div className="space-y-6">
+              <Card className="bg-black/30 border-gray-700">
+                <CardHeader>
+                  <CardTitle>Your Referral Code</CardTitle>
+                  <CardDescription className="text-gray-400">
+                    Share this code with potential buyers
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex items-center gap-4">
+                    <div className="flex-1 bg-black/50 border border-gray-700 rounded px-4 py-2 text-xl font-mono">
+                      {referralCode}
+                    </div>
+                    <Button onClick={copyToClipboard} variant="secondary">
+                      Copy Code
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {stats && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <Card className="bg-black/30 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Total Referrals</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{stats.totalReferrals}</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-black/30 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Current Commission</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{stats.commission}%</p>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-black/30 border-gray-700">
+                    <CardHeader>
+                      <CardTitle className="text-xl">Total Earnings</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-3xl font-bold">{stats.totalEarnings} DMC</p>
+                    </CardContent>
+                  </Card>
                 </div>
-                <Button onClick={copyToClipboard} variant="secondary">
-                  Copy Code
-                </Button>
-              </div>
-              <p className="text-sm text-gray-400">
-                Share this code with potential buyers. You'll earn DMC tokens for each successful referral!
-              </p>
+              )}
             </div>
           )}
         </div>
