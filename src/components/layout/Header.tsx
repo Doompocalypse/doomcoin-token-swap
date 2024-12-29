@@ -27,8 +27,11 @@ const Header = ({ onConnect }: HeaderProps) => {
               <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                 Token Swap
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/about")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
                 NFT Marketplace
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/affiliate-program")} className="cursor-pointer hover:bg-gray-100">
+                Affiliate Program
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

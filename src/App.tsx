@@ -6,6 +6,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Suspense } from "react";
 import Index from "./pages/Index";
 import NFTMarketplace from "./pages/NFTMarketplace";
+import AffiliateProgram from "./pages/AffiliateProgram";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/nft-marketplace" element={<NFTMarketplace />} />
+            <Route path="/affiliate-program" element={<AffiliateProgram />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
