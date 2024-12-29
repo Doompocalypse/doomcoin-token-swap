@@ -1,22 +1,14 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import AffiliateHowItWorks from "@/components/affiliate/AffiliateHowItWorks";
+import AffiliateDashboard from "@/components/affiliate/AffiliateDashboard";
 
 interface AffiliateStats {
-  referralCode: string;
   totalReferrals: number;
   totalEarnings: number;
-  commission: number;
 }
 
 const AffiliateProgram = () => {
@@ -25,7 +17,6 @@ const AffiliateProgram = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<AffiliateStats | null>(null);
   const { toast } = useToast();
-  const navigate = useNavigate();
 
   const calculateCommissionRate = (referralCount: number): number => {
     if (referralCount >= 20) return 0.20;
@@ -56,8 +47,7 @@ const AffiliateProgram = () => {
 
       return {
         totalReferrals,
-        totalEarnings,
-        commission: commission * 100 // Convert to percentage
+        totalEarnings
       };
     } catch (error) {
       console.error("Error fetching affiliate stats:", error);
@@ -83,13 +73,9 @@ const AffiliateProgram = () => {
         console.log("Found existing affiliate with code:", affiliate.referral_code);
         setReferralCode(affiliate.referral_code);
         
-        // Fetch and set stats
         const stats = await fetchAffiliateStats(affiliate.id);
         if (stats) {
-          setStats({
-            referralCode: affiliate.referral_code,
-            ...stats
-          });
+          setStats(stats);
         }
 
         toast({
@@ -153,10 +139,8 @@ const AffiliateProgram = () => {
 
       setReferralCode(newCode);
       setStats({
-        referralCode: newCode,
         totalReferrals: 0,
-        totalEarnings: 0,
-        commission: 10 // Starting commission rate
+        totalEarnings: 0
       });
       
       toast({
@@ -175,23 +159,6 @@ const AffiliateProgram = () => {
     }
   };
 
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(referralCode);
-      toast({
-        title: "Copied!",
-        description: "Referral code copied to clipboard",
-      });
-    } catch (err) {
-      console.error("Failed to copy:", err);
-      toast({
-        title: "Error",
-        description: "Failed to copy referral code",
-        variant: "destructive",
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-[#221F26] text-white">
       <Header onConnect={handleConnect} />
@@ -201,26 +168,7 @@ const AffiliateProgram = () => {
           
           {!referralCode ? (
             <div className="space-y-6">
-              <div className="bg-black/30 p-6 rounded-lg">
-                <h2 className="text-xl font-semibold mb-4">How it works:</h2>
-                <ul className="list-disc list-inside space-y-2 text-gray-300">
-                  <li>Connect your wallet to sign up as an affiliate</li>
-                  <li>Get your unique referral code</li>
-                  <li>Share your code with potential buyers</li>
-                  <li>Earn DMC tokens when they make purchases</li>
-                  <li>Increase your commission rate by referring more users</li>
-                </ul>
-                
-                <div className="mt-6 p-4 bg-purple-900/30 rounded-lg">
-                  <h3 className="font-semibold mb-2">Commission Tiers:</h3>
-                  <ul className="space-y-1 text-gray-300">
-                    <li>1-9 referrals: 10% commission</li>
-                    <li>10-19 referrals: 15% commission</li>
-                    <li>20+ referrals: 20% commission</li>
-                  </ul>
-                </div>
-              </div>
-
+              <AffiliateHowItWorks />
               <Button
                 onClick={handleSignUp}
                 disabled={!walletAddress || isLoading}
@@ -230,57 +178,7 @@ const AffiliateProgram = () => {
               </Button>
             </div>
           ) : (
-            <div className="space-y-6">
-              <Card className="bg-black/30 border-gray-700">
-                <CardHeader>
-                  <CardTitle>Your Referral Code</CardTitle>
-                  <CardDescription className="text-gray-400">
-                    Share this code with potential buyers
-                  </CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex items-center gap-4">
-                    <div className="flex-1 bg-black/50 border border-gray-700 rounded px-4 py-2 text-xl font-mono">
-                      {referralCode}
-                    </div>
-                    <Button onClick={copyToClipboard} variant="secondary">
-                      Copy Code
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-
-              {stats && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <Card className="bg-black/30 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-xl">Total Referrals</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold">{stats.totalReferrals}</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-black/30 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-xl">Current Commission</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold">{stats.commission}%</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="bg-black/30 border-gray-700">
-                    <CardHeader>
-                      <CardTitle className="text-xl">Total Earnings</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-3xl font-bold">{stats.totalEarnings} DMC</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              )}
-            </div>
+            <AffiliateDashboard referralCode={referralCode} stats={stats} />
           )}
         </div>
       </div>
