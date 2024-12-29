@@ -39,18 +39,10 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
     );
   }
   
-  if (!sortedNfts) {
+  if (!sortedNfts || sortedNfts.length === 0) {
     return (
       <div className="text-white text-center p-4">
         <p className="text-xl">Loading NFTs...</p>
-      </div>
-    );
-  }
-
-  if (sortedNfts.length === 0) {
-    return (
-      <div className="text-white text-center p-4">
-        <p className="text-xl">No NFTs available at the moment</p>
       </div>
     );
   }

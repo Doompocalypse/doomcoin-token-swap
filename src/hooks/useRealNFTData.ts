@@ -14,21 +14,6 @@ export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
     queryKey: ['real_nfts', connectedAccount],
     queryFn: async () => {
-      const { data: contractAddress } = await supabase
-        .from('app_settings')
-        .select('value')
-        .eq('key', 'nft_contract_address')
-        .single();
-      
-      if (!contractAddress) {
-        throw new Error('NFT contract address not found');
-      }
-      
-      console.log('Fetching NFTs from contract:', contractAddress.value);
-      
-      const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
-      const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
-      
       // Fetch NFTs from metadata table
       const { data: metadataRows, error: metadataError } = await supabase
         .from('nft_metadata')
@@ -40,25 +25,43 @@ export const useRealNFTData = (connectedAccount?: string) => {
         throw metadataError;
       }
 
+      console.log('Fetched metadata rows:', metadataRows);
+
+      const { data: contractAddress } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'nft_contract_address')
+        .single();
+      
+      if (!contractAddress) {
+        throw new Error('NFT contract address not found');
+      }
+
+      const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
+      const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
+      
       const nftData: NFT[] = [];
       
       for (const metadata of metadataRows) {
         try {
-          // Check if token exists
-          const exists = await contract.exists(metadata.token_id);
-          if (!exists) continue;
-
           // Get token balance if connected
           let balance = 0;
           if (connectedAccount) {
-            balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
+            try {
+              balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
+            } catch (error) {
+              console.log(`Error getting balance for token ${metadata.token_id}:`, error);
+              // Continue with balance 0 if there's an error
+            }
           }
 
+          const price = metadata.attributes?.price || 1000;
+          
           nftData.push({
             id: metadata.token_id,
             name: metadata.name,
             description: metadata.description,
-            price: 1000, // Default price in DMC tokens
+            price: price,
             imageUrl: metadata.image_url,
             videoUrl: '', // We don't store videos in metadata currently
             balance
