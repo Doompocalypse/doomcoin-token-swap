@@ -58,9 +58,17 @@ export const useRealNFTData = (connectedAccount?: string) => {
             }
           }
 
-          // Safely parse attributes and get price
-          const attributes = metadata.attributes as NFTAttributes | null;
-          const price = attributes?.price || 1000; // Default price if not set
+          // Parse attributes and get price based on token_id
+          let price = 10; // Default Survivor Tier price
+          switch (metadata.token_id) {
+            case "1": price = 10; break;        // Survivor Tier
+            case "2": price = 100; break;       // Strategist Tier
+            case "3": price = 1000; break;      // Vanguard Tier
+            case "4": price = 10000; break;     // Commander Tier
+            case "5": price = 100000; break;    // Architect Tier
+            case "6": price = 1000000; break;   // Visionary Tier
+            default: price = 10;
+          }
           
           nftData.push({
             id: metadata.token_id,

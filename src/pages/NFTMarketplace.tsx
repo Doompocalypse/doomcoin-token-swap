@@ -4,7 +4,6 @@ import CountdownTimer from "@/components/CountdownTimer";
 import { Suspense, useState } from "react";
 import Header from "@/components/layout/Header";
 import NFTSection from "@/components/sections/NFTSection";
-import MysteryBoxSection from "@/components/sections/MysteryBoxSection";
 import { useNavigate } from "react-router-dom";
 
 const NFTMarketplace = () => {
@@ -45,7 +44,6 @@ const NFTMarketplace = () => {
                 });
               }}
             />
-            <MysteryBoxSection connectedAccount={connectedAccount} />
           </div>
         </main>
       </div>
