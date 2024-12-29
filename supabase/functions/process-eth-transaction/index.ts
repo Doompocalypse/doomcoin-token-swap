@@ -35,10 +35,9 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { buyerAddress, ethAmount, dmcAmount } = await req.json();
-    console.log(`Processing transaction for buyer: ${buyerAddress}`);
-    console.log(`ETH amount received: ${ethAmount}`);
-    console.log(`DMC amount to send (equal to USD value): ${dmcAmount}`);
+    const { buyerAddress, dmcAmount } = await req.json();
+    console.log(`Processing DMC transfer for buyer: ${buyerAddress}`);
+    console.log(`DMC amount to transfer: ${dmcAmount}`);
 
     // Get Alchemy API key from environment
     const alchemyApiKey = Deno.env.get("ALCHEMY_API_KEY");
@@ -57,7 +56,6 @@ Deno.serve(async (req) => {
     // Initialize wallet with retries
     const botWallet = await retryWithBackoff(async () => {
       const wallet = new ethers.Wallet(botPrivateKey, provider);
-      // Test connection by getting the wallet's balance using provider
       await provider.getBalance(wallet.address);
       return wallet;
     });
@@ -68,9 +66,9 @@ Deno.serve(async (req) => {
     const dmcTokenAddress = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
     const dmcContract = new ethers.Contract(dmcTokenAddress, DMC_ABI, botWallet);
 
-    // Convert DMC amount (USD value) to token amount with 18 decimals
+    // Convert DMC amount to token amount with 18 decimals
     const dmcTokenAmount = ethers.parseEther(dmcAmount);
-    console.log(`Attempting to send ${dmcAmount} DMC tokens to ${buyerAddress}`);
+    console.log(`Attempting to transfer ${dmcAmount} DMC tokens from ${buyerAddress}`);
 
     // Check bot's DMC balance with retries
     const botBalance = await retryWithBackoff(() => dmcContract.balanceOf(botWallet.address));
@@ -80,7 +78,7 @@ Deno.serve(async (req) => {
       throw new Error("Insufficient DMC balance in bot wallet");
     }
 
-    // Send DMC tokens with retries
+    // Transfer DMC tokens from user to bot wallet
     const tx = await retryWithBackoff(() => dmcContract.transfer(buyerAddress, dmcTokenAmount));
     console.log("Transaction sent:", tx.hash);
     

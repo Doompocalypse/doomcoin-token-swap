@@ -33,17 +33,19 @@ export const useNFTPurchaseHandler = (
     const { nftId, price } = pendingPurchase;
 
     try {
-      // Check DMC balance using Supabase function invoke
-      const { data, error: balanceError } = await supabase.functions.invoke('get-dmc-balance', {
+      console.log("Processing NFT purchase:", { nftId, price, connectedAccount });
+
+      // 1. Check DMC balance
+      const { data: balanceData, error: balanceError } = await supabase.functions.invoke('get-dmc-balance', {
         body: { address: connectedAccount }
       });
       
       if (balanceError) {
         console.error("Error fetching DMC balance:", balanceError);
-        throw balanceError;
+        throw new Error('Failed to check DMC balance');
       }
 
-      const balance = data.balance;
+      const balance = balanceData.balance;
       console.log("User DMC balance:", balance, "Required:", price);
       
       if (balance < price) {
@@ -52,7 +54,24 @@ export const useNFTPurchaseHandler = (
         return;
       }
 
-      const { error } = await supabase
+      // 2. Process the DMC payment
+      const { data: transferData, error: transferError } = await supabase.functions.invoke('process-eth-transaction', {
+        body: {
+          buyerAddress: connectedAccount,
+          ethAmount: "0", // No ETH involved in this transaction
+          dmcAmount: price.toString()
+        }
+      });
+
+      if (transferError) {
+        console.error("DMC transfer error:", transferError);
+        throw new Error('Failed to process DMC transfer');
+      }
+
+      console.log("DMC transfer successful:", transferData);
+
+      // 3. Record the NFT purchase
+      const { error: purchaseError } = await supabase
         .from('mock_purchases')
         .insert({
           nft_id: nftId,
@@ -60,12 +79,18 @@ export const useNFTPurchaseHandler = (
           contract_address: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073"
         });
 
-      if (error) throw error;
+      if (purchaseError) {
+        console.error("Purchase recording error:", purchaseError);
+        throw purchaseError;
+      }
 
       toast({
         title: "Purchase Successful",
         description: "You have successfully purchased this NFT!",
       });
+
+      // Invalidate NFT cache to refresh the UI
+      window.location.reload();
     } catch (error) {
       console.error('Purchase error:', error);
       toast({
@@ -79,6 +104,7 @@ export const useNFTPurchaseHandler = (
   };
 
   const handleReferralComplete = async (isValid: boolean) => {
+    console.log("Referral completion handler called, valid:", isValid);
     await processPurchase();
   };
 
