@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import WalletConnect from "@/components/WalletConnect";
 import {
   DropdownMenu,
@@ -14,6 +14,20 @@ interface HeaderProps {
 
 const Header = ({ onConnect }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const getPageTitle = () => {
+    switch (location.pathname) {
+      case '/':
+        return 'Token Swap';
+      case '/nft-marketplace':
+        return 'NFT Marketplace';
+      case '/affiliate-program':
+        return 'Affiliate Program';
+      default:
+        return 'Token Swap';
+    }
+  };
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
@@ -36,7 +50,7 @@ const Header = ({ onConnect }: HeaderProps) => {
             </DropdownMenuContent>
           </DropdownMenu>
           <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-            NFT Marketplace
+            {getPageTitle()}
           </h1>
         </div>
         <div className="flex items-center gap-4">
