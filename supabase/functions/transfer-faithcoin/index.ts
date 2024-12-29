@@ -11,7 +11,7 @@ const NETWORKS = {
     name: 'Sepolia',
     chainId: '0xaa36a7',
     rpcUrl: (apiKey: string) => `https://eth-sepolia.g.alchemy.com/v2/${apiKey}`,
-    faithcoinAddress: '0xaAcfFDe6fdb5B4eAF0aa3a66e15BcF8064839Fc4',
+    faithcoinAddress: '0xaAcfFDe6fdb5B4eAF0aa3a66e15BcF8064839Fc4', // Update with Sepolia address
     botWallet: '0x2088891D40e755d83e1990d70fdb7e65a384e9B0'
   },
   arbitrum: {
@@ -23,15 +23,10 @@ const NETWORKS = {
   }
 };
 
-// Faithcoin Token Contract ABI (expanded with more details)
+// Faithcoin Token Contract ABI (minimal required for transfer)
 const FAITHCOIN_ABI = [
-  "function name() view returns (string)",
-  "function symbol() view returns (string)",
-  "function decimals() view returns (uint8)",
-  "function totalSupply() view returns (uint256)",
-  "function balanceOf(address account) view returns (uint256)",
   "function transfer(address to, uint256 amount) returns (bool)",
-  "event Transfer(address indexed from, address indexed to, uint256 value)"
+  "function balanceOf(address account) view returns (uint256)",
 ];
 
 // Retry configuration
@@ -66,7 +61,6 @@ Deno.serve(async (req) => {
     console.log(`Processing Faithcoin transfer on ${networkConfig.name}`);
     console.log(`To address: ${toAddress}`);
     console.log(`Amount: ${amount} Faithcoin`);
-    console.log(`Contract address: ${networkConfig.faithcoinAddress}`);
 
     const alchemyApiKey = Deno.env.get("ALCHEMY_API_KEY");
     if (!alchemyApiKey) {
@@ -97,32 +91,17 @@ Deno.serve(async (req) => {
       botWallet
     );
 
-    // Verify contract exists and is accessible
-    try {
-      const name = await faithcoinContract.name();
-      const symbol = await faithcoinContract.symbol();
-      console.log(`Connected to Faithcoin contract: ${name} (${symbol})`);
-    } catch (error) {
-      console.error('Error accessing Faithcoin contract:', error);
-      throw new Error(`Could not access Faithcoin contract at ${networkConfig.faithcoinAddress}. Please verify the contract address and deployment.`);
-    }
-
     const faithcoinAmount = ethers.parseEther(amount);
     
-    // Check bot's Faithcoin balance with better error handling
-    let botBalance;
-    try {
-      botBalance = await retryWithBackoff(() => 
-        faithcoinContract.balanceOf(botWallet.address)
-      );
-      console.log(`Bot Faithcoin balance: ${ethers.formatEther(botBalance)} Faithcoin`);
-    } catch (error) {
-      console.error('Error checking bot balance:', error);
-      throw new Error('Failed to check bot wallet Faithcoin balance. Please verify the contract implementation.');
-    }
+    // Check bot's Faithcoin balance
+    const botBalance = await retryWithBackoff(() => 
+      faithcoinContract.balanceOf(botWallet.address)
+    );
+    
+    console.log(`Bot Faithcoin balance: ${ethers.formatEther(botBalance)} Faithcoin`);
 
     if (botBalance < faithcoinAmount) {
-      throw new Error(`Insufficient Faithcoin balance in bot wallet. Available: ${ethers.formatEther(botBalance)} Faithcoin`);
+      throw new Error("Insufficient Faithcoin balance in bot wallet");
     }
 
     // Send Faithcoin tokens with retries

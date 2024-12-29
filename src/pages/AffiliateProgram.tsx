@@ -5,7 +5,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AffiliateHowItWorks from "@/components/affiliate/AffiliateHowItWorks";
 import AffiliateDashboard from "@/components/affiliate/AffiliateDashboard";
-import FaithcoinTest from "@/components/test/FaithcoinTest";
 
 interface AffiliateStats {
   totalReferrals: number;
@@ -164,7 +163,7 @@ const AffiliateProgram = () => {
     <div className="min-h-screen bg-[#221F26] text-white">
       <Header onConnect={handleConnect} />
       <div className="container mx-auto px-4 pt-24 pb-12">
-        <div className="max-w-4xl mx-auto space-y-8">
+        <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-bold mb-6">Affiliate Program</h1>
           
           {!referralCode ? (
@@ -181,11 +180,6 @@ const AffiliateProgram = () => {
           ) : (
             <AffiliateDashboard referralCode={referralCode} stats={stats} />
           )}
-
-          {/* Add test component at the bottom */}
-          <div className="mt-8 pt-8 border-t border-gray-700">
-            <FaithcoinTest walletAddress={walletAddress} />
-          </div>
         </div>
       </div>
     </div>
