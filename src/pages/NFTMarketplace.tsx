@@ -4,7 +4,6 @@ import CountdownTimer from "@/components/CountdownTimer";
 import { Suspense, useState } from "react";
 import Header from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import ProductSlider from "@/components/products/ProductSlider";
 
 const NFTMarketplace = () => {
   const { toast } = useToast();
@@ -42,10 +41,7 @@ const NFTMarketplace = () => {
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            <ProductSlider 
-              connectedAccount={connectedAccount}
-              onInsufficientBalance={handleInsufficientBalance}
-            />
+            {/* NFT display section will be implemented later */}
           </div>
         </main>
       </div>
