@@ -27,7 +27,7 @@ const ProductCard = memo(({ name, description, imageUrl, price }: ProductCardPro
         <h3 className="text-2xl font-bold text-white mb-2">{name}</h3>
         <p className="text-gray-300 mb-4">{description}</p>
         <div className="flex items-center justify-between">
-          <span className="text-xl font-semibold text-white">${price.toFixed(2)} DMC</span>
+          <span className="text-xl font-semibold text-white">{price} DMC</span>
         </div>
       </div>
     </Card>

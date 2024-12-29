@@ -12,53 +12,53 @@ import { useCarouselRotation } from '@/hooks/useCarouselRotation';
 const products = [
   {
     id: "1",
-    name: "Anubis Guardian",
-    description: "Ancient protector of the digital realm, granting enhanced security features.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/d89c3541-c973-4fc0-9fe9-7adf6ad0a40c.png",
-    price: 299.99
+    name: "Survivor Tier",
+    description: "Early access, digital badge (NFT), and exclusive in-game perks",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/f461441e-2978-4f00-8198-2e5938a97d5b.png",
+    price: 10
   },
   {
     id: "2",
-    name: "Horus Overseer",
-    description: "All-seeing deity NFT that provides strategic advantages and rare item drops.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/b782cb08-ff38-49a9-a223-199ae309434f.png",
-    price: 199.99
+    name: "Strategist Tier",
+    description: "All Survivor Tier rewards, plus in-game currency, exclusive faction NFT, and badge perks",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/592b8080-ac57-446d-b218-2e9ecc071b98.png",
+    price: 100
   },
   {
     id: "3",
-    name: "Ra's Blessing",
-    description: "Sun god's power enhancing gameplay mechanics and resource generation.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/f8c3764a-5c61-450a-8fff-4f7daf9d6b24.png",
-    price: 149.99
+    name: "Vanguard Tier",
+    description: "All Strategist Tier rewards, plus founding member title, physical merch bundle, exclusive beta access, and premium badge perks",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/38239f3c-03f5-4bb0-b193-43e728dadabc.png",
+    price: 1000
   },
   {
     id: "4",
-    name: "Osiris Judge",
-    description: "Underworld ruler providing exclusive access to special game modes.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/6dd04cea-cba0-44b0-895a-8f621da2695f.png",
-    price: 399.99
+    name: "Commander Tier",
+    description: "All Vanguard Tier rewards, plus faction leadership NFT, premium merch package, personalized message, and commander badge perks",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/4982d180-059b-40a6-beb6-92032eb2a62a.png",
+    price: 10000
   },
   {
     id: "5",
-    name: "Isis Enchantress",
-    description: "Magical deity offering enhanced crafting and spell-casting abilities.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/97c7a9ea-bec9-4213-b473-ef285882518d.png",
-    price: 299.99
+    name: "Architect Tier",
+    description: "All Commander Tier rewards, plus world builder NFT, private developer roundtable, lifetime VIP access, and architect badge perks",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/84deb4fb-7810-4688-8eb5-2dc2827c2dbd.png",
+    price: 100000
   },
   {
     id: "6",
-    name: "Thoth's Wisdom",
-    description: "Knowledge keeper providing strategic insights and bonus experience.",
-    videoUrl: "https://player.vimeo.com/video/1039284485",
-    imageUrl: "/lovable-uploads/0c37c47b-cfd2-4cc0-9cbe-c285a6d4ff34.png",
-    price: 249.99
+    name: "Visionary Tier",
+    description: "All Architect Tier rewards, plus co-creator credit NFT, in-game monument NFT, custom merchandise package, and exclusive experience",
+    videoUrl: "",
+    imageUrl: "/lovable-uploads/8b332fe2-0b91-4907-b27f-ec42ef8ab9c4.png",
+    price: 1000000
   }
-].sort((a, b) => a.price - b.price);
+];
 
 const ProductSlider = memo(() => {
   const { setApi } = useCarouselRotation({ 
@@ -66,7 +66,7 @@ const ProductSlider = memo(() => {
     name: 'product-slider'
   });
 
-  console.log('Rendering ProductSlider with sorted products:', products);
+  console.log('Rendering ProductSlider with products:', products);
 
   return (
     <div className="w-full max-w-3xl mx-auto px-4 relative">
