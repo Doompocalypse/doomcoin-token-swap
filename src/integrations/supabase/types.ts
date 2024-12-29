@@ -9,6 +9,33 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      affiliates: {
+        Row: {
+          created_at: string
+          id: string
+          referral_code: string
+          total_earnings: number
+          total_referrals: number
+          user_address: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          referral_code: string
+          total_earnings?: number
+          total_referrals?: number
+          user_address: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          referral_code?: string
+          total_earnings?: number
+          total_referrals?: number
+          user_address?: string
+        }
+        Relationships: []
+      }
       app_settings: {
         Row: {
           key: string
@@ -135,6 +162,41 @@ export type Database = {
           token_id?: string
         }
         Relationships: []
+      }
+      referrals: {
+        Row: {
+          commission_paid: number
+          created_at: string
+          id: string
+          purchase_amount: number
+          referred_address: string
+          referrer_id: string
+        }
+        Insert: {
+          commission_paid?: number
+          created_at?: string
+          id?: string
+          purchase_amount?: number
+          referred_address: string
+          referrer_id: string
+        }
+        Update: {
+          commission_paid?: number
+          created_at?: string
+          id?: string
+          purchase_amount?: number
+          referred_address?: string
+          referrer_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "referrals_referrer_id_fkey"
+            columns: ["referrer_id"]
+            isOneToOne: false
+            referencedRelation: "affiliates"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {

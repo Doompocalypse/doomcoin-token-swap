@@ -4,6 +4,7 @@ import Header from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import type { Database } from "@/integrations/supabase/types";
 
 const AffiliateProgram = () => {
   const [walletAddress, setWalletAddress] = useState<string>("");
@@ -23,9 +24,9 @@ const AffiliateProgram = () => {
   const checkExistingAffiliate = async (address: string) => {
     try {
       const { data: affiliate } = await supabase
-        .from("affiliates")
-        .select("referral_code")
-        .eq("user_address", address)
+        .from('affiliates')
+        .select('referral_code')
+        .eq('user_address', address)
         .single();
 
       if (affiliate?.referral_code) {
@@ -54,12 +55,14 @@ const AffiliateProgram = () => {
     setIsLoading(true);
     try {
       const referralCode = generateReferralCode(walletAddress);
-      const { error } = await supabase.from("affiliates").insert([
-        {
-          user_address: walletAddress,
-          referral_code: referralCode,
-        },
-      ]);
+      const { error } = await supabase
+        .from('affiliates')
+        .insert([
+          {
+            user_address: walletAddress,
+            referral_code: referralCode,
+          },
+        ]);
 
       if (error) throw error;
 
