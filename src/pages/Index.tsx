@@ -1,7 +1,6 @@
 import { useToast } from "@/components/ui/use-toast";
 import TokenExchange from "@/components/TokenExchange";
 import WalletConnect from "@/components/WalletConnect";
-import Doomy from "@/components/Doomy";
 import VideoBackground from "@/components/VideoBackground";
 import { useState, Suspense } from "react";
 import ErrorBoundary from "@/components/ErrorBoundary";
@@ -81,7 +80,6 @@ const Index = () => {
               />
             </div>
           </main>
-          <Doomy />
         </div>
       </Suspense>
     </ErrorBoundary>
