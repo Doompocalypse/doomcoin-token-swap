@@ -1,14 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
-
-export interface NFT {
-  id: string;
-  name: string;
-  description: string | null;
-  price: number;
-  video_url: string;
-  image_url: string;
-}
+import { NFT } from "@/types/nft";
 
 export const useNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
@@ -16,16 +8,27 @@ export const useNFTData = (connectedAccount?: string) => {
     queryFn: async () => {
       console.log('Fetching NFTs from Supabase');
       const { data, error } = await supabase
-        .from('mock_nfts')
+        .from('nft_metadata')
         .select('*')
-        .order('price', { ascending: true });
+        .order('token_id', { ascending: true });
       
       if (error) {
         console.error('Error fetching NFTs:', error);
         throw error;
       }
-      console.log('Received NFTs from Supabase:', data);
-      return data as NFT[];
+      
+      // Transform the data to match the NFT interface
+      const transformedData: NFT[] = data.map(nft => ({
+        id: nft.token_id,
+        name: nft.name,
+        description: nft.description,
+        price: 1000, // Default price in DMC tokens
+        videoUrl: '', // We don't store videos in metadata currently
+        imageUrl: nft.image_url,
+      }));
+      
+      console.log('Received NFTs from Supabase:', transformedData);
+      return transformedData;
     }
   });
 
@@ -33,18 +36,20 @@ export const useNFTData = (connectedAccount?: string) => {
     queryKey: ['purchased_nfts', connectedAccount],
     queryFn: async () => {
       if (!connectedAccount) return [];
+      
       console.log('Fetching purchased NFTs for account:', connectedAccount);
       const { data, error } = await supabase
-        .from('mock_purchases')
-        .select('nft_id')
+        .from('nft_purchases')
+        .select('token_id')
         .eq('buyer_address', connectedAccount);
       
       if (error) {
         console.error('Error fetching purchased NFTs:', error);
         throw error;
       }
+      
       console.log('Received purchased NFTs:', data);
-      return data.map(purchase => purchase.nft_id);
+      return data.map(purchase => purchase.token_id);
     },
     enabled: !!connectedAccount
   });
