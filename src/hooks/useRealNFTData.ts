@@ -4,7 +4,7 @@ import { NFT } from "@/types/nft";
 
 export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
-    queryKey: ['real_nfts'],
+    queryKey: ['nft_metadata'],
     queryFn: async () => {
       console.log('Fetching NFTs from Supabase');
       const { data: nftData, error: nftError } = await supabase
@@ -19,28 +19,14 @@ export const useRealNFTData = (connectedAccount?: string) => {
 
       console.log('Received NFT data from Supabase:', nftData);
       
-      const transformedData: NFT[] = nftData.map(nft => {
-        // Determine price based on token_id
-        let price = 10; // Default Survivor Tier price
-        switch (nft.token_id) {
-          case "1": price = 10; break;        // Survivor Tier
-          case "2": price = 100; break;       // Strategist Tier
-          case "3": price = 1000; break;      // Vanguard Tier
-          case "4": price = 10000; break;     // Commander Tier
-          case "5": price = 100000; break;    // Architect Tier
-          case "6": price = 1000000; break;   // Visionary Tier
-          default: price = 10;
-        }
-
-        return {
-          id: nft.token_id,
-          name: nft.name,
-          description: nft.description || '',
-          price: price,
-          imageUrl: nft.image_url,
-          videoUrl: '', // We don't store videos in metadata currently
-        };
-      });
+      const transformedData: NFT[] = nftData.map(nft => ({
+        id: nft.token_id,
+        name: nft.name,
+        description: nft.description || '',
+        price: getPriceForTier(nft.token_id),
+        imageUrl: nft.image_url,
+        videoUrl: '',
+      }));
 
       console.log('Transformed NFT data:', transformedData);
       return transformedData;
@@ -70,4 +56,17 @@ export const useRealNFTData = (connectedAccount?: string) => {
   });
 
   return { nfts, purchasedNfts, nftsError };
+};
+
+// Helper function to determine price based on NFT tier
+const getPriceForTier = (tokenId: string): number => {
+  switch (tokenId) {
+    case "1": return 10;        // Survivor Tier
+    case "2": return 100;       // Strategist Tier
+    case "3": return 1000;      // Vanguard Tier
+    case "4": return 10000;     // Commander Tier
+    case "5": return 100000;    // Architect Tier
+    case "6": return 1000000;   // Visionary Tier
+    default: return 10;
+  }
 };
