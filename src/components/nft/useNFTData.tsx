@@ -17,7 +17,8 @@ export const useNFTData = (connectedAccount?: string) => {
       console.log('Fetching NFTs from Supabase');
       const { data, error } = await supabase
         .from('mock_nfts')
-        .select('*');
+        .select('*')
+        .order('price', { ascending: true });
       
       if (error) {
         console.error('Error fetching NFTs:', error);
