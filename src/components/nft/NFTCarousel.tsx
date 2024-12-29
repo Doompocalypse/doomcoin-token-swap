@@ -7,7 +7,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import NFTCard from './NFTCard';
-import { useERC1155NFTs } from '@/hooks/useERC1155NFTs';
+import { useRealNFTData } from '@/hooks/useRealNFTData';
 import { useNFTPurchaseHandler } from './NFTPurchaseHandler';
 import { useCarouselRotation } from '@/hooks/useCarouselRotation';
 
@@ -17,7 +17,7 @@ interface NFTCarouselProps {
 }
 
 const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarouselProps) => {
-  const { data: nfts, isLoading } = useERC1155NFTs(connectedAccount);
+  const { nfts, purchasedNfts, nftsError } = useRealNFTData(connectedAccount);
   const { handlePurchase, ReferralDialog } = useNFTPurchaseHandler(connectedAccount, onInsufficientBalance);
   const { setApi } = useCarouselRotation({ 
     itemsLength: nfts?.length || 0,
@@ -29,8 +29,12 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
   
   console.log('NFTCarousel render - nfts:', sortedNfts);
 
-  if (isLoading) return <div>Loading NFTs...</div>;
-  if (!sortedNfts) return null;
+  if (nftsError) {
+    console.error('Error loading NFTs:', nftsError);
+    return <div className="text-white">Error loading NFTs. Please try again later.</div>;
+  }
+  
+  if (!sortedNfts) return <div className="text-white">Loading NFTs...</div>;
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 relative">
@@ -50,7 +54,7 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
                 <NFTCard
                   {...nft}
                   onPurchase={() => handlePurchase(nft.id, nft.price)}
-                  isPurchased={nft.balance > 0}
+                  isPurchased={purchasedNfts?.includes(nft.id)}
                 />
               </div>
             </CarouselItem>

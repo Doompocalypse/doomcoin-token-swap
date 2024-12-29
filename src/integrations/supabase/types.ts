@@ -51,65 +51,65 @@ export type Database = {
         }
         Relationships: []
       }
-      mock_nfts: {
+      nft_metadata: {
         Row: {
+          attributes: Json | null
           created_at: string
           description: string | null
-          id: string
           image_url: string
           name: string
-          price: number
-          video_url: string
+          token_id: string
         }
         Insert: {
+          attributes?: Json | null
           created_at?: string
           description?: string | null
-          id?: string
           image_url: string
           name: string
-          price: number
-          video_url: string
+          token_id: string
         }
         Update: {
+          attributes?: Json | null
           created_at?: string
           description?: string | null
-          id?: string
           image_url?: string
           name?: string
-          price?: number
-          video_url?: string
+          token_id?: string
         }
         Relationships: []
       }
-      mock_purchases: {
+      nft_purchases: {
         Row: {
           buyer_address: string
-          contract_address: string
           id: string
-          nft_id: string
+          price_paid: number
           purchase_date: string
+          token_id: string
+          transaction_hash: string
         }
         Insert: {
           buyer_address: string
-          contract_address: string
           id?: string
-          nft_id: string
+          price_paid: number
           purchase_date?: string
+          token_id: string
+          transaction_hash: string
         }
         Update: {
           buyer_address?: string
-          contract_address?: string
           id?: string
-          nft_id?: string
+          price_paid?: number
           purchase_date?: string
+          token_id?: string
+          transaction_hash?: string
         }
         Relationships: [
           {
-            foreignKeyName: "mock_purchases_nft_id_fkey"
-            columns: ["nft_id"]
+            foreignKeyName: "nft_purchases_token_id_fkey"
+            columns: ["token_id"]
             isOneToOne: false
-            referencedRelation: "mock_nfts"
-            referencedColumns: ["id"]
+            referencedRelation: "nft_metadata"
+            referencedColumns: ["token_id"]
           },
         ]
       }

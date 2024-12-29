@@ -2,6 +2,12 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useState } from "react";
 import ReferralCodeDialog from "./ReferralCodeDialog";
+import { ethers } from "ethers";
+
+const NFT_ABI = [
+  "function mint(address to, uint256 tokenId) external",
+  "function ownerOf(uint256 tokenId) view returns (address)",
+];
 
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
@@ -70,13 +76,39 @@ export const useNFTPurchaseHandler = (
 
       console.log("DMC transfer successful:", transferData);
 
-      // 3. Record the NFT purchase
+      // 3. Mint NFT to user's wallet
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      
+      const { data: contractAddress } = await supabase
+        .from('app_settings')
+        .select('value')
+        .eq('key', 'nft_contract_address')
+        .single();
+      
+      if (!contractAddress) {
+        throw new Error('NFT contract address not found');
+      }
+
+      const nftContract = new ethers.Contract(
+        contractAddress.value,
+        NFT_ABI,
+        signer
+      );
+
+      const mintTx = await nftContract.mint(connectedAccount, nftId);
+      const receipt = await mintTx.wait();
+      
+      console.log("NFT minted successfully:", receipt);
+
+      // 4. Record the NFT purchase
       const { error: purchaseError } = await supabase
-        .from('mock_purchases')
+        .from('nft_purchases')
         .insert({
-          nft_id: nftId,
+          token_id: nftId,
           buyer_address: connectedAccount,
-          contract_address: "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073"
+          transaction_hash: receipt.hash,
+          price_paid: price
         });
 
       if (purchaseError) {

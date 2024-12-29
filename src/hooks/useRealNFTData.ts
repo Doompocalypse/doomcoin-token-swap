@@ -48,9 +48,12 @@ export const useRealNFTData = (connectedAccount?: string) => {
           const metadata = await response.json();
           
           // Store metadata in Supabase
-          await supabase.from('real_nfts').upsert({
+          await supabase.from('nft_metadata').upsert({
             token_id: tokenId.toString(),
-            metadata
+            name: metadata.name,
+            description: metadata.description,
+            image_url: metadata.image,
+            attributes: metadata.attributes
           }, {
             onConflict: 'token_id'
           });
@@ -60,8 +63,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
             name: metadata.name,
             description: metadata.description,
             price: metadata.price || 0,
-            image_url: metadata.image,
-            video_url: metadata.animation_url || ''
+            imageUrl: metadata.image,
+            videoUrl: metadata.animation_url || ''
           });
         }
         
@@ -75,12 +78,12 @@ export const useRealNFTData = (connectedAccount?: string) => {
   });
 
   const { data: purchasedNfts } = useQuery({
-    queryKey: ['real_nft_purchases', connectedAccount],
+    queryKey: ['nft_purchases', connectedAccount],
     queryFn: async () => {
       if (!connectedAccount) return [];
       
       const { data, error } = await supabase
-        .from('real_nft_purchases')
+        .from('nft_purchases')
         .select('token_id')
         .eq('buyer_address', connectedAccount);
       
