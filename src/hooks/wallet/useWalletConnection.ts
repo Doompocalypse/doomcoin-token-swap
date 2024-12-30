@@ -1,6 +1,7 @@
 import { useWalletCore } from "./useWalletCore";
 import { useWalletEvents } from "./useWalletEvents";
 import { useWalletDisconnect } from "./useWalletDisconnect";
+import { useCallback } from "react";
 
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
@@ -20,7 +21,7 @@ export const useWalletConnection = (
     onConnect
   );
 
-  const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
+  const connectWallet = useCallback(async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
     console.log("Connecting wallet with type:", walletType);
     
     // If switching between connected accounts
@@ -41,7 +42,7 @@ export const useWalletConnection = (
       wcModal.setAttribute('theme', 'dark');
       document.body.appendChild(wcModal);
     }
-  };
+  }, [accounts, connectMetaMask, onConnect, setAccounts]);
 
   return {
     accounts,

@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export const useWalletDisconnect = (
@@ -6,7 +7,7 @@ export const useWalletDisconnect = (
 ) => {
   const { toast } = useToast();
 
-  const forceDisconnectWallet = async () => {
+  const forceDisconnectWallet = useCallback(async () => {
     try {
       console.log("Starting force wallet disconnection process...");
       
@@ -59,9 +60,9 @@ export const useWalletDisconnect = (
         variant: "destructive",
       });
     }
-  };
+  }, [setAccounts, onConnect, toast]);
 
-  const disconnectWallet = async () => {
+  const disconnectWallet = useCallback(async () => {
     try {
       console.log("Starting wallet disconnection process...");
       
@@ -110,7 +111,7 @@ export const useWalletDisconnect = (
         variant: "destructive",
       });
     }
-  };
+  }, [setAccounts, onConnect, toast]);
 
   return {
     disconnectWallet,
