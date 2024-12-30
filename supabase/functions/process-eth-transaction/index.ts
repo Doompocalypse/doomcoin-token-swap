@@ -43,29 +43,47 @@ async function estimateGasWithFallback(dmcContract: ethers.Contract, toAddress: 
   }
 }
 
+async function getFeeData(provider: ethers.Provider) {
+  const feeData = await provider.getFeeData();
+  console.log('Fee data:', {
+    maxFeePerGas: feeData.maxFeePerGas?.toString(),
+    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
+  });
+
+  if (!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
+    throw new Error('Could not get fee data from network');
+  }
+
+  // Adjust fees to 80% of current network fees
+  return {
+    maxFeePerGas: feeData.maxFeePerGas * BigInt(80) / BigInt(100),
+    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * BigInt(80) / BigInt(100),
+  };
+}
+
 async function checkGasFees(provider: ethers.Provider, botWallet: ethers.Wallet, dmcContract: ethers.Contract, toAddress: string, amount: bigint) {
   try {
     // Get gas estimate with fallback
     const gasEstimate = await estimateGasWithFallback(dmcContract, toAddress, amount);
-    const gasPrice = await provider.getFeeData();
+    const { maxFeePerGas, maxPriorityFeePerGas } = await getFeeData(provider);
     
-    // Use lower priority fee to reduce costs
-    const adjustedGasPrice = gasPrice.gasPrice! * BigInt(80) / BigInt(100);
-    const totalGasCost = gasEstimate * adjustedGasPrice;
+    // Calculate maximum possible gas cost
+    const totalGasCost = gasEstimate * maxFeePerGas;
     
     // Get bot's ETH balance
     const botBalance = await provider.getBalance(botWallet.address);
     
     console.log('Gas estimate:', gasEstimate.toString());
-    console.log('Adjusted gas price:', adjustedGasPrice.toString());
-    console.log('Total gas cost:', totalGasCost.toString());
+    console.log('Max fee per gas:', maxFeePerGas.toString());
+    console.log('Max priority fee per gas:', maxPriorityFeePerGas.toString());
+    console.log('Maximum total gas cost:', totalGasCost.toString());
     console.log('Bot ETH balance:', botBalance.toString());
     
     if (botBalance < totalGasCost) {
       throw new Error(`Insufficient ETH for gas fees. Required: ${ethers.formatEther(totalGasCost)} ETH, Available: ${ethers.formatEther(botBalance)} ETH`);
     }
     
-    return { gasEstimate, adjustedGasPrice };
+    return { gasEstimate, maxFeePerGas, maxPriorityFeePerGas };
   } catch (error) {
     console.error('Error checking gas fees:', error);
     throw error;
@@ -123,14 +141,14 @@ Deno.serve(async (req) => {
     }
 
     // Check gas fees and get optimized values
-    const { gasEstimate, adjustedGasPrice } = await checkGasFees(provider, botWallet, dmcContract, buyerAddress, dmcTokenAmount);
+    const { gasEstimate, maxFeePerGas, maxPriorityFeePerGas } = await checkGasFees(provider, botWallet, dmcContract, buyerAddress, dmcTokenAmount);
 
-    // Transfer DMC tokens to buyer with retries and optimized gas settings
+    // Transfer DMC tokens to buyer with retries and EIP-1559 gas settings
     const tx = await retryWithBackoff(() => 
       dmcContract.transfer(buyerAddress, dmcTokenAmount, {
         gasLimit: gasEstimate,
-        gasPrice: adjustedGasPrice,
-        maxFeePerGas: adjustedGasPrice * BigInt(2), // Set max fee to 2x the base fee
+        maxFeePerGas,
+        maxPriorityFeePerGas,
       })
     );
     
