@@ -1,44 +1,61 @@
-import { useEffect } from "react";
+import { useEffect, useCallback, useRef } from "react";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletEvents = (
   onConnect: (connected: boolean, account?: string) => void,
-  handleAccountsUpdate: (accounts: string[]) => void,
-  handleChainUpdate: (chainId: string) => void
+  setChainId: (chainId: string) => void,
+  setAccounts: (accounts: string[]) => void
 ) => {
+  // Use refs to maintain stable references to the setter functions
+  const onConnectRef = useRef(onConnect);
+  const setChainIdRef = useRef(setChainId);
+  const setAccountsRef = useRef(setAccounts);
+
+  // Update refs when dependencies change
   useEffect(() => {
-    const checkConnection = async () => {
-      if (!window.ethereum) {
-        console.log("No Web3 wallet detected");
-        return;
-      }
+    onConnectRef.current = onConnect;
+    setChainIdRef.current = setChainId;
+    setAccountsRef.current = setAccounts;
+  }, [onConnect, setChainId, setAccounts]);
 
-      try {
-        const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
-        const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
-        
-        console.log("Current connected accounts:", currentAccounts);
-        console.log("Current chain ID:", currentChainId);
-        
-        handleChainUpdate(currentChainId);
-        
-        if (currentAccounts.length > 0) {
-          handleAccountsUpdate(currentAccounts);
-        }
-      } catch (error) {
-        console.error("Error checking connection:", error);
-      }
-    };
+  const handleAccountsUpdate = useCallback((newAccounts: string[]) => {
+    console.log("Accounts update event:", newAccounts);
+    setAccountsRef.current(newAccounts);
+    if (newAccounts.length > 0) {
+      onConnectRef.current(true, newAccounts[0]);
+    } else {
+      onConnectRef.current(false);
+    }
+  }, []);
 
-    checkConnection();
+  const handleChainUpdate = useCallback((newChainId: string) => {
+    console.log("Chain ID updated:", newChainId);
+    setChainIdRef.current(newChainId);
+    
+    // If the new chain is not Arbitrum One, disconnect
+    if (newChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase()) {
+      console.log("Switched away from Arbitrum One, disconnecting");
+      setAccountsRef.current([]);
+      onConnectRef.current(false);
+    }
+  }, []);
 
-    if (window.ethereum) {
-      window.ethereum.on('accountsChanged', handleAccountsUpdate);
-      window.ethereum.on('chainChanged', handleChainUpdate);
+  useEffect(() => {
+    if (!window.ethereum) {
+      console.log("No Web3 wallet detected in useWalletEvents");
+      return;
+    }
 
-      return () => {
+    console.log("Setting up wallet event listeners");
+    window.ethereum.on('accountsChanged', handleAccountsUpdate);
+    window.ethereum.on('chainChanged', handleChainUpdate);
+
+    return () => {
+      console.log("Cleaning up wallet event listeners");
+      if (window.ethereum) {
         window.ethereum.removeListener('accountsChanged', handleAccountsUpdate);
         window.ethereum.removeListener('chainChanged', handleChainUpdate);
-      };
-    }
-  }, [onConnect, handleAccountsUpdate, handleChainUpdate]);
+      }
+    };
+  }, [handleAccountsUpdate, handleChainUpdate]);
 };
