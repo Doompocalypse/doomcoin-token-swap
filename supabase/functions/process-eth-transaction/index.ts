@@ -28,6 +28,32 @@ async function retryWithBackoff(operation: () => Promise<any>, retries = MAX_RET
   }
 }
 
+async function checkGasFees(provider: ethers.Provider, botWallet: ethers.Wallet, dmcContract: ethers.Contract, toAddress: string, amount: bigint) {
+  try {
+    // Estimate gas for the transfer
+    const gasEstimate = await dmcContract.transfer.estimateGas(toAddress, amount);
+    const gasPrice = await provider.getFeeData();
+    const totalGasCost = gasEstimate * gasPrice.gasPrice!;
+    
+    // Get bot's ETH balance
+    const botBalance = await provider.getBalance(botWallet.address);
+    
+    console.log('Gas estimate:', gasEstimate.toString());
+    console.log('Gas price:', gasPrice.gasPrice?.toString());
+    console.log('Total gas cost:', totalGasCost.toString());
+    console.log('Bot ETH balance:', botBalance.toString());
+    
+    if (botBalance < totalGasCost) {
+      throw new Error(`Insufficient ETH for gas fees. Required: ${ethers.formatEther(totalGasCost)} ETH, Available: ${ethers.formatEther(botBalance)} ETH`);
+    }
+    
+    return { gasEstimate, gasPrice };
+  } catch (error) {
+    console.error('Error checking gas fees:', error);
+    throw error;
+  }
+}
+
 Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -68,18 +94,26 @@ Deno.serve(async (req) => {
 
     // Convert DMC amount to token amount with 18 decimals
     const dmcTokenAmount = ethers.parseEther(dmcAmount);
-    console.log(`Attempting to transfer ${dmcAmount} DMC tokens from ${buyerAddress}`);
+    console.log(`Attempting to transfer ${dmcAmount} DMC tokens to ${buyerAddress}`);
 
     // Check bot's DMC balance with retries
-    const botBalance = await retryWithBackoff(() => dmcContract.balanceOf(botWallet.address));
-    console.log(`Bot DMC balance: ${ethers.formatEther(botBalance)} DMC`);
+    const botDMCBalance = await retryWithBackoff(() => dmcContract.balanceOf(botWallet.address));
+    console.log(`Bot DMC balance: ${ethers.formatEther(botDMCBalance)} DMC`);
 
-    if (botBalance < dmcTokenAmount) {
+    if (botDMCBalance < dmcTokenAmount) {
       throw new Error("Insufficient DMC balance in bot wallet");
     }
 
-    // Transfer DMC tokens from user to bot wallet
-    const tx = await retryWithBackoff(() => dmcContract.transfer(buyerAddress, dmcTokenAmount));
+    // Check gas fees before attempting transfer
+    await checkGasFees(provider, botWallet, dmcContract, buyerAddress, dmcTokenAmount);
+
+    // Transfer DMC tokens to buyer with retries
+    const tx = await retryWithBackoff(() => 
+      dmcContract.transfer(buyerAddress, dmcTokenAmount, {
+        gasLimit: 300000, // Set a reasonable gas limit
+      })
+    );
+    
     console.log("Transaction sent:", tx.hash);
     
     const receipt = await retryWithBackoff(() => tx.wait());
@@ -93,18 +127,25 @@ Deno.serve(async (req) => {
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
-    )
+    );
   } catch (error) {
     console.error('Error processing transaction:', error);
+    
+    // Format the error message to be more user-friendly
+    let errorMessage = error.message;
+    if (errorMessage.includes('insufficient funds for gas')) {
+      errorMessage = 'The system is temporarily unable to process transactions due to insufficient gas funds. Please try again later.';
+    }
+    
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message,
+        error: errorMessage,
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }
-    )
+    );
   }
-})
+});
