@@ -79,15 +79,7 @@ async function getFeeData(provider: ethers.Provider) {
     return { maxFeePerGas, maxPriorityFeePerGas };
   } catch (error) {
     console.error('Error getting fee data:', error);
-    
-    // Last resort fallback: use hardcoded conservative values
-    const fallbackGasPrice = ethers.parseUnits('0.1', 'gwei'); // Very conservative base price
-    console.log('Using fallback gas price:', fallbackGasPrice.toString());
-    
-    return {
-      maxFeePerGas: fallbackGasPrice * BigInt(2),
-      maxPriorityFeePerGas: fallbackGasPrice,
-    };
+    throw new Error('Could not get fee data from network');
   }
 }
 
