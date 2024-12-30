@@ -1,9 +1,16 @@
-import { ToastProps } from "@/components/ui/toast";
+import { ToastActionElement } from "@/components/ui/toast";
+
+type ToastProps = {
+  title?: string;
+  description?: React.ReactNode;
+  action?: ToastActionElement;
+  variant?: "default" | "destructive";
+};
 
 export const useWalletDisconnect = (
   setAccounts: (accounts: string[]) => void,
   onConnect: (connected: boolean) => void,
-  toast: (props: Omit<ToastProps, "id">) => void
+  toast: (props: ToastProps) => void
 ) => {
   const forceDisconnectWallet = async () => {
     try {
