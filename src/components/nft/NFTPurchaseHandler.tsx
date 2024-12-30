@@ -9,6 +9,15 @@ const NFT_ABI = [
   "function ownerOf(uint256 tokenId) view returns (address)",
 ];
 
+const DMC_ABI = [
+  "function transfer(address to, uint256 amount) returns (bool)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function balanceOf(address account) view returns (uint256)",
+];
+
+const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
+const DMC_CONTRACT = "0xe0a5AC02b20C9a7E08D6F9C75134D35B1AfC6073";
+
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
   onInsufficientBalance?: () => void
@@ -44,47 +53,33 @@ export const useNFTPurchaseHandler = (
     try {
       console.log("Processing NFT purchase:", { nftId, price, connectedAccount });
 
-      // 1. Check DMC balance
-      const { data: balanceData, error: balanceError } = await supabase.functions.invoke('get-dmc-balance', {
-        body: { address: connectedAccount }
-      });
-      
-      if (balanceError) {
-        console.error("Error fetching DMC balance:", balanceError);
-        throw new Error('Failed to check DMC balance');
-      }
+      // Get provider and signer
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
 
-      const balance = balanceData.balance;
-      console.log("User DMC balance:", balance, "Required:", price);
+      // Initialize DMC token contract
+      const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer);
+
+      // Check DMC balance
+      const balance = await dmcContract.balanceOf(connectedAccount);
+      const priceInWei = ethers.parseEther(price.toString());
       
-      if (balance < price) {
+      console.log("User DMC balance:", ethers.formatEther(balance), "Required:", price);
+      
+      if (balance < priceInWei) {
         console.log("Purchase failed: Insufficient DMC balance");
         onInsufficientBalance?.();
         return;
       }
 
-      // 2. Process the DMC payment
-      console.log("Processing DMC payment...");
-      const { data: transferData, error: transferError } = await supabase.functions.invoke('process-eth-transaction', {
-        body: {
-          buyerAddress: connectedAccount,
-          ethAmount: "0", // No ETH involved in this transaction
-          dmcAmount: price.toString()
-        }
-      });
-
-      if (transferError) {
-        console.error("DMC transfer error:", transferError);
-        throw new Error('Failed to process DMC transfer');
-      }
-
-      console.log("DMC transfer successful:", transferData);
-
-      // 3. Mint NFT to user's wallet
-      console.log("Initiating NFT minting...");
-      const provider = new ethers.BrowserProvider(window.ethereum);
-      const signer = await provider.getSigner();
+      // Transfer DMC tokens to bot wallet
+      console.log("Transferring DMC tokens to bot wallet...");
+      const transferTx = await dmcContract.transfer(BOT_WALLET, priceInWei);
+      const transferReceipt = await transferTx.wait();
       
+      console.log("DMC transfer successful:", transferReceipt.hash);
+
+      // Get NFT contract address
       const { data: contractAddress } = await supabase
         .from('app_settings')
         .select('value')
@@ -95,20 +90,20 @@ export const useNFTPurchaseHandler = (
         throw new Error('NFT contract address not found');
       }
 
+      // Mint NFT
+      console.log("Minting NFT...");
       const nftContract = new ethers.Contract(
         contractAddress.value,
         NFT_ABI,
         signer
       );
 
-      console.log("Minting NFT with contract:", contractAddress.value);
       const mintTx = await nftContract.mint(connectedAccount, nftId);
       const receipt = await mintTx.wait();
       
-      console.log("NFT minted successfully:", receipt);
+      console.log("NFT minted successfully:", receipt.hash);
 
-      // 4. Record the NFT purchase
-      console.log("Recording purchase in database...");
+      // Record the purchase
       const { error: purchaseError } = await supabase
         .from('nft_purchases')
         .insert({
@@ -128,7 +123,7 @@ export const useNFTPurchaseHandler = (
         description: "You have successfully purchased this NFT!",
       });
 
-      // Invalidate NFT cache to refresh the UI
+      // Refresh the UI
       window.location.reload();
     } catch (error: any) {
       console.error('Purchase error:', error);
