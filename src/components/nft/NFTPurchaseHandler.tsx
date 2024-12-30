@@ -21,7 +21,10 @@ export const useNFTPurchaseHandler = (
   } | null>(null);
 
   const handlePurchase = async (nftId: string, price: number) => {
+    console.log("Starting NFT purchase flow:", { nftId, price });
+    
     if (!connectedAccount) {
+      console.log("Purchase failed: No wallet connected");
       toast({
         title: "Wallet Required",
         description: "Please connect your wallet to purchase NFTs",
@@ -55,12 +58,13 @@ export const useNFTPurchaseHandler = (
       console.log("User DMC balance:", balance, "Required:", price);
       
       if (balance < price) {
-        console.log("Insufficient DMC balance");
+        console.log("Purchase failed: Insufficient DMC balance");
         onInsufficientBalance?.();
         return;
       }
 
       // 2. Process the DMC payment
+      console.log("Processing DMC payment...");
       const { data: transferData, error: transferError } = await supabase.functions.invoke('process-eth-transaction', {
         body: {
           buyerAddress: connectedAccount,
@@ -77,6 +81,7 @@ export const useNFTPurchaseHandler = (
       console.log("DMC transfer successful:", transferData);
 
       // 3. Mint NFT to user's wallet
+      console.log("Initiating NFT minting...");
       const provider = new ethers.BrowserProvider(window.ethereum);
       const signer = await provider.getSigner();
       
@@ -96,12 +101,14 @@ export const useNFTPurchaseHandler = (
         signer
       );
 
+      console.log("Minting NFT with contract:", contractAddress.value);
       const mintTx = await nftContract.mint(connectedAccount, nftId);
       const receipt = await mintTx.wait();
       
       console.log("NFT minted successfully:", receipt);
 
       // 4. Record the NFT purchase
+      console.log("Recording purchase in database...");
       const { error: purchaseError } = await supabase
         .from('nft_purchases')
         .insert({
@@ -123,11 +130,11 @@ export const useNFTPurchaseHandler = (
 
       // Invalidate NFT cache to refresh the UI
       window.location.reload();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Purchase error:', error);
       toast({
         title: "Purchase Failed",
-        description: "Failed to purchase NFT. Please try again.",
+        description: error.message || "Failed to purchase NFT. Please try again.",
         variant: "destructive",
       });
     } finally {
