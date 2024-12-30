@@ -19,7 +19,8 @@ export const useWalletConnection = (
   
   const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(
     setAccounts,
-    onConnect
+    onConnect,
+    toast
   );
 
   const connectWallet = async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
