@@ -27,16 +27,16 @@ export function Toaster() {
       {toasts.map(function ({ id, title, description, action, variant, ...props }) {
         return (
           <Toast key={id} {...props}>
-            <div className="grid gap-1">
+            <div className="grid gap-2 w-full">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
-                <div className="flex items-center justify-between gap-2">
-                  <ToastDescription>{description}</ToastDescription>
+                <div className="flex items-start justify-between gap-4">
+                  <ToastDescription className="flex-1 max-w-[90%]">{description}</ToastDescription>
                   {variant === "destructive" && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 shrink-0 text-destructive hover:bg-destructive/10"
+                      className="h-6 w-6 shrink-0 text-destructive-foreground/50 hover:text-destructive-foreground hover:bg-destructive-foreground/10"
                       onClick={() => handleCopy(title || '', description?.toString() || '')}
                     >
                       <ClipboardCopy className="h-4 w-4" />
