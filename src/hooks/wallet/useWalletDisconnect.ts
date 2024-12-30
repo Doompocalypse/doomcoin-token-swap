@@ -1,9 +1,9 @@
-import { Toast } from "@/components/ui/toast";
+import { ToastProps } from "@/components/ui/toast";
 
 export const useWalletDisconnect = (
   setAccounts: (accounts: string[]) => void,
   onConnect: (connected: boolean) => void,
-  toast: (props: Toast) => void
+  toast: (props: Omit<ToastProps, "id">) => void
 ) => {
   const forceDisconnectWallet = async () => {
     try {

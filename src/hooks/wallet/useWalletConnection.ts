@@ -7,6 +7,7 @@ export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
   const { toast } = useToast();
+  
   const {
     accounts,
     chainId,
@@ -15,6 +16,7 @@ export const useWalletConnection = (
     handleChainUpdate,
   } = useWalletCore(onConnect);
 
+  // Always call useWalletEvents, even if no accounts
   useWalletEvents(onConnect, handleAccountsUpdate, handleChainUpdate);
   
   const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -6,7 +6,7 @@ export const useWalletCore = (
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
 
-  const handleAccountsUpdate = (newAccounts: string[]) => {
+  const handleAccountsUpdate = useCallback((newAccounts: string[]) => {
     console.log("Accounts update event:", newAccounts);
     setAccounts(newAccounts);
     if (newAccounts.length > 0) {
@@ -14,12 +14,12 @@ export const useWalletCore = (
     } else {
       onConnect(false);
     }
-  };
+  }, [onConnect]);
 
-  const handleChainUpdate = (newChainId: string) => {
+  const handleChainUpdate = useCallback((newChainId: string) => {
     console.log("Chain ID updated:", newChainId);
     setChainId(newChainId);
-  };
+  }, []);
 
   return {
     accounts,
