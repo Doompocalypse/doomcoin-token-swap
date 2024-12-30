@@ -26,19 +26,19 @@ export function Toaster() {
     <ToastProvider>
       {toasts.map(function ({ id, title, description, action, variant, ...props }) {
         return (
-          <Toast key={id} {...props} className="min-h-[80px]">
-            <div className="grid gap-2 w-full pr-6">
+          <Toast key={id} {...props}>
+            <div className="flex flex-col space-y-2">
               {title && <ToastTitle>{title}</ToastTitle>}
               {description && (
-                <div className="flex items-start justify-between gap-4">
-                  <ToastDescription className="flex-1 max-w-[85%] break-words">
+                <div className="flex items-start justify-between gap-2">
+                  <ToastDescription className="text-sm whitespace-pre-wrap break-words mr-8">
                     {description}
                   </ToastDescription>
                   {variant === "destructive" && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 shrink-0 text-destructive-foreground hover:text-destructive-foreground/90 hover:bg-destructive-foreground/10"
+                      className="h-8 w-8 shrink-0 text-destructive-foreground/90 hover:text-destructive-foreground hover:bg-destructive-foreground/10"
                       onClick={() => handleCopy(title || '', description?.toString() || '')}
                     >
                       <ClipboardCopy className="h-5 w-5" />
