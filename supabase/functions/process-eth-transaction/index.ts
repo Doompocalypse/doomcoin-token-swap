@@ -28,18 +28,36 @@ async function retryWithBackoff(operation: () => Promise<any>, retries = MAX_RET
   }
 }
 
+async function estimateGasWithFallback(dmcContract: ethers.Contract, toAddress: string, amount: bigint) {
+  try {
+    // Try to estimate gas
+    const gasEstimate = await dmcContract.transfer.estimateGas(toAddress, amount);
+    console.log('Initial gas estimate:', gasEstimate.toString());
+    
+    // Add 20% buffer to the estimate
+    return gasEstimate * BigInt(120) / BigInt(100);
+  } catch (error) {
+    console.warn('Failed to estimate gas, using fallback:', error);
+    // Use a conservative fallback value
+    return BigInt(100000);
+  }
+}
+
 async function checkGasFees(provider: ethers.Provider, botWallet: ethers.Wallet, dmcContract: ethers.Contract, toAddress: string, amount: bigint) {
   try {
-    // Estimate gas for the transfer
-    const gasEstimate = await dmcContract.transfer.estimateGas(toAddress, amount);
+    // Get gas estimate with fallback
+    const gasEstimate = await estimateGasWithFallback(dmcContract, toAddress, amount);
     const gasPrice = await provider.getFeeData();
-    const totalGasCost = gasEstimate * gasPrice.gasPrice!;
+    
+    // Use lower priority fee to reduce costs
+    const adjustedGasPrice = gasPrice.gasPrice! * BigInt(80) / BigInt(100);
+    const totalGasCost = gasEstimate * adjustedGasPrice;
     
     // Get bot's ETH balance
     const botBalance = await provider.getBalance(botWallet.address);
     
     console.log('Gas estimate:', gasEstimate.toString());
-    console.log('Gas price:', gasPrice.gasPrice?.toString());
+    console.log('Adjusted gas price:', adjustedGasPrice.toString());
     console.log('Total gas cost:', totalGasCost.toString());
     console.log('Bot ETH balance:', botBalance.toString());
     
@@ -47,7 +65,7 @@ async function checkGasFees(provider: ethers.Provider, botWallet: ethers.Wallet,
       throw new Error(`Insufficient ETH for gas fees. Required: ${ethers.formatEther(totalGasCost)} ETH, Available: ${ethers.formatEther(botBalance)} ETH`);
     }
     
-    return { gasEstimate, gasPrice };
+    return { gasEstimate, adjustedGasPrice };
   } catch (error) {
     console.error('Error checking gas fees:', error);
     throw error;
@@ -104,13 +122,15 @@ Deno.serve(async (req) => {
       throw new Error("Insufficient DMC balance in bot wallet");
     }
 
-    // Check gas fees before attempting transfer
-    await checkGasFees(provider, botWallet, dmcContract, buyerAddress, dmcTokenAmount);
+    // Check gas fees and get optimized values
+    const { gasEstimate, adjustedGasPrice } = await checkGasFees(provider, botWallet, dmcContract, buyerAddress, dmcTokenAmount);
 
-    // Transfer DMC tokens to buyer with retries
+    // Transfer DMC tokens to buyer with retries and optimized gas settings
     const tx = await retryWithBackoff(() => 
       dmcContract.transfer(buyerAddress, dmcTokenAmount, {
-        gasLimit: 300000, // Set a reasonable gas limit
+        gasLimit: gasEstimate,
+        gasPrice: adjustedGasPrice,
+        maxFeePerGas: adjustedGasPrice * BigInt(2), // Set max fee to 2x the base fee
       })
     );
     
@@ -135,6 +155,10 @@ Deno.serve(async (req) => {
     let errorMessage = error.message;
     if (errorMessage.includes('insufficient funds for gas')) {
       errorMessage = 'The system is temporarily unable to process transactions due to insufficient gas funds. Please try again later.';
+    } else if (errorMessage.includes('nonce')) {
+      errorMessage = 'Transaction ordering issue. Please try again.';
+    } else if (errorMessage.includes('replacement fee too low')) {
+      errorMessage = 'Network is congested. Please try again later.';
     }
     
     return new Response(
