@@ -6,18 +6,19 @@ import { useToast } from "@/hooks/use-toast";
 export const useWalletConnection = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
+  const { toast } = useToast();
   const {
     accounts,
     chainId,
+    setAccounts,
     handleAccountsUpdate,
     handleChainUpdate,
-    toast
   } = useWalletCore(onConnect);
 
   useWalletEvents(onConnect, handleAccountsUpdate, handleChainUpdate);
   
   const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(
-    () => handleAccountsUpdate([]),
+    setAccounts,
     onConnect
   );
 

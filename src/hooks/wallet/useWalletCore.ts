@@ -1,13 +1,10 @@
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
 ) => {
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
-  const { toast } = useToast();
 
   const handleAccountsUpdate = (newAccounts: string[]) => {
     console.log("Accounts update event:", newAccounts);
@@ -31,6 +28,5 @@ export const useWalletCore = (
     setChainId,
     handleAccountsUpdate,
     handleChainUpdate,
-    toast,
   };
 };
