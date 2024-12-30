@@ -105,6 +105,7 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
   };
 
   const handleSkip = () => {
+    console.log("Skip clicked - proceeding directly to NFT purchase");
     onSubmit(false);
     onClose();
   };

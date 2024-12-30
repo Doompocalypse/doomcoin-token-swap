@@ -35,6 +35,7 @@ export const useNFTPurchaseHandler = (
   };
 
   const processPurchase = async () => {
+    console.log("Processing NFT purchase...");
     if (!pendingPurchase || !connectedAccount) return;
     const { nftId, price } = pendingPurchase;
 
