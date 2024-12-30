@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import { useMetaMaskProvider } from "./useMetaMaskProvider";
@@ -16,7 +16,7 @@ export const useWalletCore = (
   const { switchToArbitrum } = useNetworkSwitch();
   const { clearExistingPermissions, requestAccounts } = useWalletPermissions();
 
-  const connectMetaMask = async () => {
+  const connectMetaMask = useCallback(async () => {
     console.log("Starting MetaMask connection attempt...");
     
     const provider = getMetaMaskProvider();
@@ -49,11 +49,11 @@ export const useWalletCore = (
       console.error("MetaMask connection error:", error);
       toast({
         title: "Connection Failed",
-        description: error.message || "Failed to connect to MetaMask. Please ensure you're using the correct wallet.",
+        description: error.message || "Failed to connect to MetaMask. Please try again.",
         variant: "destructive",
       });
     }
-  };
+  }, [getMetaMaskProvider, validateProvider, clearExistingPermissions, requestAccounts, switchToArbitrum, onConnect, toast]);
 
   return {
     accounts,
