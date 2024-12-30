@@ -132,6 +132,7 @@ export const useNFTPurchaseHandler = (
       });
     } finally {
       setPendingPurchase(null);
+      setShowReferralDialog(false);
     }
   };
 
