@@ -44,21 +44,51 @@ async function estimateGasWithFallback(dmcContract: ethers.Contract, toAddress: 
 }
 
 async function getFeeData(provider: ethers.Provider) {
-  const feeData = await provider.getFeeData();
-  console.log('Fee data:', {
-    maxFeePerGas: feeData.maxFeePerGas?.toString(),
-    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
-  });
+  try {
+    const feeData = await provider.getFeeData();
+    console.log('Raw fee data:', {
+      maxFeePerGas: feeData.maxFeePerGas?.toString(),
+      maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString(),
+      gasPrice: feeData.gasPrice?.toString(),
+    });
 
-  if (!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
-    throw new Error('Could not get fee data from network');
+    // If EIP-1559 fees are not available, fall back to legacy gas price
+    if (!feeData.maxFeePerGas || !feeData.maxPriorityFeePerGas) {
+      if (!feeData.gasPrice) {
+        throw new Error('Neither EIP-1559 fees nor legacy gas price available');
+      }
+      
+      const gasPrice = feeData.gasPrice * BigInt(80) / BigInt(100); // 80% of current gas price
+      console.log('Using legacy gas price:', gasPrice.toString());
+      
+      return {
+        maxFeePerGas: gasPrice * BigInt(2), // 2x for max fee
+        maxPriorityFeePerGas: gasPrice, // Base price for priority fee
+      };
+    }
+
+    // Adjust EIP-1559 fees to 80% of current network fees
+    const maxFeePerGas = feeData.maxFeePerGas * BigInt(80) / BigInt(100);
+    const maxPriorityFeePerGas = feeData.maxPriorityFeePerGas * BigInt(80) / BigInt(100);
+
+    console.log('Adjusted EIP-1559 fees:', {
+      maxFeePerGas: maxFeePerGas.toString(),
+      maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+    });
+
+    return { maxFeePerGas, maxPriorityFeePerGas };
+  } catch (error) {
+    console.error('Error getting fee data:', error);
+    
+    // Last resort fallback: use hardcoded conservative values
+    const fallbackGasPrice = ethers.parseUnits('0.1', 'gwei'); // Very conservative base price
+    console.log('Using fallback gas price:', fallbackGasPrice.toString());
+    
+    return {
+      maxFeePerGas: fallbackGasPrice * BigInt(2),
+      maxPriorityFeePerGas: fallbackGasPrice,
+    };
   }
-
-  // Adjust fees to 80% of current network fees
-  return {
-    maxFeePerGas: feeData.maxFeePerGas * BigInt(80) / BigInt(100),
-    maxPriorityFeePerGas: feeData.maxPriorityFeePerGas * BigInt(80) / BigInt(100),
-  };
 }
 
 async function checkGasFees(provider: ethers.Provider, botWallet: ethers.Wallet, dmcContract: ethers.Contract, toAddress: string, amount: bigint) {
