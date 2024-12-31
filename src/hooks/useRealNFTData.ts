@@ -26,27 +26,33 @@ export const useRealNFTData = (connectedAccount?: string) => {
 
         console.log('Successfully fetched metadata rows:', metadataRows);
 
-        const { data: contractData, error: contractError } = await supabase
+        // Get contract address and Infura Project ID
+        const { data: settings, error: settingsError } = await supabase
           .from('app_settings')
-          .select('value')
-          .eq('key', 'nft_contract_address')
-          .single();
+          .select('key,value')
+          .in('key', ['nft_contract_address', 'INFURA_PROJECT_ID']);
         
-        if (contractError) {
-          console.error('Error fetching NFT contract address:', contractError);
-          throw contractError;
+        if (settingsError) {
+          console.error('Error fetching settings:', settingsError);
+          throw settingsError;
         }
 
-        if (!contractData) {
-          console.error('NFT contract address not found in app_settings');
-          throw new Error('NFT contract address not found');
+        const contractAddress = settings?.find(s => s.key === 'nft_contract_address')?.value;
+        const infuraProjectId = settings?.find(s => s.key === 'INFURA_PROJECT_ID')?.value;
+
+        if (!contractAddress || !infuraProjectId) {
+          console.error('Missing required settings');
+          throw new Error('Missing required settings');
         }
 
-        console.log('Successfully fetched contract address:', contractData.value);
+        console.log('Successfully fetched contract address:', contractAddress);
 
-        // Use public Sepolia RPC endpoint
-        const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
-        const contract = new ethers.Contract(contractData.value, NFT_ABI, provider);
+        // Use Infura Sepolia endpoint with API key
+        const provider = new ethers.JsonRpcProvider(
+          `https://sepolia.infura.io/v3/${infuraProjectId}`
+        );
+        
+        const contract = new ethers.Contract(contractAddress, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
         
