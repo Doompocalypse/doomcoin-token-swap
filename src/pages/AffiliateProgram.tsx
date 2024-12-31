@@ -89,21 +89,11 @@ const AffiliateProgram = () => {
     }
   };
 
-  const generateUniqueCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
-
-  const handleSignUp = async () => {
+  const handleSignUpClick = async () => {
     if (!walletAddress) {
       toast({
-        title: "Wallet Required",
+        title: "Connect Wallet",
         description: "Please connect your wallet to sign up as an affiliate.",
-        variant: "destructive",
       });
       return;
     }
@@ -160,6 +150,15 @@ const AffiliateProgram = () => {
     }
   };
 
+  const generateUniqueCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
+  };
+
   return (
     <div className="min-h-screen relative">
       <VideoBackground />
@@ -174,8 +173,8 @@ const AffiliateProgram = () => {
             <div className="space-y-6">
               <AffiliateHowItWorks />
               <Button
-                onClick={handleSignUp}
-                disabled={!walletAddress || isLoading}
+                onClick={handleSignUpClick}
+                disabled={isLoading}
                 className="w-full py-6 text-lg bg-white hover:bg-white/90 text-black"
               >
                 {isLoading ? "Processing..." : "Sign Up as Affiliate"}
