@@ -31,6 +31,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
 
         console.log('Successfully fetched metadata rows:', metadataRows);
 
+        // Get NFT contract address from app_settings
         const { data: contractAddress } = await supabase
           .from('app_settings')
           .select('value')
@@ -42,7 +43,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
           throw new Error('NFT contract address not found');
         }
 
-        // Use public Sepolia RPC endpoint
+        // Use Sepolia RPC endpoint
         const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
         const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
         
@@ -54,16 +55,23 @@ export const useRealNFTData = (connectedAccount?: string) => {
             let balance = 0;
             if (connectedAccount) {
               try {
+                console.log(`Fetching balance for token ${metadata.token_id} and account ${connectedAccount}`);
                 balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
                 console.log(`Balance for token ${metadata.token_id}:`, balance);
               } catch (error) {
-                console.log(`Error getting balance for token ${metadata.token_id}:`, error);
+                console.error(`Error getting balance for token ${metadata.token_id}:`, error);
                 // Continue with balance 0 if there's an error
               }
             }
 
             // Safely parse attributes and get price
-            const attributes = metadata.attributes as NFTAttributes | null;
+            let attributes: NFTAttributes | null = null;
+            try {
+              attributes = metadata.attributes as NFTAttributes;
+            } catch (error) {
+              console.error('Error parsing attributes:', error);
+            }
+            
             const price = attributes?.price || 1000; // Default price if not set
             
             nftData.push({
@@ -88,7 +96,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.error('Error in useRealNFTData:', error);
         throw error;
       }
-    }
+    },
+    enabled: true // Always fetch NFTs, even if not connected
   });
 
   const { data: purchasedNfts } = useQuery({
