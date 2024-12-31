@@ -9,25 +9,25 @@ export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
 export const RESERVE_WALLET = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
 
 // Contract interfaces
-interface NFTContract extends ethers.Contract {
+type NFTContract = ethers.Contract & {
   transferFrom(from: string, to: string, tokenId: string): Promise<ethers.TransactionResponse>;
   ownerOf(tokenId: string): Promise<string>;
   setApprovalForAll(operator: string, approved: boolean): Promise<ethers.TransactionResponse>;
   isApprovedForAll(owner: string, operator: string): Promise<boolean>;
   safeTransferFrom(from: string, to: string, tokenId: string): Promise<ethers.TransactionResponse>;
-}
+};
 
-interface DMCContract extends ethers.Contract {
+type DMCContract = ethers.Contract & {
   transfer(to: string, amount: bigint): Promise<ethers.TransactionResponse>;
   approve(spender: string, amount: bigint): Promise<ethers.TransactionResponse>;
   balanceOf(account: string): Promise<bigint>;
   allowance(owner: string, spender: string): Promise<bigint>;
-}
+};
 
-interface ExchangeContract extends ethers.Contract {
+type ExchangeContract = ethers.Contract & {
   purchaseNFT(tokenId: string): Promise<ethers.TransactionResponse>;
   setNFTPrice(tokenId: string, price: bigint): Promise<ethers.TransactionResponse>;
-}
+};
 
 // Contract ABIs
 const NFT_ABI = [
