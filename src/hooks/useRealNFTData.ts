@@ -42,7 +42,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
           throw new Error('NFT contract address not found');
         }
 
-        const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
+        // Use public Sepolia RPC endpoint
+        const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
         const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
