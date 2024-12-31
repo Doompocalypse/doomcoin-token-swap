@@ -8,6 +8,11 @@ const NFT_ABI = [
   "function exists(uint256 id) view returns (bool)"
 ];
 
+interface NFTAttributes {
+  price: number;
+  [key: string]: any;
+}
+
 export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
     queryKey: ['real_nfts', connectedAccount],
@@ -26,33 +31,20 @@ export const useRealNFTData = (connectedAccount?: string) => {
 
         console.log('Successfully fetched metadata rows:', metadataRows);
 
-        // Get contract address and Infura Project ID
-        const { data: settings, error: settingsError } = await supabase
+        const { data: contractAddress } = await supabase
           .from('app_settings')
-          .select('key,value')
-          .in('key', ['nft_contract_address', 'INFURA_PROJECT_ID']);
+          .select('value')
+          .eq('key', 'nft_contract_address')
+          .single();
         
-        if (settingsError) {
-          console.error('Error fetching settings:', settingsError);
-          throw settingsError;
+        if (!contractAddress) {
+          console.error('NFT contract address not found in app_settings');
+          throw new Error('NFT contract address not found');
         }
 
-        const contractAddress = settings?.find(s => s.key === 'nft_contract_address')?.value;
-        const infuraProjectId = settings?.find(s => s.key === 'INFURA_PROJECT_ID')?.value;
-
-        if (!contractAddress || !infuraProjectId) {
-          console.error('Missing required settings');
-          throw new Error('Missing required settings');
-        }
-
-        console.log('Successfully fetched contract address:', contractAddress);
-
-        // Use Infura Sepolia endpoint with API key
-        const provider = new ethers.JsonRpcProvider(
-          `https://sepolia.infura.io/v3/${infuraProjectId}`
-        );
-        
-        const contract = new ethers.Contract(contractAddress, NFT_ABI, provider);
+        // Use public Sepolia RPC endpoint
+        const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
+        const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
         
@@ -65,13 +57,13 @@ export const useRealNFTData = (connectedAccount?: string) => {
                 balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
                 console.log(`Balance for token ${metadata.token_id}:`, balance);
               } catch (error) {
-                console.warn(`Error getting balance for token ${metadata.token_id}:`, error);
+                console.log(`Error getting balance for token ${metadata.token_id}:`, error);
                 // Continue with balance 0 if there's an error
               }
             }
 
-            // Parse attributes and get price
-            const attributes = metadata.attributes as { price?: number } | null;
+            // Safely parse attributes and get price
+            const attributes = metadata.attributes as NFTAttributes | null;
             const price = attributes?.price || 1000; // Default price if not set
             
             nftData.push({
@@ -86,6 +78,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
           } catch (error) {
             console.error(`Error processing NFT ${metadata.token_id}:`, error);
             // Continue with next NFT instead of failing completely
+            continue;
           }
         }
         
@@ -95,8 +88,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.error('Error in useRealNFTData:', error);
         throw error;
       }
-    },
-    enabled: true // Always fetch NFT data, even if not connected
+    }
   });
 
   const { data: purchasedNfts } = useQuery({

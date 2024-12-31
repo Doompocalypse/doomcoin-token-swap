@@ -6,7 +6,6 @@ import VideoBackground from "@/components/VideoBackground";
 import { useToast } from "@/hooks/use-toast";
 import NFTVaultSection from "@/components/nft/vault/NFTVaultSection";
 import { useRealNFTData } from "@/hooks/useRealNFTData";
-import Raven from "@/components/Raven";
 
 const NFTVault = () => {
   const [connectedAccount, setConnectedAccount] = useState<string>();
@@ -67,7 +66,6 @@ const NFTVault = () => {
           )}
         </div>
       </main>
-      <Raven />
     </div>
   );
 };

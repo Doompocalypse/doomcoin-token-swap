@@ -31,11 +31,6 @@ const Header = ({ onConnect }: HeaderProps) => {
     }
   };
 
-  const handleNavigation = (path: string) => {
-    console.log('Navigating to:', path);
-    navigate(path);
-  };
-
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-black/30 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -44,44 +39,17 @@ const Header = ({ onConnect }: HeaderProps) => {
             <DropdownMenuTrigger className="p-2 hover:bg-white/10 rounded-md transition-colors">
               <Menu className="h-6 w-6 text-white" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent 
-              align="start" 
-              className="w-48 bg-zinc-900 border border-zinc-800 shadow-xl"
-            >
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/");
-                }} 
-                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
-              >
+            <DropdownMenuContent align="start" className="w-48 bg-white text-black border border-gray-200">
+              <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                 Token Swap
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/nft-marketplace");
-                }} 
-                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
-              >
+              <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
                 NFT Marketplace
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/affiliate-program");
-                }} 
-                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
-              >
+              <DropdownMenuItem onClick={() => navigate("/affiliate-program")} className="cursor-pointer hover:bg-gray-100">
                 Affiliate Program
               </DropdownMenuItem>
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleNavigation("/nft-vault");
-                }} 
-                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
-              >
+              <DropdownMenuItem onClick={() => navigate("/nft-vault")} className="cursor-pointer hover:bg-gray-100">
                 NFT Vault
               </DropdownMenuItem>
             </DropdownMenuContent>
