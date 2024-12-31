@@ -1,10 +1,11 @@
 import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
+import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
-// Contract addresses (Arbitrum One)
+// Contract addresses
 export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
 export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
-export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
+export const NFT_CONTRACT = "0xE4e4EBe798D29Cc75e674B58B3B6Da00227A9839"; // Updated NFT contract address
 export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
 export const RESERVE_WALLET = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
 
@@ -63,6 +64,14 @@ export const createContractService = async (): Promise<ContractService> => {
   }
 
   const provider = new ethers.BrowserProvider(window.ethereum);
+  const chainId = await provider.getNetwork().then(network => network.chainId.toString(16));
+  console.log("Current chain ID:", chainId);
+
+  // Validate network
+  if (![ARBITRUM_CHAIN_ID.toLowerCase(), SEPOLIA_CHAIN_ID.toLowerCase()].includes(chainId.toLowerCase())) {
+    throw new Error("Please connect to either Arbitrum One or Sepolia network");
+  }
+
   const signer = await provider.getSigner();
 
   // Get Bot Wallet private key from Supabase
@@ -80,6 +89,13 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const botWallet = new ethers.Wallet(secretData.value, provider);
   console.log("Bot Wallet address:", botWallet.address);
+
+  // Initialize contracts with network-specific RPC URLs
+  const rpcUrl = chainId.toLowerCase() === ARBITRUM_CHAIN_ID.toLowerCase()
+    ? "https://arb1.arbitrum.io/rpc"
+    : "https://rpc.sepolia.org";
+  
+  console.log("Using RPC URL:", rpcUrl);
 
   const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
   const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer) as NFTContract;

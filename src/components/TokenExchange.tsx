@@ -8,6 +8,7 @@ import SwapButton from "./exchange/SwapButton";
 import ContractInfo from "./exchange/ContractInfo";
 import { fetchEthPrice } from "@/utils/ethPrice";
 import { handleTokenExchange } from "@/utils/web3Transactions";
+import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
 interface TokenExchangeProps {
   isConnected: boolean;
@@ -140,7 +141,7 @@ const TokenExchange = ({ isConnected, connectedAccount }: TokenExchangeProps) =>
           onAmountChange={setUsdAmount}
         />
         <div className="text-base text-white text-center bg-transparent p-4 rounded border border-[#8E9196]/20 space-y-3">
-          <p>Please ensure you are connected to the Arbitrum One network before swapping tokens</p>
+          <p>Please ensure you are connected to either the Arbitrum One or Sepolia network before swapping tokens</p>
           {isMobile && (
             <p className="text-red-400">Token swapping is currently only available on desktop devices</p>
           )}

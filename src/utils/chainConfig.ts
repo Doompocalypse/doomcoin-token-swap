@@ -23,7 +23,7 @@ export const SUPPORTED_CHAINS: SupportedChains = {
       symbol: "ETH",
       decimals: 18,
     },
-    rpcUrls: ["https://sepolia.infura.io/v3/"],
+    rpcUrls: ["https://rpc.sepolia.org"],
     blockExplorerUrls: ["https://sepolia.etherscan.io"],
   },
 };
@@ -43,4 +43,9 @@ export const getNetworkName = (chainId: string): string => {
     return "Sepolia";
   }
   return "Unsupported Network";
+};
+
+export const getRpcUrl = (chainId: string): string => {
+  const chain = SUPPORTED_CHAINS[chainId];
+  return chain?.rpcUrls[0] || "https://arb1.arbitrum.io/rpc";
 };
