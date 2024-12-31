@@ -62,15 +62,17 @@ export const useNFTPurchaseHandler = (
       });
       
       const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
-      console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
-      
-      toast({
-        title: "Confirming Approval",
-        description: "Please wait while the approval transaction is confirmed",
-      });
-      
-      await dmcApprovalTx.wait();
-      console.log("DMC approval confirmed");
+      if (dmcApprovalTx.hash) {
+        console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
+        
+        toast({
+          title: "Confirming Approval",
+          description: "Please wait while the approval transaction is confirmed",
+        });
+        
+        await dmcApprovalTx.wait();
+        console.log("DMC approval confirmed");
+      }
 
       // Request NFT approval
       console.log("Requesting NFT contract approval...");
@@ -80,15 +82,17 @@ export const useNFTPurchaseHandler = (
       });
       
       const nftApprovalTx = await contractService.approveNFT(connectedAccount);
-      console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
-      
-      toast({
-        title: "Confirming Approval",
-        description: "Please wait while the NFT approval is confirmed",
-      });
-      
-      await nftApprovalTx.wait();
-      console.log("NFT approval confirmed");
+      if (nftApprovalTx.hash) {
+        console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
+        
+        toast({
+          title: "Confirming Approval",
+          description: "Please wait while the NFT approval is confirmed",
+        });
+        
+        await nftApprovalTx.wait();
+        console.log("NFT approval confirmed");
+      }
 
       // Purchase NFT
       console.log("Executing NFT purchase...");

@@ -5,10 +5,11 @@ export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
 export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
 export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
 export const EXCHANGE_CONTRACT = "0x529a7FdC52bb74cc0456D6d8E8693C22e2b28629";
+export const RESERVE_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054"; // Using bot wallet as reserve for now
 
 // Contract ABIs
 const NFT_ABI = [
-  "function mint(address to, uint256 tokenId) external",
+  "function transferFrom(address from, address to, uint256 tokenId) external",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function setApprovalForAll(address operator, bool approved) external",
   "function isApprovedForAll(address owner, address operator) view returns (bool)"
@@ -46,26 +47,38 @@ export const createContractService = async (): Promise<ContractService> => {
   const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer);
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
+    console.log("Checking DMC balance for account:", account);
     return dmcContract.balanceOf(account);
   };
 
   const approveDMC = async (account: string, amount: bigint): Promise<ethers.TransactionResponse> => {
+    console.log("Checking DMC allowance for Exchange contract...");
     const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+    console.log("Current DMC allowance:", allowance.toString());
+    
     if (allowance < amount) {
+      console.log("Requesting DMC approval for amount:", amount.toString());
       return dmcContract.approve(EXCHANGE_CONTRACT, amount);
     }
+    console.log("Sufficient DMC allowance already exists");
     return Promise.resolve({} as ethers.TransactionResponse);
   };
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
+    console.log("Checking NFT approval status...");
     const isApproved = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
+    console.log("NFT approval status:", isApproved);
+    
     if (!isApproved) {
+      console.log("Requesting NFT contract approval");
       return nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
     }
+    console.log("NFT contract already approved");
     return Promise.resolve({} as ethers.TransactionResponse);
   };
 
   const purchaseNFT = async (account: string, tokenId: string): Promise<ethers.TransactionResponse> => {
+    console.log("Initiating NFT purchase for token:", tokenId);
     return exchangeContract.purchaseNFT(tokenId);
   };
 
