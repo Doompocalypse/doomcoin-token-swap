@@ -25,27 +25,25 @@ const ErrorFallback = () => (
 );
 
 const App = () => (
-  <StrictMode>
-    <ErrorBoundary fallback={<ErrorFallback />}>
-      <QueryClientProvider client={queryClient}>
-        <TooltipProvider>
-          <Suspense fallback={<LoadingFallback />}>
-            <Toaster />
-            <Sonner />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/nft-marketplace" element={<NFTMarketplace />} />
-                <Route path="/affiliate-program" element={<AffiliateProgram />} />
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
-            <Raven />
-          </Suspense>
-        </TooltipProvider>
-      </QueryClientProvider>
-    </ErrorBoundary>
-  </StrictMode>
+  <QueryClientProvider client={queryClient}>
+    <TooltipProvider>
+      <Suspense fallback={<LoadingFallback />}>
+        <ErrorBoundary fallback={<ErrorFallback />}>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/nft-marketplace" element={<NFTMarketplace />} />
+              <Route path="/affiliate-program" element={<AffiliateProgram />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+          </BrowserRouter>
+          <Raven />
+        </ErrorBoundary>
+      </Suspense>
+    </TooltipProvider>
+  </QueryClientProvider>
 );
 
 export default App;
