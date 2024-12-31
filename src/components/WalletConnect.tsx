@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -31,6 +31,11 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     if (normalizedChainId === ARBITRUM_CHAIN_ID.toLowerCase()) {
       console.log("✅ Connected to Arbitrum One");
       return " (Arbitrum)";
+    }
+    
+    if (normalizedChainId === SEPOLIA_CHAIN_ID.toLowerCase()) {
+      console.log("✅ Connected to Sepolia Testnet");
+      return " (Sepolia)";
     }
     
     console.warn("Connected to unsupported network:", normalizedChainId);
