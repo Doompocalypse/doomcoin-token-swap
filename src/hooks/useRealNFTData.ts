@@ -5,7 +5,9 @@ import { NFT } from "@/types/nft";
 
 const NFT_ABI = [
   "function balanceOf(address account, uint256 id) view returns (uint256)",
-  "function exists(uint256 id) view returns (bool)"
+  "function exists(uint256 id) view returns (bool)",
+  "function uri(uint256 id) view returns (string)",
+  "function totalSupply(uint256 id) view returns (uint256)"
 ];
 
 interface NFTAttributes {
@@ -32,20 +34,23 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.log('Successfully fetched metadata rows:', metadataRows);
 
         // Get NFT contract address from app_settings
-        const { data: contractAddress } = await supabase
+        const { data: settings, error: settingsError } = await supabase
           .from('app_settings')
           .select('value')
           .eq('key', 'nft_contract_address')
           .single();
         
-        if (!contractAddress) {
-          console.error('NFT contract address not found in app_settings');
+        if (settingsError || !settings) {
+          console.error('Error fetching NFT contract address:', settingsError);
           throw new Error('NFT contract address not found');
         }
 
-        // Use Sepolia RPC endpoint
+        const contractAddress = settings.value;
+        console.log('NFT Contract Address:', contractAddress);
+
+        // Initialize provider and contract
         const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
-        const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
+        const contract = new ethers.Contract(contractAddress, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
         
@@ -55,9 +60,16 @@ export const useRealNFTData = (connectedAccount?: string) => {
             let balance = 0;
             if (connectedAccount) {
               try {
-                console.log(`Fetching balance for token ${metadata.token_id} and account ${connectedAccount}`);
-                balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
-                console.log(`Balance for token ${metadata.token_id}:`, balance);
+                console.log(`Checking balance for token ${metadata.token_id} and account ${connectedAccount}`);
+                const exists = await contract.exists(metadata.token_id);
+                
+                if (exists) {
+                  const balanceBN = await contract.balanceOf(connectedAccount, metadata.token_id);
+                  balance = Number(balanceBN);
+                  console.log(`Balance for token ${metadata.token_id}:`, balance);
+                } else {
+                  console.log(`Token ${metadata.token_id} does not exist in the contract`);
+                }
               } catch (error) {
                 console.error(`Error getting balance for token ${metadata.token_id}:`, error);
                 // Continue with balance 0 if there's an error
@@ -69,7 +81,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
             try {
               attributes = metadata.attributes as NFTAttributes;
             } catch (error) {
-              console.error('Error parsing attributes:', error);
+              console.error('Error parsing attributes for token', metadata.token_id, ':', error);
             }
             
             const price = attributes?.price || 1000; // Default price if not set
@@ -97,7 +109,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
         throw error;
       }
     },
-    enabled: true // Always fetch NFTs, even if not connected
+    enabled: !!connectedAccount, // Only fetch when wallet is connected
+    refetchInterval: 30000 // Refetch every 30 seconds to keep balances updated
   });
 
   const { data: purchasedNfts } = useQuery({
