@@ -17,7 +17,12 @@ export const useNFTPurchaseHandler = (
   } | null>(null);
 
   const handlePurchase = async (nftId: string, price: number) => {
-    console.log("Starting NFT purchase flow:", { nftId, price, network: "Sepolia Testnet" });
+    console.log("Starting NFT purchase flow:", { 
+      nftId, 
+      price, 
+      network: "Sepolia Testnet",
+      connectedAccount 
+    });
     
     if (!connectedAccount) {
       console.log("Purchase failed: No wallet connected");
@@ -38,28 +43,49 @@ export const useNFTPurchaseHandler = (
     const { nftId, price } = pendingPurchase;
 
     try {
-      console.log("Processing NFT purchase on Sepolia:", { nftId, price, connectedAccount });
+      console.log("Processing NFT purchase on Sepolia:", { 
+        nftId, 
+        price, 
+        connectedAccount,
+        priceInWei: ethers.parseEther(price.toString()).toString()
+      });
       
       const contractService = await createContractService();
       const priceInWei = ethers.parseEther(price.toString());
       
       // Check DMC balance
+      console.log("Checking DMC balance...");
       const balance = await contractService.checkDMCBalance(connectedAccount);
+      console.log("DMC Balance:", ethers.formatEther(balance), "DMC");
+      
       if (balance < priceInWei) {
-        console.log("Purchase failed: Insufficient DMC balance");
+        console.log("Purchase failed: Insufficient DMC balance", {
+          required: ethers.formatEther(priceInWei),
+          available: ethers.formatEther(balance)
+        });
         onInsufficientBalance?.();
         return;
       }
 
-      // Handle approvals
+      // Handle DMC approval
+      console.log("Requesting DMC token approval...");
       await contractService.approveDMC(connectedAccount, priceInWei);
+      console.log("DMC approval successful");
+
+      // Handle NFT approval
+      console.log("Requesting NFT contract approval...");
       await contractService.approveNFT(connectedAccount);
+      console.log("NFT approval successful");
 
       // Purchase NFT
+      console.log("Executing NFT purchase transaction...");
       const transactionHash = await contractService.purchaseNFT(connectedAccount, nftId);
+      console.log("Purchase transaction successful:", transactionHash);
 
       // Record the purchase
+      console.log("Recording purchase in database...");
       await recordPurchase(nftId, connectedAccount, transactionHash, price);
+      console.log("Purchase recorded successfully");
 
       toast({
         title: "Purchase Successful",
@@ -69,10 +95,28 @@ export const useNFTPurchaseHandler = (
       // Refresh the UI
       window.location.reload();
     } catch (error: any) {
-      console.error('Purchase error:', error);
+      console.error('Purchase error details:', {
+        error: error.message,
+        code: error.code,
+        data: error.data,
+        stack: error.stack
+      });
+      
+      let errorMessage = "Failed to purchase NFT. ";
+      
+      if (error.code === 'INSUFFICIENT_FUNDS') {
+        errorMessage += "Insufficient ETH for gas fees.";
+      } else if (error.code === 'ACTION_REJECTED') {
+        errorMessage += "Transaction was rejected.";
+      } else if (error.message.includes("user rejected")) {
+        errorMessage += "You rejected the transaction.";
+      } else {
+        errorMessage += error.message || "Please try again.";
+      }
+      
       toast({
         title: "Purchase Failed",
-        description: error.message || "Failed to purchase NFT. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
