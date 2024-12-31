@@ -49,25 +49,37 @@ const Header = ({ onConnect }: HeaderProps) => {
               className="w-48 bg-zinc-900 border border-zinc-800 shadow-xl"
             >
               <DropdownMenuItem 
-                onClick={() => handleNavigation("/")} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation("/");
+                }} 
                 className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
               >
                 Token Swap
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => handleNavigation("/nft-marketplace")} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation("/nft-marketplace");
+                }} 
                 className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
               >
                 NFT Marketplace
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => handleNavigation("/affiliate-program")} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation("/affiliate-program");
+                }} 
                 className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
               >
                 Affiliate Program
               </DropdownMenuItem>
               <DropdownMenuItem 
-                onClick={() => handleNavigation("/nft-vault")} 
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleNavigation("/nft-vault");
+                }} 
                 className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
               >
                 NFT Vault
