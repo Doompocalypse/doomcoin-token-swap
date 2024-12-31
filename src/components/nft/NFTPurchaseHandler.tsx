@@ -121,11 +121,13 @@ export const useNFTPurchaseHandler = (
 
       // Purchase NFT through exchange contract
       console.log("Executing NFT purchase through exchange contract...");
+      let transactionHash: string;
       try {
         const purchaseTx = await exchangeContract.purchaseNFT(nftId);
         console.log("Purchase transaction sent:", purchaseTx.hash);
         const receipt = await purchaseTx.wait();
         console.log("NFT purchase successful:", receipt);
+        transactionHash = receipt.hash;
       } catch (error: any) {
         console.error("Purchase transaction failed:", error);
         throw new Error(`Purchase transaction failed: ${error.message}`);
@@ -137,7 +139,7 @@ export const useNFTPurchaseHandler = (
         .insert({
           token_id: nftId,
           buyer_address: connectedAccount,
-          transaction_hash: receipt.hash,
+          transaction_hash: transactionHash,
           price_paid: price
         });
 
