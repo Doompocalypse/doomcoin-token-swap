@@ -1,9 +1,9 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import { useMetaMaskProvider } from "./useMetaMaskProvider";
 import { useNetworkSwitch } from "./useNetworkSwitch";
 import { useWalletPermissions } from "./useWalletPermissions";
+import { isSupportedChain } from "@/utils/chainConfig";
 
 export const useWalletCore = (
   onConnect: (connected: boolean, account?: string) => void
@@ -13,7 +13,7 @@ export const useWalletCore = (
   const { toast } = useToast();
   
   const { getMetaMaskProvider, validateProvider } = useMetaMaskProvider();
-  const { switchToArbitrum } = useNetworkSwitch();
+  const { switchToSupportedNetwork } = useNetworkSwitch();
   const { clearExistingPermissions, requestAccounts } = useWalletPermissions();
 
   const connectMetaMask = useCallback(async () => {
@@ -34,10 +34,17 @@ export const useWalletCore = (
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        await switchToArbitrum(provider);
+        await switchToSupportedNetwork(provider);
+        
+        // Get the current chain ID after switching
+        const currentChainId = await provider.request({ method: 'eth_chainId' });
+        
+        if (!isSupportedChain(currentChainId)) {
+          throw new Error("Failed to switch to a supported network");
+        }
         
         setAccounts(accounts);
-        setChainId(ARBITRUM_CHAIN_ID);
+        setChainId(currentChainId);
         onConnect(true, accounts[0]);
         
         toast({
@@ -53,7 +60,7 @@ export const useWalletCore = (
         variant: "destructive",
       });
     }
-  }, [getMetaMaskProvider, validateProvider, clearExistingPermissions, requestAccounts, switchToArbitrum, onConnect, toast]);
+  }, [getMetaMaskProvider, validateProvider, clearExistingPermissions, requestAccounts, switchToSupportedNetwork, onConnect, toast]);
 
   return {
     accounts,
