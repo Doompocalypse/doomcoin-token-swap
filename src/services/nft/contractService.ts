@@ -105,7 +105,7 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
     console.log("Checking NFT approval status for account...");
-    const nftContractWithBotSigner = nftContract.connect(botWallet);
+    const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWallet) as NFTContract;
     const isApproved = await nftContractWithBotSigner.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
     
@@ -130,8 +130,8 @@ export const createContractService = async (): Promise<ContractService> => {
       await dmcTransferTx.wait();
       console.log("DMC transfer confirmed");
       
-      // Connect NFT contract with Bot Wallet signer
-      const nftContractWithBotSigner = nftContract.connect(botWallet);
+      // Create new contract instance with Bot Wallet signer
+      const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWallet) as NFTContract;
       
       // Check if Bot Wallet owns the NFT
       const currentOwner = await nftContract.ownerOf(tokenId);
