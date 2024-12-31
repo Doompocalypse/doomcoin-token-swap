@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
-import { getNetworkName, isSupportedChain } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,20 +21,19 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
     return `${address.slice(0, 6)}...${address.slice(-4)}`;
   };
 
-  const getNetworkDisplay = () => {
+  const getNetworkName = () => {
     if (!chainId) return "";
     
     console.log("Current chainId:", chainId);
     
-    const networkName = getNetworkName(chainId);
-    const isSupported = isSupportedChain(chainId);
+    const normalizedChainId = chainId.toString().toLowerCase();
     
-    if (isSupported) {
-      console.log(`✅ Connected to ${networkName}`);
-      return ` (${networkName})`;
+    if (normalizedChainId === ARBITRUM_CHAIN_ID.toLowerCase()) {
+      console.log("✅ Connected to Arbitrum One");
+      return " (Arbitrum)";
     }
     
-    console.warn("Connected to unsupported network:", chainId);
+    console.warn("Connected to unsupported network:", normalizedChainId);
     return " (Wrong Network)";
   };
 
@@ -48,7 +47,7 @@ const WalletConnect = ({ onConnect }: WalletConnectProps) => {
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button className="bg-white text-black hover:bg-white/90">
-            {formatAddress(accounts[0])}{getNetworkDisplay()}
+            {formatAddress(accounts[0])}{getNetworkName()}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="w-56 bg-white border-none">
