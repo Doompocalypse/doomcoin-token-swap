@@ -5,6 +5,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import AffiliateHowItWorks from "@/components/affiliate/AffiliateHowItWorks";
 import AffiliateDashboard from "@/components/affiliate/AffiliateDashboard";
+import VideoBackground from "@/components/VideoBackground";
 
 interface AffiliateStats {
   totalReferrals: number;
@@ -160,11 +161,14 @@ const AffiliateProgram = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#221F26] text-white">
+    <div className="min-h-screen bg-[#221F26] text-white relative">
+      <VideoBackground />
       <Header onConnect={handleConnect} />
-      <div className="container mx-auto px-4 pt-24 pb-12">
+      <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl font-bold mb-6">Affiliate Program</h1>
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-600">
+            Play. Earn. Repeat!
+          </h1>
           
           {!referralCode ? (
             <div className="space-y-6">
@@ -172,7 +176,7 @@ const AffiliateProgram = () => {
               <Button
                 onClick={handleSignUp}
                 disabled={!walletAddress || isLoading}
-                className="w-full py-6 text-lg bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700"
+                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isLoading ? "Processing..." : "Sign Up as Affiliate"}
               </Button>
