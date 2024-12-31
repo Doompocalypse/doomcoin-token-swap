@@ -39,17 +39,32 @@ const Header = ({ onConnect }: HeaderProps) => {
             <DropdownMenuTrigger className="p-2 hover:bg-white/10 rounded-md transition-colors">
               <Menu className="h-6 w-6 text-white" />
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-48 bg-white text-black border border-gray-200">
-              <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
+            <DropdownMenuContent 
+              align="start" 
+              className="w-48 bg-zinc-900 border border-zinc-800 shadow-xl"
+            >
+              <DropdownMenuItem 
+                onClick={() => navigate("/")} 
+                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
+              >
                 Token Swap
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem 
+                onClick={() => navigate("/nft-marketplace")} 
+                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
+              >
                 NFT Marketplace
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/affiliate-program")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem 
+                onClick={() => navigate("/affiliate-program")} 
+                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
+              >
                 Affiliate Program
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/nft-vault")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem 
+                onClick={() => navigate("/nft-vault")} 
+                className="cursor-pointer text-gray-200 focus:bg-zinc-800 focus:text-white"
+              >
                 NFT Vault
               </DropdownMenuItem>
             </DropdownMenuContent>
