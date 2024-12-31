@@ -26,20 +26,27 @@ export const useRealNFTData = (connectedAccount?: string) => {
 
         console.log('Successfully fetched metadata rows:', metadataRows);
 
-        const { data: contractAddress } = await supabase
+        const { data: contractData, error: contractError } = await supabase
           .from('app_settings')
           .select('value')
           .eq('key', 'nft_contract_address')
           .single();
         
-        if (!contractAddress) {
+        if (contractError) {
+          console.error('Error fetching NFT contract address:', contractError);
+          throw contractError;
+        }
+
+        if (!contractData) {
           console.error('NFT contract address not found in app_settings');
           throw new Error('NFT contract address not found');
         }
 
+        console.log('Successfully fetched contract address:', contractData.value);
+
         // Use public Sepolia RPC endpoint
         const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
-        const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
+        const contract = new ethers.Contract(contractData.value, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
         
