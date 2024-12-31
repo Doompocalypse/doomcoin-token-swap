@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { ethers } from "ethers";
+import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 
 const NFT_ABI = [
   "function balanceOf(address account, uint256 id) view returns (uint256)",
@@ -31,12 +32,35 @@ export const useNFTContract = (connectedAccount?: string) => {
       const contractAddress = settings.value;
       console.log('NFT Contract Address:', contractAddress);
 
-      // Initialize provider and contract
-      const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
-      const contract = new ethers.Contract(contractAddress, NFT_ABI, provider);
-      
+      // Get the current chain ID from MetaMask
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const network = await provider.getNetwork();
+      const chainId = '0x' + network.chainId.toString(16);
+      console.log('Current chain ID:', chainId);
+
+      // Use appropriate RPC URL based on network
+      let rpcUrl;
+      if (chainId.toLowerCase() === ARBITRUM_CHAIN_ID.toLowerCase()) {
+        console.log('Using Arbitrum RPC URL');
+        rpcUrl = "https://arb1.arbitrum.io/rpc";
+      } else if (chainId.toLowerCase() === SEPOLIA_CHAIN_ID.toLowerCase()) {
+        console.log('Using Sepolia RPC URL');
+        rpcUrl = "https://rpc.sepolia.org";
+      } else {
+        throw new Error('Unsupported network');
+      }
+
+      // Initialize provider with correct RPC URL
+      const networkProvider = new ethers.JsonRpcProvider(rpcUrl);
+      console.log('Initialized provider with RPC URL:', rpcUrl);
+
+      // Create contract instance
+      const contract = new ethers.Contract(contractAddress, NFT_ABI, networkProvider);
+      console.log('Contract initialized successfully');
+
       return contract;
     },
-    enabled: !!connectedAccount
+    enabled: !!connectedAccount,
+    staleTime: 30000 // Consider data fresh for 30 seconds
   });
 };

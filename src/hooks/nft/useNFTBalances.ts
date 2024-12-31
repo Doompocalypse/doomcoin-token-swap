@@ -24,24 +24,26 @@ export const useNFTBalances = (connectedAccount?: string, tokenIds: string[] = [
           console.log(`Token ${tokenId} exists:`, exists);
           
           if (exists) {
-            // Get balance using balanceOf
-            const balanceBN = await contract.balanceOf(connectedAccount, tokenId);
-            balances[tokenId] = Number(balanceBN);
-            console.log(`Balance for token ${tokenId}:`, balances[tokenId]);
-
-            // Double check ownership using ownerOf as backup
             try {
+              // Try ownerOf first
               const owner = await contract.ownerOf(tokenId);
               console.log(`Owner of token ${tokenId}:`, owner);
               
-              // If ownerOf returns the connected account, ensure balance is at least 1
-              if (owner.toLowerCase() === connectedAccount.toLowerCase() && balances[tokenId] === 0) {
-                console.log(`Setting minimum balance of 1 for owned token ${tokenId}`);
+              if (owner.toLowerCase() === connectedAccount.toLowerCase()) {
+                console.log(`Token ${tokenId} is owned by the connected account`);
                 balances[tokenId] = 1;
+              } else {
+                // If not the owner, check balanceOf
+                const balanceBN = await contract.balanceOf(connectedAccount, tokenId);
+                balances[tokenId] = Number(balanceBN);
+                console.log(`Balance for token ${tokenId}:`, balances[tokenId]);
               }
             } catch (ownerError) {
-              console.log(`Error checking owner of token ${tokenId}:`, ownerError);
-              // If ownerOf fails, trust the balanceOf result
+              console.log(`Error checking owner of token ${tokenId}, falling back to balanceOf:`, ownerError);
+              // Fallback to balanceOf if ownerOf fails
+              const balanceBN = await contract.balanceOf(connectedAccount, tokenId);
+              balances[tokenId] = Number(balanceBN);
+              console.log(`Fallback balance for token ${tokenId}:`, balances[tokenId]);
             }
           } else {
             console.log(`Token ${tokenId} does not exist in the contract`);
