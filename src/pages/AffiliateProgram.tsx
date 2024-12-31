@@ -166,7 +166,7 @@ const AffiliateProgram = () => {
       <Header onConnect={handleConnect} />
       <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center text-white">
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-purple-600">
             Play. Earn. Repeat!
           </h1>
           
@@ -176,7 +176,7 @@ const AffiliateProgram = () => {
               <Button
                 onClick={handleSignUp}
                 disabled={!walletAddress || isLoading}
-                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-white"
+                className="w-full py-6 text-lg bg-primary hover:bg-primary/90 text-primary-foreground"
               >
                 {isLoading ? "Processing..." : "Sign Up as Affiliate"}
               </Button>
