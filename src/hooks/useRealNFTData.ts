@@ -42,8 +42,10 @@ export const useRealNFTData = (connectedAccount?: string) => {
           throw new Error('NFT contract address not found');
         }
 
-        // Use Sepolia provider
-        const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
+        // Use a public Sepolia RPC endpoint
+        const provider = new ethers.JsonRpcProvider("https://rpc.sepolia.org");
+        console.log("Initializing provider for Sepolia network");
+        
         const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
@@ -54,6 +56,7 @@ export const useRealNFTData = (connectedAccount?: string) => {
             let balance = 0;
             if (connectedAccount) {
               try {
+                console.log(`Checking balance for token ${metadata.token_id} and account ${connectedAccount}`);
                 const rawBalance = await contract.balanceOf(connectedAccount, metadata.token_id);
                 balance = Number(rawBalance);
                 console.log(`Raw balance for token ${metadata.token_id}:`, rawBalance.toString());
