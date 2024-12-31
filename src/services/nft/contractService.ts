@@ -7,6 +7,27 @@ export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
 export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
 export const RESERVE_WALLET = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
 
+// Contract interfaces
+interface NFTContract extends ethers.BaseContract {
+  transferFrom(from: string, to: string, tokenId: string): Promise<ethers.TransactionResponse>;
+  ownerOf(tokenId: string): Promise<string>;
+  setApprovalForAll(operator: string, approved: boolean): Promise<ethers.TransactionResponse>;
+  isApprovedForAll(owner: string, operator: string): Promise<boolean>;
+  safeTransferFrom(from: string, to: string, tokenId: string): Promise<ethers.TransactionResponse>;
+}
+
+interface DMCContract extends ethers.BaseContract {
+  transfer(to: string, amount: bigint): Promise<ethers.TransactionResponse>;
+  approve(spender: string, amount: bigint): Promise<ethers.TransactionResponse>;
+  balanceOf(account: string): Promise<bigint>;
+  allowance(owner: string, spender: string): Promise<bigint>;
+}
+
+interface ExchangeContract extends ethers.BaseContract {
+  purchaseNFT(tokenId: string): Promise<ethers.TransactionResponse>;
+  setNFTPrice(tokenId: string, price: bigint): Promise<ethers.TransactionResponse>;
+}
+
 // Contract ABIs
 const NFT_ABI = [
   "function transferFrom(address from, address to, uint256 tokenId) external",
@@ -43,9 +64,9 @@ export const createContractService = async (): Promise<ContractService> => {
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
   
-  const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer);
-  const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer);
-  const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer);
+  const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
+  const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer) as NFTContract;
+  const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer) as ExchangeContract;
 
   // Get Bot Wallet private key from Supabase
   const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/get-secret', {
@@ -90,7 +111,7 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
     console.log("Checking NFT approval status for account...");
-    const nftContractWithBotSigner = nftContract.connect(botWallet);
+    const nftContractWithBotSigner = nftContract.connect(botWallet) as NFTContract;
     const isApproved = await nftContractWithBotSigner.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
     
@@ -116,7 +137,7 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("DMC transfer confirmed");
       
       // Connect NFT contract with Bot Wallet signer
-      const nftContractWithBotSigner = nftContract.connect(botWallet);
+      const nftContractWithBotSigner = nftContract.connect(botWallet) as NFTContract;
       
       // Check if Bot Wallet owns the NFT
       const currentOwner = await nftContract.ownerOf(tokenId);
