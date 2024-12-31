@@ -33,14 +33,22 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
 
     setIsLoading(true);
     try {
+      console.log("Checking referral code:", code.trim());
+      
       // Check if code exists (case insensitive)
       const { data: referralCode, error: referralError } = await supabase
         .from("referral_codes")
         .select("id")
         .ilike("code", code.trim())
-        .single();
+        .maybeSingle();
 
-      if (referralError || !referralCode) {
+      if (referralError) {
+        console.error("Error checking referral code:", referralError);
+        throw referralError;
+      }
+
+      if (!referralCode) {
+        console.log("Invalid referral code:", code.trim());
         toast({
           title: "Invalid Referral Code",
           description: "The code you entered is not valid.",
@@ -48,6 +56,8 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
         });
         return;
       }
+
+      console.log("Valid referral code found:", referralCode);
 
       // Record the referral code use
       const { error: useError } = await supabase
@@ -59,6 +69,7 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
 
       if (useError) {
         if (useError.code === "23505") { // Unique violation
+          console.log("Referral code already used by address:", userAddress);
           toast({
             title: "Code Already Used",
             description: "You have already used this referral code.",
@@ -69,7 +80,10 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
         throw useError;
       }
 
+      console.log("Referral code use recorded successfully");
+
       // Trigger Faithcoin transfer
+      console.log("Initiating Faithcoin transfer to:", userAddress);
       const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/transfer-faithcoin', {
         method: 'POST',
         headers: {
@@ -85,6 +99,7 @@ const ReferralCodeDialog = ({ isOpen, onClose, onSubmit, userAddress }: Referral
         throw new Error('Failed to transfer Faithcoin');
       }
 
+      console.log("Faithcoin transfer successful");
       toast({
         title: "Success!",
         description: "Referral code applied successfully. You received 1 Faithcoin!",
