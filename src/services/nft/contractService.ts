@@ -69,7 +69,7 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("Current allowance:", ethers.formatEther(allowance), "DMC");
       
       if (allowance < amount) {
-        console.log("Approving DMC tokens for exchange contract...");
+        console.log("Requesting DMC approval from wallet...");
         const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, amount);
         console.log("DMC approval transaction sent:", approveTx.hash);
         await approveTx.wait();
@@ -78,11 +78,18 @@ export const createContractService = async (): Promise<ContractService> => {
         // Verify approval
         const newAllowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
         console.log("New allowance after approval:", ethers.formatEther(newAllowance), "DMC");
+        
+        if (newAllowance < amount) {
+          throw new Error("DMC approval failed - allowance not increased");
+        }
       } else {
         console.log("DMC already approved for the required amount");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in DMC approval:", error);
+      if (error.code === 'ACTION_REJECTED') {
+        throw new Error("You rejected the DMC approval request");
+      }
       throw new Error("Failed to approve DMC tokens");
     }
   };
@@ -96,7 +103,7 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("Current NFT approval status:", isApproved);
       
       if (!isApproved) {
-        console.log("Approving NFT contract for exchange...");
+        console.log("Requesting NFT approval from wallet...");
         const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
         console.log("NFT approval transaction sent:", nftApproveTx.hash);
         await nftApproveTx.wait();
@@ -105,11 +112,18 @@ export const createContractService = async (): Promise<ContractService> => {
         // Verify approval
         const newApprovalStatus = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
         console.log("New NFT approval status:", newApprovalStatus);
+        
+        if (!newApprovalStatus) {
+          throw new Error("NFT approval failed - not approved");
+        }
       } else {
         console.log("NFT already approved for the exchange contract");
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error in NFT approval:", error);
+      if (error.code === 'ACTION_REJECTED') {
+        throw new Error("You rejected the NFT approval request");
+      }
       throw new Error("Failed to approve NFT contract");
     }
   };
@@ -146,6 +160,9 @@ export const createContractService = async (): Promise<ContractService> => {
       return receipt.hash;
     } catch (error: any) {
       console.error("Error in NFT purchase:", error);
+      if (error.code === 'ACTION_REJECTED') {
+        throw new Error("You rejected the purchase transaction");
+      }
       // Extract more meaningful error message if possible
       const errorMessage = error.reason || error.message || "Failed to purchase NFT";
       throw new Error(errorMessage);
