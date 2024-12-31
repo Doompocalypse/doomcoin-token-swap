@@ -44,22 +44,39 @@ export const useNFTPurchaseHandler = (
       const priceInWei = ethers.parseEther(price.toString());
       
       // Check DMC balance
+      console.log("Checking DMC balance...");
       const balance = await contractService.checkDMCBalance(connectedAccount);
+      console.log("User DMC balance:", ethers.formatEther(balance));
+      
       if (balance < priceInWei) {
         console.log("Purchase failed: Insufficient DMC balance");
         onInsufficientBalance?.();
         return;
       }
 
-      // Handle approvals
-      await contractService.approveDMC(connectedAccount, priceInWei);
-      await contractService.approveNFT(connectedAccount);
+      // Request DMC approval
+      console.log("Requesting DMC token approval...");
+      const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
+      console.log("DMC approval transaction:", dmcApprovalTx.hash);
+      await dmcApprovalTx.wait();
+      console.log("DMC approval confirmed");
+
+      // Request NFT approval
+      console.log("Requesting NFT contract approval...");
+      const nftApprovalTx = await contractService.approveNFT(connectedAccount);
+      console.log("NFT approval transaction:", nftApprovalTx.hash);
+      await nftApprovalTx.wait();
+      console.log("NFT approval confirmed");
 
       // Purchase NFT
-      const transactionHash = await contractService.purchaseNFT(connectedAccount, nftId);
+      console.log("Executing NFT purchase...");
+      const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId);
+      console.log("Purchase transaction:", purchaseTx.hash);
+      const receipt = await purchaseTx.wait();
+      console.log("Purchase confirmed:", receipt);
 
       // Record the purchase
-      await recordPurchase(nftId, connectedAccount, transactionHash, price);
+      await recordPurchase(nftId, connectedAccount, receipt.hash, price);
 
       toast({
         title: "Purchase Successful",

@@ -28,12 +28,16 @@ const EXCHANGE_ABI = [
 
 export interface ContractService {
   checkDMCBalance: (account: string) => Promise<bigint>;
-  approveDMC: (account: string, amount: bigint) => Promise<void>;
-  approveNFT: (account: string) => Promise<void>;
-  purchaseNFT: (account: string, tokenId: string) => Promise<string>;
+  approveDMC: (account: string, amount: bigint) => Promise<ethers.TransactionResponse>;
+  approveNFT: (account: string) => Promise<ethers.TransactionResponse>;
+  purchaseNFT: (account: string, tokenId: string) => Promise<ethers.TransactionResponse>;
 }
 
 export const createContractService = async (): Promise<ContractService> => {
+  if (!window.ethereum) {
+    throw new Error("Web3 provider not found");
+  }
+
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
   
@@ -42,45 +46,27 @@ export const createContractService = async (): Promise<ContractService> => {
   const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer);
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
-    console.log("Checking DMC balance for account:", account);
-    const balance = await dmcContract.balanceOf(account);
-    console.log("User DMC balance:", ethers.formatEther(balance));
-    return balance;
+    return dmcContract.balanceOf(account);
   };
 
-  const approveDMC = async (account: string, amount: bigint): Promise<void> => {
-    console.log("Checking DMC allowance...");
+  const approveDMC = async (account: string, amount: bigint): Promise<ethers.TransactionResponse> => {
     const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
-    
     if (allowance < amount) {
-      console.log("Approving DMC tokens for exchange contract...");
-      const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, amount);
-      console.log("DMC approval transaction sent:", approveTx.hash);
-      await approveTx.wait();
-      console.log("DMC approval successful");
+      return dmcContract.approve(EXCHANGE_CONTRACT, amount);
     }
+    return Promise.resolve({} as ethers.TransactionResponse);
   };
 
-  const approveNFT = async (account: string): Promise<void> => {
-    console.log("Checking NFT approval status...");
+  const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
     const isApproved = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
-    
     if (!isApproved) {
-      console.log("Approving NFT contract for exchange...");
-      const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
-      console.log("NFT approval transaction sent:", nftApproveTx.hash);
-      await nftApproveTx.wait();
-      console.log("NFT approval successful");
+      return nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
     }
+    return Promise.resolve({} as ethers.TransactionResponse);
   };
 
-  const purchaseNFT = async (account: string, tokenId: string): Promise<string> => {
-    console.log("Executing NFT purchase through exchange contract...");
-    const purchaseTx = await exchangeContract.purchaseNFT(tokenId);
-    console.log("Purchase transaction sent:", purchaseTx.hash);
-    const receipt = await purchaseTx.wait();
-    console.log("NFT purchase successful:", receipt);
-    return receipt.hash;
+  const purchaseNFT = async (account: string, tokenId: string): Promise<ethers.TransactionResponse> => {
+    return exchangeContract.purchaseNFT(tokenId);
   };
 
   return {
