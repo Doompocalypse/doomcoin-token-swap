@@ -34,8 +34,14 @@ export interface ContractService {
 }
 
 export const createContractService = async (): Promise<ContractService> => {
+  console.log("Creating contract service...");
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
+  
+  console.log("Initializing contracts with addresses:");
+  console.log("DMC Contract:", DMC_CONTRACT);
+  console.log("NFT Contract:", NFT_CONTRACT);
+  console.log("Exchange Contract:", EXCHANGE_CONTRACT);
   
   const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer);
   const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer);
@@ -43,51 +49,107 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
     console.log("Checking DMC balance for account:", account);
-    const balance = await dmcContract.balanceOf(account);
-    console.log("User DMC balance:", ethers.formatEther(balance));
-    return balance;
+    try {
+      const balance = await dmcContract.balanceOf(account);
+      console.log("User DMC balance:", ethers.formatEther(balance), "DMC");
+      return balance;
+    } catch (error) {
+      console.error("Error checking DMC balance:", error);
+      throw new Error("Failed to check DMC balance");
+    }
   };
 
   const approveDMC = async (account: string, amount: bigint): Promise<void> => {
     console.log("Checking DMC allowance...");
-    const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+    console.log("Account:", account);
+    console.log("Amount to approve:", ethers.formatEther(amount), "DMC");
     
-    if (allowance < amount) {
-      console.log("Approving DMC tokens for exchange contract...");
-      const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, amount);
-      console.log("DMC approval transaction sent:", approveTx.hash);
-      await approveTx.wait();
-      console.log("DMC approval successful");
-    } else {
-      console.log("DMC already approved for the required amount");
+    try {
+      const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+      console.log("Current allowance:", ethers.formatEther(allowance), "DMC");
+      
+      if (allowance < amount) {
+        console.log("Approving DMC tokens for exchange contract...");
+        const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, amount);
+        console.log("DMC approval transaction sent:", approveTx.hash);
+        await approveTx.wait();
+        console.log("DMC approval successful");
+        
+        // Verify approval
+        const newAllowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+        console.log("New allowance after approval:", ethers.formatEther(newAllowance), "DMC");
+      } else {
+        console.log("DMC already approved for the required amount");
+      }
+    } catch (error) {
+      console.error("Error in DMC approval:", error);
+      throw new Error("Failed to approve DMC tokens");
     }
   };
 
   const approveNFT = async (account: string): Promise<void> => {
     console.log("Checking NFT approval status...");
-    const isApproved = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
+    console.log("Account:", account);
     
-    if (!isApproved) {
-      console.log("Approving NFT contract for exchange...");
-      const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
-      console.log("NFT approval transaction sent:", nftApproveTx.hash);
-      await nftApproveTx.wait();
-      console.log("NFT approval successful");
-    } else {
-      console.log("NFT already approved for the exchange contract");
+    try {
+      const isApproved = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
+      console.log("Current NFT approval status:", isApproved);
+      
+      if (!isApproved) {
+        console.log("Approving NFT contract for exchange...");
+        const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
+        console.log("NFT approval transaction sent:", nftApproveTx.hash);
+        await nftApproveTx.wait();
+        console.log("NFT approval successful");
+        
+        // Verify approval
+        const newApprovalStatus = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
+        console.log("New NFT approval status:", newApprovalStatus);
+      } else {
+        console.log("NFT already approved for the exchange contract");
+      }
+    } catch (error) {
+      console.error("Error in NFT approval:", error);
+      throw new Error("Failed to approve NFT contract");
     }
   };
 
   const purchaseNFT = async (account: string, tokenId: string): Promise<string> => {
-    console.log("Executing NFT purchase through exchange contract...");
+    console.log("Starting NFT purchase process...");
     console.log("Token ID:", tokenId);
     console.log("Buyer address:", account);
     
-    const purchaseTx = await exchangeContract.purchaseNFT(tokenId);
-    console.log("Purchase transaction sent:", purchaseTx.hash);
-    const receipt = await purchaseTx.wait();
-    console.log("NFT purchase successful:", receipt);
-    return receipt.hash;
+    try {
+      // Verify DMC balance and allowance before purchase
+      const balance = await checkDMCBalance(account);
+      const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+      console.log("Current DMC balance:", ethers.formatEther(balance), "DMC");
+      console.log("Current DMC allowance:", ethers.formatEther(allowance), "DMC");
+      
+      console.log("Executing NFT purchase through exchange contract...");
+      const purchaseTx = await exchangeContract.purchaseNFT(tokenId);
+      console.log("Purchase transaction sent:", purchaseTx.hash);
+      const receipt = await purchaseTx.wait();
+      console.log("NFT purchase successful:", receipt);
+      
+      // Verify the purchase
+      try {
+        const owner = await nftContract.ownerOf(tokenId);
+        console.log("New NFT owner:", owner);
+        if (owner.toLowerCase() !== account.toLowerCase()) {
+          console.warn("Warning: NFT ownership verification failed");
+        }
+      } catch (error) {
+        console.warn("Warning: Could not verify NFT ownership:", error);
+      }
+      
+      return receipt.hash;
+    } catch (error: any) {
+      console.error("Error in NFT purchase:", error);
+      // Extract more meaningful error message if possible
+      const errorMessage = error.reason || error.message || "Failed to purchase NFT";
+      throw new Error(errorMessage);
+    }
   };
 
   return {
