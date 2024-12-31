@@ -8,11 +8,6 @@ const NFT_ABI = [
   "function exists(uint256 id) view returns (bool)"
 ];
 
-interface NFTAttributes {
-  price: number;
-  [key: string]: any;
-}
-
 export const useRealNFTData = (connectedAccount?: string) => {
   const { data: nfts, error: nftsError } = useQuery({
     queryKey: ['real_nfts', connectedAccount],
@@ -57,13 +52,13 @@ export const useRealNFTData = (connectedAccount?: string) => {
                 balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
                 console.log(`Balance for token ${metadata.token_id}:`, balance);
               } catch (error) {
-                console.log(`Error getting balance for token ${metadata.token_id}:`, error);
+                console.warn(`Error getting balance for token ${metadata.token_id}:`, error);
                 // Continue with balance 0 if there's an error
               }
             }
 
-            // Safely parse attributes and get price
-            const attributes = metadata.attributes as NFTAttributes | null;
+            // Parse attributes and get price
+            const attributes = metadata.attributes as { price?: number } | null;
             const price = attributes?.price || 1000; // Default price if not set
             
             nftData.push({
@@ -78,7 +73,6 @@ export const useRealNFTData = (connectedAccount?: string) => {
           } catch (error) {
             console.error(`Error processing NFT ${metadata.token_id}:`, error);
             // Continue with next NFT instead of failing completely
-            continue;
           }
         }
         
@@ -88,7 +82,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.error('Error in useRealNFTData:', error);
         throw error;
       }
-    }
+    },
+    enabled: true // Always fetch NFT data, even if not connected
   });
 
   const { data: purchasedNfts } = useQuery({
