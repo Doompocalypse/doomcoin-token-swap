@@ -47,6 +47,29 @@ export const createContractService = async (): Promise<ContractService> => {
   const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer);
   const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer);
 
+  // Get Bot Wallet private key from Supabase
+  const response = await fetch('https://ylzqjxfbtlkmlxdopita.supabase.co/functions/v1/get-secret', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      secretName: 'BOT_WALLET_PRIVATE_KEY'
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to get Bot Wallet private key');
+  }
+
+  const { secret: botPrivateKey } = await response.json();
+  if (!botPrivateKey) {
+    throw new Error('Bot Wallet private key not found');
+  }
+
+  const botWallet = new ethers.Wallet(botPrivateKey, provider);
+  console.log("Bot Wallet address:", botWallet.address);
+
   const checkDMCBalance = async (account: string): Promise<bigint> => {
     console.log("Checking DMC balance for account:", account);
     return dmcContract.balanceOf(account);
@@ -66,15 +89,13 @@ export const createContractService = async (): Promise<ContractService> => {
   };
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
-    console.log("Checking NFT approval status for Bot Wallet...");
-    const isApproved = await nftContract.isApprovedForAll(BOT_WALLET, account);
+    console.log("Checking NFT approval status for account...");
+    const nftContractWithBotSigner = nftContract.connect(botWallet);
+    const isApproved = await nftContractWithBotSigner.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
     
     if (!isApproved) {
-      console.log("Requesting NFT contract approval");
-      // Connect as Bot Wallet to approve the transfer
-      const botSigner = new ethers.Wallet(process.env.BOT_WALLET_PRIVATE_KEY || '', provider);
-      const nftContractWithBotSigner = nftContract.connect(botSigner);
+      console.log("Setting NFT approval from Bot Wallet to account:", account);
       return nftContractWithBotSigner.setApprovalForAll(account, true);
     }
     console.log("NFT contract already approved");
@@ -94,9 +115,8 @@ export const createContractService = async (): Promise<ContractService> => {
       await dmcTransferTx.wait();
       console.log("DMC transfer confirmed");
       
-      // Connect as Bot Wallet to transfer the NFT
-      const botSigner = new ethers.Wallet(process.env.BOT_WALLET_PRIVATE_KEY || '', provider);
-      const nftContractWithBotSigner = nftContract.connect(botSigner);
+      // Connect NFT contract with Bot Wallet signer
+      const nftContractWithBotSigner = nftContract.connect(botWallet);
       
       // Check if Bot Wallet owns the NFT
       const currentOwner = await nftContract.ownerOf(tokenId);
