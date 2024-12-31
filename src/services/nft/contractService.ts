@@ -12,7 +12,8 @@ const NFT_ABI = [
   "function transferFrom(address from, address to, uint256 tokenId) external",
   "function ownerOf(uint256 tokenId) view returns (address)",
   "function setApprovalForAll(address operator, bool approved) external",
-  "function isApprovedForAll(address owner, address operator) view returns (bool)"
+  "function isApprovedForAll(address owner, address operator) view returns (bool)",
+  "function safeTransferFrom(address from, address to, uint256 tokenId) external"
 ];
 
 const DMC_ABI = [
@@ -65,13 +66,16 @@ export const createContractService = async (): Promise<ContractService> => {
   };
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
-    console.log("Checking NFT approval status...");
+    console.log("Checking NFT approval status for Bot Wallet...");
     const isApproved = await nftContract.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
     
     if (!isApproved) {
       console.log("Requesting NFT contract approval");
-      return nftContract.setApprovalForAll(BOT_WALLET, true);
+      // Connect as Bot Wallet to approve the transfer
+      const botSigner = new ethers.Wallet(process.env.BOT_WALLET_PRIVATE_KEY || '', provider);
+      const nftContractWithBotSigner = nftContract.connect(botSigner);
+      return nftContractWithBotSigner.setApprovalForAll(account, true);
     }
     console.log("NFT contract already approved");
     return Promise.resolve({} as ethers.TransactionResponse);
@@ -83,17 +87,34 @@ export const createContractService = async (): Promise<ContractService> => {
     console.log("Token ID:", tokenId);
     console.log("Amount:", amount.toString());
     
-    // First transfer DMC to Reserve Wallet
-    console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);
-    const dmcTransferTx = await dmcContract.transfer(RESERVE_WALLET, amount);
-    await dmcTransferTx.wait();
-    console.log("DMC transfer confirmed");
-    
-    // Then transfer NFT from Bot Wallet to buyer
-    console.log("Transferring NFT from Bot Wallet to buyer");
-    console.log("From:", BOT_WALLET);
-    console.log("To:", account);
-    return nftContract.transferFrom(BOT_WALLET, account, tokenId);
+    try {
+      // First transfer DMC to Reserve Wallet
+      console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);
+      const dmcTransferTx = await dmcContract.transfer(RESERVE_WALLET, amount);
+      await dmcTransferTx.wait();
+      console.log("DMC transfer confirmed");
+      
+      // Connect as Bot Wallet to transfer the NFT
+      const botSigner = new ethers.Wallet(process.env.BOT_WALLET_PRIVATE_KEY || '', provider);
+      const nftContractWithBotSigner = nftContract.connect(botSigner);
+      
+      // Check if Bot Wallet owns the NFT
+      const currentOwner = await nftContract.ownerOf(tokenId);
+      console.log("Current NFT owner:", currentOwner);
+      
+      if (currentOwner.toLowerCase() !== BOT_WALLET.toLowerCase()) {
+        throw new Error("Bot Wallet does not own this NFT");
+      }
+      
+      // Transfer NFT from Bot Wallet to buyer using safeTransferFrom
+      console.log("Transferring NFT from Bot Wallet to buyer");
+      console.log("From:", BOT_WALLET);
+      console.log("To:", account);
+      return nftContractWithBotSigner.safeTransferFrom(BOT_WALLET, account, tokenId);
+    } catch (error) {
+      console.error("Error in NFT purchase process:", error);
+      throw error;
+    }
   };
 
   return {
