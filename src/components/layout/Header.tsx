@@ -24,6 +24,8 @@ const Header = ({ onConnect }: HeaderProps) => {
         return 'NFT Marketplace';
       case '/affiliate-program':
         return 'Affiliate Program';
+      case '/nft-vault':
+        return 'NFT Vault';
       default:
         return 'Token Swap';
     }
@@ -46,6 +48,9 @@ const Header = ({ onConnect }: HeaderProps) => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/affiliate-program")} className="cursor-pointer hover:bg-gray-100">
                 Affiliate Program
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/nft-vault")} className="cursor-pointer hover:bg-gray-100">
+                NFT Vault
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
