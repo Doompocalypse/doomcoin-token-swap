@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
 
-// Contract addresses (Sepolia Testnet)
+// Contract addresses (Arbitrum One)
 export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
 export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
 export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
@@ -127,8 +127,8 @@ export const createContractService = async (): Promise<ContractService> => {
       // First transfer DMC to Reserve Wallet
       console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);
       const dmcTransferTx = await dmcContract.transfer(RESERVE_WALLET, amount);
-      await dmcTransferTx.wait();
-      console.log("DMC transfer confirmed");
+      const dmcReceipt = await dmcTransferTx.wait();
+      console.log("DMC transfer confirmed in block:", dmcReceipt.blockNumber);
       
       // Create new contract instance with Bot Wallet signer
       const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWallet) as NFTContract;
@@ -145,7 +145,14 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("Transferring NFT from Bot Wallet to buyer");
       console.log("From:", BOT_WALLET);
       console.log("To:", account);
-      return nftContractWithBotSigner.safeTransferFrom(BOT_WALLET, account, tokenId);
+      const nftTransferTx = await nftContractWithBotSigner.safeTransferFrom(BOT_WALLET, account, tokenId);
+      
+      // Wait for NFT transfer to be confirmed
+      console.log("Waiting for NFT transfer confirmation...");
+      const nftReceipt = await nftTransferTx.wait();
+      console.log("NFT transfer confirmed in block:", nftReceipt.blockNumber);
+      
+      return nftTransferTx;
     } catch (error) {
       console.error("Error in NFT purchase process:", error);
       throw error;
