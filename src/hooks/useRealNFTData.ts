@@ -42,7 +42,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
           throw new Error('NFT contract address not found');
         }
 
-        const provider = new ethers.JsonRpcProvider("https://arb1.arbitrum.io/rpc");
+        // Use Sepolia provider
+        const provider = new ethers.JsonRpcProvider("https://sepolia.infura.io/v3/9aa3d95b3bc440fa88ea12eaa4456161");
         const contract = new ethers.Contract(contractAddress.value, NFT_ABI, provider);
         
         const nftData: NFT[] = [];
@@ -53,10 +54,12 @@ export const useRealNFTData = (connectedAccount?: string) => {
             let balance = 0;
             if (connectedAccount) {
               try {
-                balance = Number(await contract.balanceOf(connectedAccount, metadata.token_id));
-                console.log(`Balance for token ${metadata.token_id}:`, balance);
+                const rawBalance = await contract.balanceOf(connectedAccount, metadata.token_id);
+                balance = Number(rawBalance);
+                console.log(`Raw balance for token ${metadata.token_id}:`, rawBalance.toString());
+                console.log(`Converted balance for token ${metadata.token_id}:`, balance);
               } catch (error) {
-                console.log(`Error getting balance for token ${metadata.token_id}:`, error);
+                console.error(`Error getting balance for token ${metadata.token_id}:`, error);
                 // Continue with balance 0 if there's an error
               }
             }
@@ -65,15 +68,18 @@ export const useRealNFTData = (connectedAccount?: string) => {
             const attributes = metadata.attributes as NFTAttributes | null;
             const price = attributes?.price || 1000; // Default price if not set
             
-            nftData.push({
-              id: metadata.token_id,
-              name: metadata.name,
-              description: metadata.description || '',
-              price: price,
-              imageUrl: metadata.image_url,
-              videoUrl: '', // We don't store videos in metadata currently
-              balance
-            });
+            // Only add NFTs with a positive balance
+            if (balance > 0) {
+              nftData.push({
+                id: metadata.token_id,
+                name: metadata.name,
+                description: metadata.description || '',
+                price: price,
+                imageUrl: metadata.image_url,
+                videoUrl: '', // We don't store videos in metadata currently
+                balance
+              });
+            }
           } catch (error) {
             console.error(`Error processing NFT ${metadata.token_id}:`, error);
             // Continue with next NFT instead of failing completely
@@ -87,7 +93,8 @@ export const useRealNFTData = (connectedAccount?: string) => {
         console.error('Error in useRealNFTData:', error);
         throw error;
       }
-    }
+    },
+    enabled: !!connectedAccount
   });
 
   const { data: purchasedNfts } = useQuery({
