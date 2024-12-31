@@ -27,11 +27,15 @@ function ErrorFallback({ error }: { error: Error }) {
 }
 
 function App() {
+  const handleConnect = (connected: boolean, account?: string) => {
+    console.log("Wallet connection status:", connected, "Account:", account);
+  };
+
   return (
     <ErrorBoundary FallbackComponent={ErrorFallback}>
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
-          <Header />
+          <Header onConnect={handleConnect} />
           <NFTVault />
         </BrowserRouter>
         <Toaster position="bottom-right" />
