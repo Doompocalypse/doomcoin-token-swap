@@ -1,6 +1,6 @@
 import { useState, useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID, switchToNetwork } from "@/utils/chainConfig";
+import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 import { useMetaMaskProvider } from "./useMetaMaskProvider";
 import { useNetworkSwitch } from "./useNetworkSwitch";
 import { useWalletPermissions } from "./useWalletPermissions";
@@ -34,18 +34,10 @@ export const useWalletCore = (
       console.log("Accounts after selection:", accounts);
       
       if (accounts.length > 0) {
-        const currentChainId = await provider.request({ method: 'eth_chainId' });
-        console.log("Current chain ID:", currentChainId);
-
-        // Allow both Arbitrum and Sepolia
-        if (currentChainId.toLowerCase() !== ARBITRUM_CHAIN_ID.toLowerCase() && 
-            currentChainId.toLowerCase() !== SEPOLIA_CHAIN_ID.toLowerCase()) {
-          // Default to Sepolia for NFT marketplace
-          await switchToNetwork(SEPOLIA_CHAIN_ID);
-        }
+        await switchToArbitrum(provider);
         
         setAccounts(accounts);
-        setChainId(currentChainId);
+        setChainId(ARBITRUM_CHAIN_ID);
         onConnect(true, accounts[0]);
         
         toast({
@@ -61,7 +53,7 @@ export const useWalletCore = (
         variant: "destructive",
       });
     }
-  }, [getMetaMaskProvider, validateProvider, clearExistingPermissions, requestAccounts, onConnect, toast]);
+  }, [getMetaMaskProvider, validateProvider, clearExistingPermissions, requestAccounts, switchToArbitrum, onConnect, toast]);
 
   return {
     accounts,

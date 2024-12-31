@@ -1,9 +1,19 @@
 import { SupportedChains } from "@/types/wallet";
 
 export const ARBITRUM_CHAIN_ID = "0xa4b1"; // Arbitrum One Chain ID
-export const SEPOLIA_CHAIN_ID = "0xaa36a7"; // Sepolia Testnet Chain ID
 
 export const SUPPORTED_CHAINS: SupportedChains = {
+  "0x1": {
+    chainId: "0x1",
+    chainName: "Ethereum Mainnet",
+    nativeCurrency: {
+      name: "ETH",
+      symbol: "ETH",
+      decimals: 18,
+    },
+    rpcUrls: ["https://mainnet.infura.io/v3/"],
+    blockExplorerUrls: ["https://etherscan.io/"],
+  },
   "0xa4b1": {
     chainId: "0xa4b1",
     chainName: "Arbitrum One",
@@ -15,27 +25,15 @@ export const SUPPORTED_CHAINS: SupportedChains = {
     rpcUrls: ["https://arb1.arbitrum.io/rpc"],
     blockExplorerUrls: ["https://arbiscan.io/"],
   },
-  "0xaa36a7": {
-    chainId: "0xaa36a7",
-    chainName: "Sepolia",
-    nativeCurrency: {
-      name: "ETH",
-      symbol: "ETH",
-      decimals: 18,
-    },
-    rpcUrls: ["https://sepolia.infura.io/v3/"],
-    blockExplorerUrls: ["https://sepolia.etherscan.io"],
-  },
 };
 
-export const switchToNetwork = async (targetChainId: string) => {
+export const switchToArbitrum = async () => {
   if (!window.ethereum) return false;
   
   try {
-    console.log(`Attempting to switch to chain: ${targetChainId}`);
     await window.ethereum.request({
       method: 'wallet_switchEthereumChain',
-      params: [{ chainId: targetChainId }],
+      params: [{ chainId: ARBITRUM_CHAIN_ID }],
     });
     return true;
   } catch (switchError: any) {
@@ -44,15 +42,15 @@ export const switchToNetwork = async (targetChainId: string) => {
       try {
         await window.ethereum.request({
           method: 'wallet_addEthereumChain',
-          params: [SUPPORTED_CHAINS[targetChainId]],
+          params: [SUPPORTED_CHAINS[ARBITRUM_CHAIN_ID]],
         });
         return true;
       } catch (addError) {
-        console.error('Error adding chain:', addError);
+        console.error('Error adding Arbitrum chain:', addError);
         return false;
       }
     }
-    console.error('Error switching chain:', switchError);
+    console.error('Error switching to Arbitrum chain:', switchError);
     return false;
   }
 };
