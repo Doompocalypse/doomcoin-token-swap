@@ -4,7 +4,7 @@ import { ethers } from "ethers";
 export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
 export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
 export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
-export const EXCHANGE_CONTRACT = "0x529a7FdC52bb74cc0456D6d8E8693C22e2b28629";
+export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
 
 // Contract ABIs
 const NFT_ABI = [
@@ -58,6 +58,8 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("DMC approval transaction sent:", approveTx.hash);
       await approveTx.wait();
       console.log("DMC approval successful");
+    } else {
+      console.log("DMC already approved for the required amount");
     }
   };
 
@@ -71,11 +73,16 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("NFT approval transaction sent:", nftApproveTx.hash);
       await nftApproveTx.wait();
       console.log("NFT approval successful");
+    } else {
+      console.log("NFT already approved for the exchange contract");
     }
   };
 
   const purchaseNFT = async (account: string, tokenId: string): Promise<string> => {
     console.log("Executing NFT purchase through exchange contract...");
+    console.log("Token ID:", tokenId);
+    console.log("Buyer address:", account);
+    
     const purchaseTx = await exchangeContract.purchaseNFT(tokenId);
     console.log("Purchase transaction sent:", purchaseTx.hash);
     const receipt = await purchaseTx.wait();
