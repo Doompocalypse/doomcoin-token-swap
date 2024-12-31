@@ -52,13 +52,13 @@ export const createContractService = async (): Promise<ContractService> => {
   };
 
   const approveDMC = async (account: string, amount: bigint): Promise<ethers.TransactionResponse> => {
-    console.log("Checking DMC allowance for Exchange contract...");
-    const allowance = await dmcContract.allowance(account, EXCHANGE_CONTRACT);
+    console.log("Checking DMC allowance for Reserve Wallet...");
+    const allowance = await dmcContract.allowance(account, RESERVE_WALLET);
     console.log("Current DMC allowance:", allowance.toString());
     
     if (allowance < amount) {
       console.log("Requesting DMC approval for amount:", amount.toString());
-      return dmcContract.approve(EXCHANGE_CONTRACT, amount);
+      return dmcContract.approve(RESERVE_WALLET, amount);
     }
     console.log("Sufficient DMC allowance already exists");
     return Promise.resolve({} as ethers.TransactionResponse);
@@ -66,20 +66,33 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
     console.log("Checking NFT approval status...");
-    const isApproved = await nftContract.isApprovedForAll(account, EXCHANGE_CONTRACT);
+    const isApproved = await nftContract.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
     
     if (!isApproved) {
       console.log("Requesting NFT contract approval");
-      return nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
+      return nftContract.setApprovalForAll(BOT_WALLET, true);
     }
     console.log("NFT contract already approved");
     return Promise.resolve({} as ethers.TransactionResponse);
   };
 
   const purchaseNFT = async (account: string, tokenId: string): Promise<ethers.TransactionResponse> => {
-    console.log("Initiating NFT purchase for token:", tokenId);
-    return exchangeContract.purchaseNFT(tokenId);
+    console.log("Starting NFT purchase process...");
+    console.log("Buyer:", account);
+    console.log("Token ID:", tokenId);
+    
+    // First transfer DMC to Reserve Wallet
+    console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);
+    const dmcTransferTx = await dmcContract.transfer(RESERVE_WALLET, amount);
+    await dmcTransferTx.wait();
+    console.log("DMC transfer confirmed");
+    
+    // Then transfer NFT from Bot Wallet to buyer
+    console.log("Transferring NFT from Bot Wallet to buyer");
+    console.log("From:", BOT_WALLET);
+    console.log("To:", account);
+    return nftContract.transferFrom(BOT_WALLET, account, tokenId);
   };
 
   return {
