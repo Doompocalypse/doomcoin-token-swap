@@ -161,7 +161,7 @@ const AffiliateProgram = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#221F26] text-white relative">
+    <div className="min-h-screen relative">
       <VideoBackground />
       <Header onConnect={handleConnect} />
       <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
