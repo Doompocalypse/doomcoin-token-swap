@@ -56,22 +56,55 @@ export const useNFTPurchaseHandler = (
 
       // Request DMC approval
       console.log("Requesting DMC token approval...");
+      toast({
+        title: "Approval Required",
+        description: "Please approve DMC token spending in your wallet",
+      });
+      
       const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
-      console.log("DMC approval transaction:", dmcApprovalTx.hash);
+      console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
+      
+      toast({
+        title: "Confirming Approval",
+        description: "Please wait while the approval transaction is confirmed",
+      });
+      
       await dmcApprovalTx.wait();
       console.log("DMC approval confirmed");
 
       // Request NFT approval
       console.log("Requesting NFT contract approval...");
+      toast({
+        title: "Approval Required",
+        description: "Please approve NFT contract interaction in your wallet",
+      });
+      
       const nftApprovalTx = await contractService.approveNFT(connectedAccount);
-      console.log("NFT approval transaction:", nftApprovalTx.hash);
+      console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
+      
+      toast({
+        title: "Confirming Approval",
+        description: "Please wait while the NFT approval is confirmed",
+      });
+      
       await nftApprovalTx.wait();
       console.log("NFT approval confirmed");
 
       // Purchase NFT
       console.log("Executing NFT purchase...");
+      toast({
+        title: "Purchase Initiated",
+        description: "Please confirm the purchase transaction in your wallet",
+      });
+      
       const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId);
-      console.log("Purchase transaction:", purchaseTx.hash);
+      console.log("Purchase transaction initiated:", purchaseTx.hash);
+      
+      toast({
+        title: "Confirming Purchase",
+        description: "Please wait while your purchase is being confirmed",
+      });
+      
       const receipt = await purchaseTx.wait();
       console.log("Purchase confirmed:", receipt);
 
