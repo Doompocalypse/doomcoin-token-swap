@@ -87,28 +87,49 @@ export const useNFTPurchaseHandler = (
 
       // Check and set DMC approval
       const allowance = await dmcContract.allowance(connectedAccount, EXCHANGE_CONTRACT);
+      console.log("Current DMC allowance:", ethers.formatEther(allowance));
+      
       if (allowance < priceInWei) {
         console.log("Approving DMC tokens for exchange contract...");
-        const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, priceInWei);
-        await approveTx.wait();
-        console.log("DMC approval successful");
+        try {
+          const approveTx = await dmcContract.approve(EXCHANGE_CONTRACT, priceInWei);
+          console.log("DMC approval transaction sent:", approveTx.hash);
+          await approveTx.wait();
+          console.log("DMC approval successful");
+        } catch (error: any) {
+          console.error("DMC approval failed:", error);
+          throw new Error(`DMC approval failed: ${error.message}`);
+        }
       }
 
       // Check and set NFT approval
       const isApproved = await nftContract.isApprovedForAll(connectedAccount, EXCHANGE_CONTRACT);
+      console.log("NFT approval status:", isApproved);
+      
       if (!isApproved) {
         console.log("Approving NFT contract for exchange...");
-        const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
-        await nftApproveTx.wait();
-        console.log("NFT approval successful");
+        try {
+          const nftApproveTx = await nftContract.setApprovalForAll(EXCHANGE_CONTRACT, true);
+          console.log("NFT approval transaction sent:", nftApproveTx.hash);
+          await nftApproveTx.wait();
+          console.log("NFT approval successful");
+        } catch (error: any) {
+          console.error("NFT approval failed:", error);
+          throw new Error(`NFT approval failed: ${error.message}`);
+        }
       }
 
       // Purchase NFT through exchange contract
       console.log("Executing NFT purchase through exchange contract...");
-      const purchaseTx = await exchangeContract.purchaseNFT(nftId);
-      const receipt = await purchaseTx.wait();
-      
-      console.log("NFT purchase successful:", receipt.hash);
+      try {
+        const purchaseTx = await exchangeContract.purchaseNFT(nftId);
+        console.log("Purchase transaction sent:", purchaseTx.hash);
+        const receipt = await purchaseTx.wait();
+        console.log("NFT purchase successful:", receipt);
+      } catch (error: any) {
+        console.error("Purchase transaction failed:", error);
+        throw new Error(`Purchase transaction failed: ${error.message}`);
+      }
 
       // Record the purchase
       const { error: purchaseError } = await supabase
