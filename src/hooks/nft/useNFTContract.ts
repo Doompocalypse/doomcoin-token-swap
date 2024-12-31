@@ -6,7 +6,8 @@ const NFT_ABI = [
   "function balanceOf(address account, uint256 id) view returns (uint256)",
   "function exists(uint256 id) view returns (bool)",
   "function uri(uint256 id) view returns (string)",
-  "function totalSupply(uint256 id) view returns (uint256)"
+  "function totalSupply(uint256 id) view returns (uint256)",
+  "function ownerOf(uint256 tokenId) view returns (address)"
 ];
 
 export const useNFTContract = (connectedAccount?: string) => {
