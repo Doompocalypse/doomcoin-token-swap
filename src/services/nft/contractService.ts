@@ -64,10 +64,6 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
-  
-  const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
-  const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer) as NFTContract;
-  const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer) as ExchangeContract;
 
   // Get Bot Wallet private key from Supabase
   console.log("Fetching Bot Wallet private key from Supabase...");
@@ -77,13 +73,17 @@ export const createContractService = async (): Promise<ContractService> => {
     .eq('key', 'BOT_WALLET_PRIVATE_KEY')
     .single();
 
-  if (secretError || !secretData) {
+  if (secretError || !secretData?.value) {
     console.error('Error fetching Bot Wallet private key:', secretError);
-    throw new Error('Failed to get Bot Wallet private key');
+    throw new Error('Bot Wallet private key not found in app_settings');
   }
 
   const botWallet = new ethers.Wallet(secretData.value, provider);
   console.log("Bot Wallet address:", botWallet.address);
+
+  const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
+  const nftContract = new ethers.Contract(NFT_CONTRACT, NFT_ABI, signer) as NFTContract;
+  const exchangeContract = new ethers.Contract(EXCHANGE_CONTRACT, EXCHANGE_ABI, signer) as ExchangeContract;
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
     console.log("Checking DMC balance for account:", account);
