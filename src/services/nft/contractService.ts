@@ -4,8 +4,8 @@ import { ethers } from "ethers";
 export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
 export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
 export const NFT_CONTRACT = "0x6890Fc38B996371366f845a73587722307EE54F7";
-export const EXCHANGE_CONTRACT = "0x529a7FdC52bb74cc0456D6d8E8693C22e2b28629";
-export const RESERVE_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054"; // Using bot wallet as reserve for now
+export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
+export const RESERVE_WALLET = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
 
 // Contract ABIs
 const NFT_ABI = [
@@ -31,7 +31,7 @@ export interface ContractService {
   checkDMCBalance: (account: string) => Promise<bigint>;
   approveDMC: (account: string, amount: bigint) => Promise<ethers.TransactionResponse>;
   approveNFT: (account: string) => Promise<ethers.TransactionResponse>;
-  purchaseNFT: (account: string, tokenId: string) => Promise<ethers.TransactionResponse>;
+  purchaseNFT: (account: string, tokenId: string, amount: bigint) => Promise<ethers.TransactionResponse>;
 }
 
 export const createContractService = async (): Promise<ContractService> => {
@@ -77,10 +77,11 @@ export const createContractService = async (): Promise<ContractService> => {
     return Promise.resolve({} as ethers.TransactionResponse);
   };
 
-  const purchaseNFT = async (account: string, tokenId: string): Promise<ethers.TransactionResponse> => {
+  const purchaseNFT = async (account: string, tokenId: string, amount: bigint): Promise<ethers.TransactionResponse> => {
     console.log("Starting NFT purchase process...");
     console.log("Buyer:", account);
     console.log("Token ID:", tokenId);
+    console.log("Amount:", amount.toString());
     
     // First transfer DMC to Reserve Wallet
     console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);

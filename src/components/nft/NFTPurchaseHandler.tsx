@@ -101,7 +101,7 @@ export const useNFTPurchaseHandler = (
         description: "Please confirm the purchase transaction in your wallet",
       });
       
-      const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId);
+      const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId, priceInWei);
       console.log("Purchase transaction initiated:", purchaseTx.hash);
       
       toast({
