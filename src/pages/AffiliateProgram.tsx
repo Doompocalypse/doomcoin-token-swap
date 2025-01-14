@@ -40,10 +40,12 @@ const AffiliateProgram = () => {
         .select('*')
         .eq('referrer_id', affiliateId);
 
-      if (referralsError) throw referralsError;
+      if (referralsError) {
+        console.error("Error fetching referrals:", referralsError);
+        return null;
+      }
 
       const totalReferrals = referrals?.length || 0;
-      const commission = calculateCommissionRate(totalReferrals);
       const totalEarnings = referrals?.reduce((sum, ref) => sum + Number(ref.commission_paid), 0) || 0;
 
       return {
@@ -63,15 +65,15 @@ const AffiliateProgram = () => {
         .from('affiliates')
         .select('*')
         .eq('user_address', address)
-        .single();
+        .maybeSingle();
 
       if (error) {
         console.error("Error checking affiliate:", error);
         return;
       }
 
-      if (affiliate?.referral_code) {
-        console.log("Found existing affiliate with code:", affiliate.referral_code);
+      if (affiliate) {
+        console.log("Found existing affiliate:", affiliate);
         setReferralCode(affiliate.referral_code);
         
         const stats = await fetchAffiliateStats(affiliate.id);
@@ -83,9 +85,18 @@ const AffiliateProgram = () => {
           title: "Welcome Back!",
           description: `Your referral code is: ${affiliate.referral_code}`,
         });
+      } else {
+        console.log("No existing affiliate found for address:", address);
+        setReferralCode("");
+        setStats(null);
       }
     } catch (error) {
       console.error("Error checking affiliate status:", error);
+      toast({
+        title: "Error",
+        description: "Failed to check affiliate status. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
