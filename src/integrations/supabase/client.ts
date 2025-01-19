@@ -12,7 +12,9 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   global: {
     headers: {
       'Authorization': `Bearer ${supabaseAnonKey}`,
-      'apikey': supabaseAnonKey
+      'apikey': supabaseAnonKey,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal'
     }
   }
 });
