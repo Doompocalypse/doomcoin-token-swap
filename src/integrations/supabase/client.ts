@@ -8,13 +8,5 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     persistSession: true,
     autoRefreshToken: true,
     detectSessionInUrl: true
-  },
-  global: {
-    headers: {
-      'Authorization': `Bearer ${supabaseAnonKey}`,
-      'apikey': supabaseAnonKey,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    }
   }
 });

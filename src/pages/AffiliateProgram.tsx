@@ -40,7 +40,10 @@ const AffiliateProgram = () => {
         .select('*')
         .eq('referrer_id', affiliateId);
 
-      if (referralsError) throw referralsError;
+      if (referralsError) {
+        console.error("Error fetching referrals:", referralsError);
+        return null;
+      }
 
       const totalReferrals = referrals?.length || 0;
       const totalEarnings = referrals?.reduce((sum, ref) => sum + Number(ref.commission_paid), 0) || 0;
@@ -60,12 +63,13 @@ const AffiliateProgram = () => {
       console.log("Checking existing affiliate for address:", address);
       const { data: affiliate, error } = await supabase
         .from('affiliates')
-        .select()
-        .eq('user_address', address.toLowerCase())
-        .single();
+        .select('*')
+        .eq('user_address', address)
+        .maybeSingle();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (error) {
+        console.error("Error checking affiliate:", error);
+        return;
       }
 
       if (affiliate) {
@@ -96,15 +100,6 @@ const AffiliateProgram = () => {
     }
   };
 
-  const generateUniqueCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 6; i++) {
-      code += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    return code;
-  };
-
   const handleSignUpClick = async () => {
     if (!walletAddress) {
       toast({
@@ -121,52 +116,58 @@ const AffiliateProgram = () => {
       
       while (!isUnique) {
         newCode = generateUniqueCode();
-        const { data, error: checkError } = await supabase
+        const { data } = await supabase
           .from('affiliates')
           .select('referral_code')
           .eq('referral_code', newCode);
         
-        if (checkError) throw checkError;
         isUnique = !data || data.length === 0;
       }
 
-      const { data: newAffiliate, error: insertError } = await supabase
+      const { data: newAffiliate, error } = await supabase
         .from('affiliates')
         .insert([
           {
-            user_address: walletAddress.toLowerCase(),
+            user_address: walletAddress,
             referral_code: newCode,
             total_referrals: 0,
             total_earnings: 0
-          }
+          },
         ])
         .select()
         .single();
 
-      if (insertError) throw insertError;
+      if (error) throw error;
 
-      if (newAffiliate) {
-        setReferralCode(newCode);
-        setStats({
-          totalReferrals: 0,
-          totalEarnings: 0
-        });
-        
-        toast({
-          title: "Success!",
-          description: `You're now registered as an affiliate. Your referral code is: ${newCode}`,
-        });
-      }
-    } catch (error: any) {
+      setReferralCode(newCode);
+      setStats({
+        totalReferrals: 0,
+        totalEarnings: 0
+      });
+      
+      toast({
+        title: "Success!",
+        description: `You're now registered as an affiliate. Your referral code is: ${newCode}`,
+      });
+    } catch (error) {
       console.error("Error creating affiliate:", error);
       toast({
         title: "Error",
-        description: error.message || "Failed to register as an affiliate. Please try again.",
+        description: "Failed to register as an affiliate. Please try again.",
         variant: "destructive",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const generateUniqueCode = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    let code = '';
+    for (let i = 0; i < 6; i++) {
+      code += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return code;
   };
 
   return (

@@ -1,5 +1,6 @@
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import ReferralCodeDialog from "./ReferralCodeDialog";
 import { createContractService } from "@/services/nft/contractService";
 import { recordPurchase } from "@/services/nft/purchaseRecordService";
 import { ethers } from "ethers";
@@ -9,6 +10,11 @@ export const useNFTPurchaseHandler = (
   onInsufficientBalance?: () => void
 ) => {
   const { toast } = useToast();
+  const [showReferralDialog, setShowReferralDialog] = useState(false);
+  const [pendingPurchase, setPendingPurchase] = useState<{
+    nftId: string;
+    price: number;
+  } | null>(null);
 
   const handlePurchase = async (nftId: string, price: number) => {
     console.log("Starting NFT purchase flow:", { nftId, price, network: "Sepolia Testnet" });
@@ -22,6 +28,14 @@ export const useNFTPurchaseHandler = (
       });
       return;
     }
+
+    setPendingPurchase({ nftId, price });
+    setShowReferralDialog(true);
+  };
+
+  const processPurchase = async () => {
+    if (!pendingPurchase || !connectedAccount) return;
+    const { nftId, price } = pendingPurchase;
 
     try {
       console.log("Processing NFT purchase on Sepolia:", { nftId, price, connectedAccount });
@@ -115,11 +129,26 @@ export const useNFTPurchaseHandler = (
         description: error.message || "Failed to purchase NFT. Please try again.",
         variant: "destructive",
       });
+    } finally {
+      setPendingPurchase(null);
+      setShowReferralDialog(false);
     }
+  };
+
+  const handleReferralComplete = async (isValid: boolean) => {
+    console.log("Referral completion handler called, valid:", isValid);
+    await processPurchase();
   };
 
   return {
     handlePurchase,
-    ReferralDialog: null,
+    ReferralDialog: showReferralDialog && connectedAccount ? (
+      <ReferralCodeDialog
+        isOpen={showReferralDialog}
+        onClose={() => setShowReferralDialog(false)}
+        onSubmit={handleReferralComplete}
+        userAddress={connectedAccount}
+      />
+    ) : null,
   };
 };
