@@ -11,6 +11,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
   },
   global: {
     headers: {
+      'Authorization': `Bearer ${supabaseAnonKey}`,
       'apikey': supabaseAnonKey
     }
   }
