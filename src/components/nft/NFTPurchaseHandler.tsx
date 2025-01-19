@@ -1,21 +1,21 @@
+import { useCallback } from 'react';
 import { useToast } from "@/hooks/use-toast";
-import { useContractInteractions } from "@/hooks/nft/useContractInteractions";
-import { executePurchase } from "@/services/nft/purchaseService";
+import { useContractInteractions } from '@/hooks/nft/useContractInteractions';
+import { purchaseNFT } from '@/services/nft/purchaseService';
 
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
   onInsufficientBalance?: () => void
 ) => {
   const { toast } = useToast();
-  const { checkDMCBalance, approveDMC, approveNFT } = useContractInteractions(connectedAccount);
+  const { checkBalance, transferDMC } = useContractInteractions();
 
-  const handlePurchase = async (nftId: string, price: number) => {
-    console.log("Starting NFT purchase flow:", { nftId, price, network: "Sepolia Testnet" });
+  const handlePurchase = useCallback(async (tokenId: string, price: number) => {
+    console.log('Starting NFT purchase process for token:', tokenId);
     
     if (!connectedAccount) {
-      console.log("Purchase failed: No wallet connected");
       toast({
-        title: "Wallet Required",
+        title: "Wallet Connection Required",
         description: "Please connect your wallet to purchase NFTs",
         variant: "destructive",
       });
@@ -23,47 +23,38 @@ export const useNFTPurchaseHandler = (
     }
 
     try {
-      // Check DMC balance
-      const hasBalance = await checkDMCBalance(price);
+      const hasBalance = await checkBalance(connectedAccount, price);
       if (!hasBalance) {
-        console.log("Purchase failed: Insufficient DMC balance");
+        console.log('Insufficient balance for purchase');
         onInsufficientBalance?.();
         return;
       }
 
-      // Get approvals
-      const dmcApproved = await approveDMC(price);
-      if (!dmcApproved) return;
+      const success = await transferDMC(connectedAccount, price);
+      if (!success) {
+        toast({
+          title: "Transaction Failed",
+          description: "Failed to transfer DMC tokens",
+          variant: "destructive",
+        });
+        return;
+      }
 
-      const nftApproved = await approveNFT();
-      if (!nftApproved) return;
-
-      // Execute purchase
+      await purchaseNFT(tokenId, connectedAccount, price);
+      
       toast({
-        title: "Purchase Initiated",
-        description: "Please confirm the purchase transaction in your wallet",
+        title: "Purchase Successful!",
+        description: "You have successfully purchased the NFT",
       });
-
-      const receipt = await executePurchase(nftId, price, connectedAccount);
-
-      toast({
-        title: "Purchase Successful",
-        description: "You have successfully purchased this NFT!",
-      });
-
-      // Refresh the UI
-      window.location.reload();
-    } catch (error: any) {
-      console.error('Purchase error:', error);
+    } catch (error) {
+      console.error('Error during purchase:', error);
       toast({
         title: "Purchase Failed",
-        description: error.message || "Failed to purchase NFT. Please try again.",
+        description: "There was an error processing your purchase",
         variant: "destructive",
       });
     }
-  };
+  }, [connectedAccount, checkBalance, transferDMC, toast, onInsufficientBalance]);
 
-  return {
-    handlePurchase,
-  };
+  return { handlePurchase };
 };
