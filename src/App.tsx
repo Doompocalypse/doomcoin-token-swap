@@ -13,12 +13,14 @@ const queryClient = new QueryClient({
     queries: {
       staleTime: 1000 * 60, // 1 minute
       retry: 2,
+      refetchOnWindowFocus: false // Add this to prevent unnecessary refetches
     },
   },
 });
 
 // Create error fallback component
 const ErrorFallback = ({ error }: { error: Error }) => {
+  console.error("Application error:", error); // Add error logging
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900">
       <div className="text-center text-white">
@@ -40,7 +42,7 @@ function App() {
             <Route path="/affiliate-program" element={<AffiliateProgram />} />
             <Route path="/nft-vault" element={<NFTVault />} />
           </Routes>
-          <Toaster />
+          <Toaster position="top-right" />
         </BrowserRouter>
       </ErrorBoundary>
     </QueryClientProvider>
