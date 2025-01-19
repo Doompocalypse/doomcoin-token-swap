@@ -1,13 +1,13 @@
 import { useToast } from "@/hooks/use-toast";
-import { createContractService } from "@/services/nft/contractService";
-import { recordPurchase } from "@/services/nft/purchaseRecordService";
-import { ethers } from "ethers";
+import { useContractInteractions } from "@/hooks/nft/useContractInteractions";
+import { executePurchase } from "@/services/nft/purchaseService";
 
 export const useNFTPurchaseHandler = (
   connectedAccount?: string,
   onInsufficientBalance?: () => void
 ) => {
   const { toast } = useToast();
+  const { checkDMCBalance, approveDMC, approveNFT } = useContractInteractions(connectedAccount);
 
   const handlePurchase = async (nftId: string, price: number) => {
     console.log("Starting NFT purchase flow:", { nftId, price, network: "Sepolia Testnet" });
@@ -23,82 +23,28 @@ export const useNFTPurchaseHandler = (
     }
 
     try {
-      console.log("Processing NFT purchase on Sepolia:", { nftId, price, connectedAccount });
-      
-      const contractService = await createContractService();
-      const priceInWei = ethers.parseEther(price.toString());
-      
       // Check DMC balance
-      console.log("Checking DMC balance...");
-      const balance = await contractService.checkDMCBalance(connectedAccount);
-      console.log("User DMC balance:", ethers.formatEther(balance));
-      
-      if (balance < priceInWei) {
+      const hasBalance = await checkDMCBalance(price);
+      if (!hasBalance) {
         console.log("Purchase failed: Insufficient DMC balance");
         onInsufficientBalance?.();
         return;
       }
 
-      // Request DMC approval
-      console.log("Requesting DMC token approval...");
-      toast({
-        title: "Approval Required",
-        description: "Please approve DMC token spending in your wallet",
-      });
-      
-      const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
-      if (dmcApprovalTx.hash) {
-        console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
-        
-        toast({
-          title: "Confirming Approval",
-          description: "Please wait while the approval transaction is confirmed",
-        });
-        
-        await dmcApprovalTx.wait();
-        console.log("DMC approval confirmed");
-      }
+      // Get approvals
+      const dmcApproved = await approveDMC(price);
+      if (!dmcApproved) return;
 
-      // Request NFT approval
-      console.log("Requesting NFT contract approval...");
-      toast({
-        title: "Approval Required",
-        description: "Please approve NFT contract interaction in your wallet",
-      });
-      
-      const nftApprovalTx = await contractService.approveNFT(connectedAccount);
-      if (nftApprovalTx.hash) {
-        console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
-        
-        toast({
-          title: "Confirming Approval",
-          description: "Please wait while the NFT approval is confirmed",
-        });
-        
-        await nftApprovalTx.wait();
-        console.log("NFT approval confirmed");
-      }
+      const nftApproved = await approveNFT();
+      if (!nftApproved) return;
 
-      // Purchase NFT
-      console.log("Executing NFT purchase...");
+      // Execute purchase
       toast({
         title: "Purchase Initiated",
         description: "Please confirm the purchase transaction in your wallet",
       });
-      
-      const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId, priceInWei);
-      console.log("Purchase transaction initiated:", purchaseTx.hash);
-      
-      toast({
-        title: "Confirming Purchase",
-        description: "Please wait while your purchase is being confirmed",
-      });
-      
-      const receipt = await purchaseTx.wait();
-      console.log("Purchase confirmed:", receipt);
 
-      // Record the purchase
-      await recordPurchase(nftId, connectedAccount, receipt.hash, price);
+      const receipt = await executePurchase(nftId, price, connectedAccount);
 
       toast({
         title: "Purchase Successful",
