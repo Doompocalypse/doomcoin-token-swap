@@ -15,7 +15,7 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
   const [showNFT, setShowNFT] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const { nfts } = useNFTData(connectedAccount);
-  const { handlePurchase, ReferralDialog } = useNFTPurchaseHandler(connectedAccount);
+  const { handlePurchase } = useNFTPurchaseHandler(connectedAccount);
 
   const selectRandomNFT = () => {
     if (!nfts || nfts.length === 0) return null;
@@ -49,7 +49,6 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
 
   return (
     <div className="relative w-full max-w-md mx-auto">
-      {ReferralDialog}
       <AnimatePresence>
         {!isOpening ? (
           <MysteryBoxDisplay 
