@@ -18,7 +18,7 @@ interface NFTCarouselProps {
 
 const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarouselProps) => {
   const { nfts, purchasedNfts, nftsError } = useRealNFTData(connectedAccount);
-  const { handlePurchase, ReferralDialog } = useNFTPurchaseHandler(connectedAccount, onInsufficientBalance);
+  const { handlePurchase } = useNFTPurchaseHandler(connectedAccount, onInsufficientBalance);
   const { setApi } = useCarouselRotation({ 
     itemsLength: nfts?.length || 0,
     name: 'nft-carousel'
@@ -49,7 +49,6 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
 
   return (
     <div className="w-full max-w-6xl mx-auto px-4 relative">
-      {ReferralDialog}
       <Carousel
         className="w-full"
         setApi={setApi}
