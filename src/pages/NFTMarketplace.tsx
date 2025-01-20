@@ -6,37 +6,36 @@ import Header from "@/components/layout/Header";
 import NFTSection from "@/components/sections/NFTSection";
 import MysteryBoxSection from "@/components/sections/MysteryBoxSection";
 import { useNavigate } from "react-router-dom";
-
+import { useWallet } from "@/contexts/WalletContext";
 const NFTMarketplace = () => {
   const { toast } = useToast();
-  const [connectedAccount, setConnectedAccount] = useState<string>();
+  // const [connectedAccount, setConnectedAccount] = useState<string>();
+  const { walletAddress, accounts, chainId, connectWallet, disconnectWallet, forceDisconnectWallet } = useWallet();
+
   const navigate = useNavigate();
 
   const handleConnect = (connected: boolean, account?: string) => {
     console.log("Connection status:", connected, "Account:", account);
-    setConnectedAccount(account);
+    // setConnectedAccount(account);
   };
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <VideoBackground />
       <div className="relative min-h-screen">
-        <Header onConnect={handleConnect} />
+        <Header />
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            <NFTSection 
-              connectedAccount={connectedAccount} 
+            <NFTSection
+              connectedAccount={walletAddress}
               onInsufficientBalance={() => {
                 toast({
                   title: "Insufficient DMC Balance",
                   description: (
                     <div className="space-y-2">
                       <p>You don't have enough DMC tokens to mint this NFT.</p>
-                      <button
-                        onClick={() => navigate("/")}
-                        className="text-blue-500 hover:text-blue-600 underline"
-                      >
+                      <button onClick={() => navigate("/")} className="text-blue-500 hover:text-blue-600 underline">
                         Click here to swap tokens
                       </button>
                     </div>
@@ -45,7 +44,7 @@ const NFTMarketplace = () => {
                 });
               }}
             />
-            <MysteryBoxSection connectedAccount={connectedAccount} />
+            <MysteryBoxSection connectedAccount={walletAddress} />
           </div>
         </main>
       </div>

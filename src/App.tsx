@@ -6,6 +6,7 @@ import Index from "@/pages/Index";
 import NFTMarketplace from "@/pages/NFTMarketplace";
 import AffiliateProgram from "@/pages/AffiliateProgram";
 import NFTVault from "@/pages/NFTVault";
+import { WalletProvider } from "./contexts/WalletContext";
 
 // Create a client
 const queryClient = new QueryClient({
@@ -32,17 +33,19 @@ const ErrorFallback = ({ error }: { error: Error }) => {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/nft-marketplace" element={<NFTMarketplace />} />
-            <Route path="/affiliate-program" element={<AffiliateProgram />} />
-            <Route path="/nft-vault" element={<NFTVault />} />
-          </Routes>
-          <Toaster />
-        </BrowserRouter>
-      </ErrorBoundary>
+      <WalletProvider>
+        <ErrorBoundary FallbackComponent={ErrorFallback}>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/nft-marketplace" element={<NFTMarketplace />} />
+              <Route path="/affiliate-program" element={<AffiliateProgram />} />
+              <Route path="/nft-vault" element={<NFTVault />} />
+            </Routes>
+            <Toaster />
+          </BrowserRouter>
+        </ErrorBoundary>
+      </WalletProvider>
     </QueryClientProvider>
   );
 }

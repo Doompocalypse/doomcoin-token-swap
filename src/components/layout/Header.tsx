@@ -9,25 +9,25 @@ import {
 import { Menu } from "lucide-react";
 
 interface HeaderProps {
-  onConnect: (connected: boolean, account?: string) => void;
+  // onConnect: (connected: boolean, account?: string) => void;
 }
 
-const Header = ({ onConnect }: HeaderProps) => {
+const Header = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
   const getPageTitle = () => {
     switch (location.pathname) {
-      case '/':
-        return 'Token Swap';
-      case '/nft-marketplace':
-        return 'NFT Marketplace';
-      case '/affiliate-program':
-        return 'Affiliate Program';
-      case '/nft-vault':
-        return 'NFT Vault';
+      case "/":
+        return "Token Swap";
+      case "/nft-marketplace":
+        return "NFT Marketplace";
+      case "/affiliate-program":
+        return "Affiliate Program";
+      case "/nft-vault":
+        return "NFT Vault";
       default:
-        return 'Token Swap';
+        return "Token Swap";
     }
   };
 
@@ -43,10 +43,14 @@ const Header = ({ onConnect }: HeaderProps) => {
               <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                 Token Swap
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem
+                onClick={() => navigate("/nft-marketplace")}
+                className="cursor-pointer hover:bg-gray-100">
                 NFT Marketplace
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => navigate("/affiliate-program")} className="cursor-pointer hover:bg-gray-100">
+              <DropdownMenuItem
+                onClick={() => navigate("/affiliate-program")}
+                className="cursor-pointer hover:bg-gray-100">
                 Affiliate Program
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => navigate("/nft-vault")} className="cursor-pointer hover:bg-gray-100">
@@ -54,12 +58,10 @@ const Header = ({ onConnect }: HeaderProps) => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-            {getPageTitle()}
-          </h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">{getPageTitle()}</h1>
         </div>
         <div className="flex items-center gap-4">
-          <WalletConnect onConnect={onConnect} />
+          <WalletConnect />
         </div>
       </div>
     </header>

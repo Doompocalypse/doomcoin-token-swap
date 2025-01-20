@@ -3,52 +3,44 @@ import { useWalletEvents } from "./useWalletEvents";
 import { useWalletDisconnect } from "./useWalletDisconnect";
 import { useCallback } from "react";
 
-export const useWalletConnection = (
-  onConnect: (connected: boolean, account?: string) => void
-) => {
-  const {
-    accounts,
-    chainId,
-    setAccounts,
-    setChainId,
-    connectMetaMask
-  } = useWalletCore(onConnect);
+export const useWalletConnection = (onConnect: (connected: boolean, account?: string) => void) => {
+  const { accounts, chainId, setAccounts, setChainId, connectMetaMask } = useWalletCore(onConnect);
 
   useWalletEvents(onConnect, setChainId, setAccounts);
-  
-  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(
-    setAccounts,
-    onConnect
+
+  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect);
+
+  const connectWallet = useCallback(
+    async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
+      console.log("Connecting wallet with type:", walletType);
+
+      // If switching between connected accounts
+      if (selectedAccount && accounts.includes(selectedAccount)) {
+        console.log("Switching to selected account:", selectedAccount);
+        setAccounts([selectedAccount]);
+        onConnect(true, selectedAccount);
+        return;
+      }
+
+      if (walletType === "metamask") {
+        await connectMetaMask();
+      } else if (walletType === "walletconnect") {
+        console.log("Opening WalletConnect modal");
+        const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
+        const wcModal = document.createElement("w3m-core");
+        wcModal.setAttribute("project-id", wcProjectId);
+        wcModal.setAttribute("theme", "dark");
+        document.body.appendChild(wcModal);
+      }
+    },
+    [accounts, connectMetaMask, onConnect, setAccounts]
   );
-
-  const connectWallet = useCallback(async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
-    console.log("Connecting wallet with type:", walletType);
-    
-    // If switching between connected accounts
-    if (selectedAccount && accounts.includes(selectedAccount)) {
-      console.log("Switching to selected account:", selectedAccount);
-      setAccounts([selectedAccount]);
-      onConnect(true, selectedAccount);
-      return;
-    }
-
-    if (walletType === "metamask") {
-      await connectMetaMask();
-    } else if (walletType === "walletconnect") {
-      console.log("Opening WalletConnect modal");
-      const wcProjectId = "0d63e4b93b8abc2ea0a58328d7e7c053";
-      const wcModal = document.createElement('w3m-core');
-      wcModal.setAttribute('project-id', wcProjectId);
-      wcModal.setAttribute('theme', 'dark');
-      document.body.appendChild(wcModal);
-    }
-  }, [accounts, connectMetaMask, onConnect, setAccounts]);
 
   return {
     accounts,
     chainId,
     connectWallet,
     disconnectWallet,
-    forceDisconnectWallet
+    forceDisconnectWallet,
   };
 };

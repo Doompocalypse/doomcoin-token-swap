@@ -30,12 +30,17 @@ export const SUPPORTED_CHAINS: SupportedChains = {
 
 export const isSupportedChain = (chainId: string): boolean => {
   const normalizedChainId = chainId.toLowerCase();
-  return [ARBITRUM_CHAIN_ID.toLowerCase(), SEPOLIA_CHAIN_ID.toLowerCase()].includes(normalizedChainId);
+
+  return (
+    ARBITRUM_CHAIN_ID.toLowerCase().includes(normalizedChainId) ||
+    SEPOLIA_CHAIN_ID.toLowerCase().includes(normalizedChainId)
+  );
+  // return [ARBITRUM_CHAIN_ID.toLowerCase(), SEPOLIA_CHAIN_ID.toLowerCase()].includes(normalizedChainId);
 };
 
 export const getNetworkName = (chainId: string): string => {
   const normalizedChainId = chainId.toLowerCase();
-  
+
   if (normalizedChainId === ARBITRUM_CHAIN_ID.toLowerCase()) {
     return "Arbitrum";
   }

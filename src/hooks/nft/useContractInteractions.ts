@@ -5,13 +5,17 @@ import { useToast } from "@/hooks/use-toast";
 export const useContractInteractions = (connectedAccount?: string) => {
   const { toast } = useToast();
 
-  const checkDMCBalance = async (price: number) => {
+  const checkBalance = async (price: number) => {
     console.log("Checking DMC balance for account:", connectedAccount);
     if (!connectedAccount) return false;
 
     try {
       const contractService = await createContractService();
+      console.log("1222");
+
       const balance = await contractService.checkDMCBalance(connectedAccount);
+      console.log("1");
+
       const priceInWei = ethers.parseEther(price.toString());
       console.log("User DMC balance:", ethers.formatEther(balance));
       return balance >= priceInWei;
@@ -28,12 +32,12 @@ export const useContractInteractions = (connectedAccount?: string) => {
     try {
       const contractService = await createContractService();
       const priceInWei = ethers.parseEther(price.toString());
-      
+
       toast({
         title: "Approval Required",
         description: "Please approve DMC token spending in your wallet",
       });
-      
+
       const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
       if (dmcApprovalTx.hash) {
         console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
@@ -54,12 +58,12 @@ export const useContractInteractions = (connectedAccount?: string) => {
 
     try {
       const contractService = await createContractService();
-      
+
       toast({
         title: "Approval Required",
         description: "Please approve NFT contract interaction in your wallet",
       });
-      
+
       const nftApprovalTx = await contractService.approveNFT(connectedAccount);
       if (nftApprovalTx.hash) {
         console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
@@ -75,7 +79,7 @@ export const useContractInteractions = (connectedAccount?: string) => {
   };
 
   return {
-    checkDMCBalance,
+    checkBalance,
     approveDMC,
     approveNFT,
   };

@@ -6,39 +6,45 @@ import { supabase } from "@/integrations/supabase/client";
 import AffiliateHowItWorks from "@/components/affiliate/AffiliateHowItWorks";
 import AffiliateDashboard from "@/components/affiliate/AffiliateDashboard";
 import VideoBackground from "@/components/VideoBackground";
-
+import { useWallet } from "@/contexts/WalletContext";
 interface AffiliateStats {
   totalReferrals: number;
   totalEarnings: number;
 }
 
 const AffiliateProgram = () => {
-  const [walletAddress, setWalletAddress] = useState<string>("");
+  const { walletAddress, accounts, chainId, connectWallet, disconnectWallet, forceDisconnectWallet } = useWallet();
+
+  // const [walletAddress, setWalletAddress] = useState<string>("");
   const [referralCode, setReferralCode] = useState<string>("");
   const [isLoading, setIsLoading] = useState(false);
   const [stats, setStats] = useState<AffiliateStats | null>(null);
   const { toast } = useToast();
 
   const calculateCommissionRate = (referralCount: number): number => {
-    if (referralCount >= 20) return 0.20;
+    if (referralCount >= 20) return 0.2;
     if (referralCount >= 10) return 0.15;
-    return 0.10;
+    return 0.1;
   };
 
-  const handleConnect = (connected: boolean, account?: string) => {
-    console.log("Wallet connection status:", connected, "Account:", account);
-    if (connected && account) {
-      setWalletAddress(account);
-      checkExistingAffiliate(account);
-    }
-  };
+  useEffect(() => {
+    if (walletAddress) checkExistingAffiliate(walletAddress);
+  }, [walletAddress]);
+
+  // const handleConnect = (connected: boolean, account?: string) => {
+  //   console.log("Wallet connection status:", connected, "Account:", account);
+  //   if (connected && account) {
+  //     // setWalletAddress(account);
+  //     checkExistingAffiliate(account);
+  //   }
+  // };
 
   const fetchAffiliateStats = async (affiliateId: string) => {
     try {
       const { data: referrals, error: referralsError } = await supabase
-        .from('referrals')
-        .select('*')
-        .eq('referrer_id', affiliateId);
+        .from("referrals")
+        .select("*")
+        .eq("referrer_id", affiliateId);
 
       if (referralsError) {
         console.error("Error fetching referrals:", referralsError);
@@ -50,7 +56,7 @@ const AffiliateProgram = () => {
 
       return {
         totalReferrals,
-        totalEarnings
+        totalEarnings,
       };
     } catch (error) {
       console.error("Error fetching affiliate stats:", error);
@@ -62,9 +68,9 @@ const AffiliateProgram = () => {
     try {
       console.log("Checking existing affiliate for address:", address);
       const { data: affiliate, error } = await supabase
-        .from('affiliates')
-        .select('*')
-        .eq('user_address', address)
+        .from("affiliates")
+        .select("*")
+        .eq("user_address", address)
         .maybeSingle();
 
       if (error) {
@@ -75,7 +81,7 @@ const AffiliateProgram = () => {
       if (affiliate) {
         console.log("Found existing affiliate:", affiliate);
         setReferralCode(affiliate.referral_code);
-        
+
         const stats = await fetchAffiliateStats(affiliate.id);
         if (stats) {
           setStats(stats);
@@ -101,6 +107,8 @@ const AffiliateProgram = () => {
   };
 
   const handleSignUpClick = async () => {
+    console.log(walletAddress);
+
     if (!walletAddress) {
       toast({
         title: "Connect Wallet",
@@ -112,26 +120,23 @@ const AffiliateProgram = () => {
     setIsLoading(true);
     try {
       let isUnique = false;
-      let newCode = '';
-      
+      let newCode = "";
+
       while (!isUnique) {
         newCode = generateUniqueCode();
-        const { data } = await supabase
-          .from('affiliates')
-          .select('referral_code')
-          .eq('referral_code', newCode);
-        
+        const { data } = await supabase.from("affiliates").select("referral_code").eq("referral_code", newCode);
+
         isUnique = !data || data.length === 0;
       }
 
       const { data: newAffiliate, error } = await supabase
-        .from('affiliates')
+        .from("affiliates")
         .insert([
           {
             user_address: walletAddress,
             referral_code: newCode,
             total_referrals: 0,
-            total_earnings: 0
+            total_earnings: 0,
           },
         ])
         .select()
@@ -142,9 +147,9 @@ const AffiliateProgram = () => {
       setReferralCode(newCode);
       setStats({
         totalReferrals: 0,
-        totalEarnings: 0
+        totalEarnings: 0,
       });
-      
+
       toast({
         title: "Success!",
         description: `You're now registered as an affiliate. Your referral code is: ${newCode}`,
@@ -162,8 +167,8 @@ const AffiliateProgram = () => {
   };
 
   const generateUniqueCode = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let code = "";
     for (let i = 0; i < 6; i++) {
       code += chars.charAt(Math.floor(Math.random() * chars.length));
     }
@@ -173,21 +178,18 @@ const AffiliateProgram = () => {
   return (
     <div className="min-h-screen relative">
       <VideoBackground />
-      <Header onConnect={handleConnect} />
+      <Header />
       <div className="container mx-auto px-4 pt-24 pb-12 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center text-white">
-            Play. Earn. Repeat!
-          </h1>
-          
+          <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center text-white">Play. Earn. Repeat!</h1>
+
           {!referralCode ? (
             <div className="space-y-6">
               <AffiliateHowItWorks />
               <Button
                 onClick={handleSignUpClick}
                 disabled={isLoading}
-                className="w-full py-6 text-lg bg-white hover:bg-white/90 text-black"
-              >
+                className="w-full py-6 text-lg bg-white hover:bg-white/90 text-black">
                 {isLoading ? "Processing..." : "Sign Up as Affiliate"}
               </Button>
             </div>

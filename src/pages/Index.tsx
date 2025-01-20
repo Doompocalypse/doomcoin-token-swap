@@ -59,25 +59,22 @@ const Index = () => {
                     <DropdownMenuItem onClick={() => navigate("/")} className="cursor-pointer hover:bg-gray-100">
                       Token Swap
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => navigate("/nft-marketplace")} className="cursor-pointer hover:bg-gray-100">
+                    <DropdownMenuItem
+                      onClick={() => navigate("/nft-marketplace")}
+                      className="cursor-pointer hover:bg-gray-100">
                       NFT Marketplace
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
-                <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">
-                  DoomCoin Token Swap
-                </h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-[#F1F1F1] tracking-tight">DoomCoin Token Swap</h1>
               </div>
-              <WalletConnect onConnect={handleConnect} />
+              <WalletConnect />
             </div>
           </header>
 
           <main className="pt-24 pb-12 px-4 flex items-center justify-center min-h-screen">
             <div className="w-full max-w-2xl mx-auto">
-              <TokenExchange 
-                isConnected={isConnected} 
-                connectedAccount={connectedAccount} 
-              />
+              <TokenExchange isConnected={isConnected} connectedAccount={connectedAccount} />
             </div>
           </main>
         </div>

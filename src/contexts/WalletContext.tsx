@@ -1,19 +1,27 @@
-import { useState, useEffect, createContext } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { useWalletCore } from "../hooks/wallet/useWalletCore";
 import { useToast } from "@/hooks/use-toast";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 interface WalletContextType {
-  address: string | null;
-  connectWallet: () => Promise<void>;
+  connectWallet: () => void;
   disconnectWallet: () => void;
+
+  forceDisconnectWallet;
+  accounts;
+  chainId;
+  walletAddress;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export const useWalletConnection = (onConnect: (connected: boolean, account?: string) => void) => {
+export const WalletProvider = ({ children }, onConnect: (connected: boolean, account?: string) => void) => {
   const [accounts, setAccounts] = useState<string[]>([]);
+  const [walletAddress, setWalletAddress] = useState<string>("");
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
+
+  console.log("WalletContext ", accounts);
 
   useEffect(() => {
     const checkConnection = async () => {
@@ -32,7 +40,7 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
 
         if (currentAccounts.length > 0) {
           setAccounts(currentAccounts);
-          onConnect(true, currentAccounts[0]);
+          setWalletAddress(currentAccounts[0]);
         }
       } catch (error) {
         console.error("Error checking connection:", error);
@@ -66,7 +74,7 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
         window.ethereum.removeListener("chainChanged", handleChainUpdate);
       };
     }
-  }, [onConnect]);
+  }, []);
 
   const disconnectWallet = async () => {
     try {
@@ -218,11 +226,18 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
     }
   };
 
-  return {
-    accounts,
-    chainId,
-    connectWallet,
-    disconnectWallet,
-    forceDisconnectWallet,
-  };
+  return (
+    <WalletContext.Provider
+      value={{ walletAddress, accounts, chainId, connectWallet, disconnectWallet, forceDisconnectWallet }}>
+      {children}
+    </WalletContext.Provider>
+  );
+};
+
+export const useWallet = () => {
+  const context = useContext(WalletContext);
+  if (context === undefined) {
+    throw new Error("useWallet must be used within a WalletProvider");
+  }
+  return context;
 };
