@@ -5,6 +5,7 @@ import { Suspense, useState } from "react";
 import Header from "@/components/layout/Header";
 import NFTSection from "@/components/sections/NFTSection";
 import MysteryBoxSection from "@/components/sections/MysteryBoxSection";
+import { useWallet } from "@/contexts/WalletContext";
 
 const LoadingFallback = () => (
   <div className="min-h-screen bg-[#221F26] flex items-center justify-center">
@@ -14,23 +15,18 @@ const LoadingFallback = () => (
 
 const About = () => {
   const { toast } = useToast();
-  const [connectedAccount, setConnectedAccount] = useState<string>();
-
-  const handleConnect = (connected: boolean, account?: string) => {
-    console.log("Connection status:", connected, "Account:", account);
-    setConnectedAccount(account);
-  };
+  const { walletAddress } = useWallet();
 
   return (
     <Suspense fallback={<LoadingFallback />}>
       <VideoBackground />
       <div className="relative min-h-screen">
-        <Header onConnect={handleConnect} />
+        <Header />
         <main className="pt-24 pb-12 px-4">
           <div className="w-full max-w-5xl mx-auto space-y-16">
             <CountdownTimer />
-            <NFTSection connectedAccount={connectedAccount} />
-            <MysteryBoxSection connectedAccount={connectedAccount} />
+            <NFTSection connectedAccount={walletAddress} />
+            <MysteryBoxSection connectedAccount={walletAddress} />
           </div>
         </main>
       </div>

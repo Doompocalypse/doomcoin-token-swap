@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Shield, Image, Layers } from "lucide-react";
 import Header from "@/components/layout/Header";
@@ -6,24 +6,22 @@ import VideoBackground from "@/components/VideoBackground";
 import { useToast } from "@/hooks/use-toast";
 import NFTVaultSection from "@/components/nft/vault/NFTVaultSection";
 import { useRealNFTData } from "@/hooks/useRealNFTData";
+import { useWallet } from "@/contexts/WalletContext";
 
 const NFTVault = () => {
-  const [connectedAccount, setConnectedAccount] = useState<string>();
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { nfts } = useRealNFTData(connectedAccount);
+  const { walletAddress } = useWallet();
+  const { nfts } = useRealNFTData(walletAddress);
 
-  const handleConnect = (connected: boolean, account?: string) => {
-    console.log("Connection status:", connected, "Account:", account);
-    setConnectedAccount(account);
-    
-    if (!connected) {
+  useEffect(() => {
+    if (!walletAddress) {
       toast({
         title: "Connect Wallet",
         description: "Please connect your wallet to view your NFTs",
       });
     }
-  };
+  }, [walletAddress, toast]);
 
   // Separate NFTs by collection
   const tierBadges = nfts?.filter(nft => nft.name.includes("Tier Badge")) || [];
@@ -32,7 +30,7 @@ const NFTVault = () => {
   return (
     <div className="min-h-screen relative">
       <VideoBackground />
-      <Header onConnect={handleConnect} />
+      <Header />
       
       <main className="container mx-auto px-4 pt-24 pb-12">
         <div className="space-y-8">
@@ -43,7 +41,7 @@ const NFTVault = () => {
             </h1>
           </div>
 
-          {!connectedAccount ? (
+          {!walletAddress ? (
             <div className="text-center py-12">
               <p className="text-white text-lg mb-4">Connect your wallet to view your NFTs</p>
             </div>

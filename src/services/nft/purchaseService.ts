@@ -1,9 +1,7 @@
 import { supabase } from "@/integrations/supabase/client";
-import { createContractService } from "./contractService";
-import { ethers } from "ethers";
 
-export const purchaseNFT = async (tokenId: string, buyerAddress: string, price: number) => {
-  console.log("Recording NFT purchase:", { tokenId, buyerAddress, price });
+export const purchaseNFT = async (tokenId: string, buyerAddress: string, price: number, transactionHash: string) => {
+  console.log("Recording NFT purchase:", { tokenId, buyerAddress, price, transactionHash });
   
   try {
     const { data: purchaseData, error: purchaseError } = await supabase
@@ -11,7 +9,8 @@ export const purchaseNFT = async (tokenId: string, buyerAddress: string, price: 
       .insert({
         token_id: tokenId,
         buyer_address: buyerAddress,
-        price_paid: price
+        price_paid: price,
+        transaction_hash: transactionHash
       })
       .select()
       .single();

@@ -2,13 +2,7 @@ import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
 import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { isSupportedChain } from "@/utils/chainConfig";
-
-// Contract addresses
-export const BOT_WALLET = "0x1D81C4D46302ef1866bda9f9c73962396968e054";
-export const DMC_CONTRACT = "0x02655Ad2a81e396Bc35957d647179fD87b3d2b36";
-export const NFT_CONTRACT = "0xE4e4EBe798D29Cc75e674B58B3B6Da00227A9839"; // Updated NFT contract address
-export const EXCHANGE_CONTRACT = "0x503611484672A1B4a54f6169C119AB506E4A179e";
-export const RESERVE_WALLET = "0x95A26A70ac69CeEEFd2aA75f0a117CF0f32e6bD4";
+import { BOT_WALLET, DMC_CONTRACT, NFT_CONTRACT, EXCHANGE_CONTRACT, RESERVE_WALLET } from "@/utils/contractAddresses";
 
 // Contract interfaces
 type NFTContract = ethers.Contract & {
@@ -68,7 +62,6 @@ export const createContractService = async (): Promise<ContractService> => {
   const chainId = await provider.getNetwork().then((network) => network.chainId.toString(16));
   console.log("Current chain ID:", chainId);
 
-  // Validate network
   if (!isSupportedChain(chainId)) {
     throw new Error("Please connect to either Arbitrum One or Sepolia network");
   }
@@ -77,21 +70,20 @@ export const createContractService = async (): Promise<ContractService> => {
 
   // Get Bot Wallet private key from Supabase
   console.log("Fetching Bot Wallet private key from Supabase...");
-  // const { data: secretData, error: secretError } = await supabase
-  //   .from("app_settings")
-  //   .select("value")
-  //   .eq("key", "BOT_WALLET_PRIVATE_KEY")
-  //   .single();
+  const { data: secretData, error: secretError } = await supabase
+    .from("app_settings")
+    .select("value")
+    .eq("key", "BOT_WALLET_PRIVATE_KEY")
+    .single();
 
-  // if (secretError || !secretData?.value) {
-  //   console.error("Error fetching Bot Wallet private key:", secretError);
-  //   throw new Error("Bot Wallet private key not found in app_settings");
-  // }
+  if (secretError || !secretData?.value) {
+    console.error("Error fetching Bot Wallet private key:", secretError);
+    throw new Error("Bot Wallet private key not found in app_settings");
+  }
 
-  // const botWallet = new ethers.Wallet(secretData.value, provider);
-  // console.log("Bot Wallet address:", botWallet.address);
+  const botWalletInstance = new ethers.Wallet(secretData.value, provider);
+  console.log("Bot Wallet address:", botWalletInstance.address);
 
-  // Initialize contracts with network-specific RPC URLs
   const rpcUrl =
     chainId.toLowerCase() === ARBITRUM_CHAIN_ID.toLowerCase()
       ? "https://arb1.arbitrum.io/rpc"
@@ -105,10 +97,6 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
     console.log("Checking DMC balance for account:", account);
-
-    console.log(dmcContract);
-    console.log(account);
-
     return dmcContract.balanceOf(account);
   };
 
@@ -127,7 +115,7 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const approveNFT = async (account: string): Promise<ethers.TransactionResponse> => {
     console.log("Checking NFT approval status for account...");
-    const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWallet) as NFTContract;
+    const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWalletInstance) as NFTContract;
     const isApproved = await nftContractWithBotSigner.isApprovedForAll(BOT_WALLET, account);
     console.log("NFT approval status:", isApproved);
 
@@ -153,7 +141,7 @@ export const createContractService = async (): Promise<ContractService> => {
       console.log("DMC transfer confirmed in block:", dmcReceipt.blockNumber);
 
       // Create new contract instance with Bot Wallet signer
-      const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWallet) as NFTContract;
+      const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWalletInstance) as NFTContract;
 
       // Check if Bot Wallet owns the NFT
       const currentOwner = await nftContract.ownerOf(tokenId);
