@@ -100,11 +100,13 @@ export const createContractService = async (): Promise<ContractService> => {
 
   const checkDMCBalance = async (account: string): Promise<bigint> => {
     console.log("Checking DMC balance for account:", account);
+    const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
     return dmcContract.balanceOf(account);
   };
 
   const approveDMC = async (account: string, amount: bigint): Promise<ethers.TransactionResponse> => {
     console.log("Checking DMC allowance for Reserve Wallet...");
+    const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
     const allowance = await dmcContract.allowance(account, RESERVE_WALLET);
     console.log("Current DMC allowance:", allowance.toString());
 

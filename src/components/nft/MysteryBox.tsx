@@ -34,7 +34,9 @@ export const MysteryBox = ({ connectedAccount }: MysteryBoxProps) => {
       setShowVideo(false);
       setShowNFT(true);
       if (randomNFT) {
-        handlePurchase(randomNFT.id, randomNFT.price);
+        // Generate a mock transaction hash for mystery box purchases
+        const mockTxHash = `mystery_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+        handlePurchase(randomNFT.id, randomNFT.price, mockTxHash);
       }
     }, 8000);
   };

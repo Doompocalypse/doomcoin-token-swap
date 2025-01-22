@@ -47,6 +47,12 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
     );
   }
 
+  const handleNFTPurchase = (nft: any) => {
+    // Generate a transaction hash for the purchase
+    const txHash = `purchase_${Date.now()}_${Math.random().toString(36).substring(7)}`;
+    handlePurchase(nft.id, nft.price, txHash);
+  };
+
   return (
     <div className="w-full max-w-6xl mx-auto px-4 relative">
       <Carousel
@@ -63,7 +69,7 @@ const NFTCarousel = memo(({ connectedAccount, onInsufficientBalance }: NFTCarous
               <div className="p-1">
                 <NFTCard
                   {...nft}
-                  onPurchase={() => handlePurchase(nft.id, nft.price)}
+                  onPurchase={() => handleNFTPurchase(nft)}
                   isPurchased={purchasedNfts?.includes(nft.id)}
                 />
               </div>
