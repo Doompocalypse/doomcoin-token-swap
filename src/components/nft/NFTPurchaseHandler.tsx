@@ -11,7 +11,7 @@ export const useNFTPurchaseHandler = (
   const { checkBalance, transferDMC } = useContractInteractions();
 
   const handlePurchase = useCallback(
-    async (tokenId: string, price: number) => {
+    async (tokenId: string, price: number, transactionHash: string) => {
       console.log("Starting NFT purchase process for token:", tokenId);
 
       if (!connectedAccount) {
@@ -41,7 +41,7 @@ export const useNFTPurchaseHandler = (
           return;
         }
 
-        await purchaseNFT(tokenId, connectedAccount, price);
+        await purchaseNFT(tokenId, connectedAccount, price, transactionHash);
 
         toast({
           title: "Purchase Successful!",

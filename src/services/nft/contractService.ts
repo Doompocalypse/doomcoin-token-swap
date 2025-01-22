@@ -2,7 +2,10 @@ import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
 import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { isSupportedChain } from "@/utils/chainConfig";
-import { BOT_WALLET, DMC_CONTRACT, NFT_CONTRACT, EXCHANGE_CONTRACT, RESERVE_WALLET } from "@/utils/contractAddresses";
+import { BOT_WALLET, DMC_CONTRACT, EXCHANGE_CONTRACT, RESERVE_WALLET } from "@/utils/contractAddresses";
+
+// Export NFT_CONTRACT from contractAddresses
+export { NFT_CONTRACT } from "@/utils/contractAddresses";
 
 // Contract interfaces
 type NFTContract = ethers.Contract & {
