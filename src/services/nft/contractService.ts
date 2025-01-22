@@ -2,10 +2,7 @@ import { ethers } from "ethers";
 import { supabase } from "@/integrations/supabase/client";
 import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
 import { isSupportedChain } from "@/utils/chainConfig";
-import { BOT_WALLET, DMC_CONTRACT, EXCHANGE_CONTRACT, RESERVE_WALLET } from "@/utils/contractAddresses";
-
-// Export NFT_CONTRACT from contractAddresses
-export { NFT_CONTRACT } from "@/utils/contractAddresses";
+import { BOT_WALLET, DMC_CONTRACT, EXCHANGE_CONTRACT, RESERVE_WALLET, NFT_CONTRACT } from "@/utils/contractAddresses";
 
 // Contract interfaces
 type NFTContract = ethers.Contract & {
@@ -141,6 +138,7 @@ export const createContractService = async (): Promise<ContractService> => {
     try {
       // First transfer DMC to Reserve Wallet
       console.log("Transferring DMC to Reserve Wallet:", RESERVE_WALLET);
+      const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer) as DMCContract;
       const dmcTransferTx = await dmcContract.transfer(RESERVE_WALLET, amount);
       const dmcReceipt = await dmcTransferTx.wait();
       console.log("DMC transfer confirmed in block:", dmcReceipt.blockNumber);
@@ -149,7 +147,7 @@ export const createContractService = async (): Promise<ContractService> => {
       const nftContractWithBotSigner = new ethers.Contract(NFT_CONTRACT, NFT_ABI, botWalletInstance) as NFTContract;
 
       // Check if Bot Wallet owns the NFT
-      const currentOwner = await nftContract.ownerOf(tokenId);
+      const currentOwner = await nftContractWithBotSigner.ownerOf(tokenId);
       console.log("Current NFT owner:", currentOwner);
 
       if (currentOwner.toLowerCase() !== BOT_WALLET.toLowerCase()) {
