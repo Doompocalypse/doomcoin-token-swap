@@ -2,11 +2,13 @@ import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useContractInteractions } from "@/hooks/nft/useContractInteractions";
 import { purchaseNFT } from "@/services/nft/purchaseService";
-import { ethers } from "ethers";
 
-export const useNFTPurchaseHandler = (connectedAccount?: string, onInsufficientBalance?: () => void) => {
+export const useNFTPurchaseHandler = (
+  connectedAccount?: string,
+  onInsufficientBalance?: () => void
+) => {
   const { toast } = useToast();
-  const { checkBalance, approveDMC } = useContractInteractions(connectedAccount);
+  const { checkBalance, transferDMC } = useContractInteractions();
 
   const handlePurchase = useCallback(
     async (tokenId: string, price: number) => {
@@ -22,14 +24,14 @@ export const useNFTPurchaseHandler = (connectedAccount?: string, onInsufficientB
       }
 
       try {
-        const hasBalance = await checkBalance(price);
+        const hasBalance = await checkBalance(connectedAccount, price);
         if (!hasBalance) {
           console.log("Insufficient balance for purchase");
           onInsufficientBalance?.();
           return;
         }
 
-        const success = await approveDMC(price);
+        const success = await transferDMC(connectedAccount, price);
         if (!success) {
           toast({
             title: "Transaction Failed",
@@ -39,7 +41,7 @@ export const useNFTPurchaseHandler = (connectedAccount?: string, onInsufficientB
           return;
         }
 
-        await purchaseNFT(tokenId, price, connectedAccount);
+        await purchaseNFT(tokenId, connectedAccount, price);
 
         toast({
           title: "Purchase Successful!",
@@ -54,7 +56,7 @@ export const useNFTPurchaseHandler = (connectedAccount?: string, onInsufficientB
         });
       }
     },
-    [connectedAccount, checkBalance, approveDMC, toast, onInsufficientBalance]
+    [connectedAccount, checkBalance, transferDMC, toast, onInsufficientBalance]
   );
 
   return { handlePurchase };

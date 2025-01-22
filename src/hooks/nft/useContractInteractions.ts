@@ -1,22 +1,29 @@
 import { ethers } from "ethers";
-import { createContractService } from "@/services/nft/contractService";
 import { useToast } from "@/hooks/use-toast";
+import { BOT_WALLET, RESERVE_WALLET, DMC_CONTRACT } from "@/utils/contractAddresses";
 
-export const useContractInteractions = (connectedAccount?: string) => {
+const DMC_ABI = [
+  "function balanceOf(address account) view returns (uint256)",
+  "function allowance(address owner, address spender) view returns (uint256)",
+  "function approve(address spender, uint256 amount) returns (bool)",
+  "function transfer(address to, uint256 amount) returns (bool)"
+];
+
+export const useContractInteractions = () => {
   const { toast } = useToast();
 
-  const checkBalance = async (price: number) => {
-    console.log("Checking DMC balance for account:", connectedAccount);
-    if (!connectedAccount) return false;
-
+  const checkBalance = async (account: string, price: number): Promise<boolean> => {
+    console.log("Checking DMC balance for account:", account);
+    
     try {
-      const contractService = await createContractService();
-      console.log("1222");
-
-      const balance = await contractService.checkDMCBalance(connectedAccount);
-      console.log("1");
-
+      if (!window.ethereum) throw new Error("No Web3 provider found");
+      
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, provider);
+      
+      const balance = await dmcContract.balanceOf(account);
       const priceInWei = ethers.parseEther(price.toString());
+      
       console.log("User DMC balance:", ethers.formatEther(balance));
       return balance >= priceInWei;
     } catch (error) {
@@ -25,62 +32,40 @@ export const useContractInteractions = (connectedAccount?: string) => {
     }
   };
 
-  const approveDMC = async (price: number) => {
-    console.log("Requesting DMC approval for price:", price);
-    if (!connectedAccount) return false;
-
+  const transferDMC = async (account: string, amount: number): Promise<boolean> => {
+    console.log("Initiating DMC transfer for amount:", amount);
+    
     try {
-      const contractService = await createContractService();
-      const priceInWei = ethers.parseEther(price.toString());
-
-      toast({
-        title: "Approval Required",
-        description: "Please approve DMC token spending in your wallet",
-      });
-
-      const dmcApprovalTx = await contractService.approveDMC(connectedAccount, priceInWei);
-      if (dmcApprovalTx.hash) {
-        console.log("DMC approval transaction initiated:", dmcApprovalTx.hash);
-        await dmcApprovalTx.wait();
-        console.log("DMC approval confirmed");
-        return true;
+      if (!window.ethereum) throw new Error("No Web3 provider found");
+      
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const signer = await provider.getSigner();
+      const dmcContract = new ethers.Contract(DMC_CONTRACT, DMC_ABI, signer);
+      
+      const amountInWei = ethers.parseEther(amount.toString());
+      
+      // First check and request approval if needed
+      const allowance = await dmcContract.allowance(account, RESERVE_WALLET);
+      if (allowance < amountInWei) {
+        console.log("Requesting DMC approval");
+        const approveTx = await dmcContract.approve(RESERVE_WALLET, amountInWei);
+        await approveTx.wait();
       }
-      return false;
+      
+      // Transfer DMC tokens
+      console.log("Transferring DMC tokens to Reserve Wallet");
+      const transferTx = await dmcContract.transfer(RESERVE_WALLET, amountInWei);
+      await transferTx.wait();
+      
+      return true;
     } catch (error) {
-      console.error("DMC approval error:", error);
-      return false;
-    }
-  };
-
-  const approveNFT = async () => {
-    console.log("Requesting NFT contract approval");
-    if (!connectedAccount) return false;
-
-    try {
-      const contractService = await createContractService();
-
-      toast({
-        title: "Approval Required",
-        description: "Please approve NFT contract interaction in your wallet",
-      });
-
-      const nftApprovalTx = await contractService.approveNFT(connectedAccount);
-      if (nftApprovalTx.hash) {
-        console.log("NFT approval transaction initiated:", nftApprovalTx.hash);
-        await nftApprovalTx.wait();
-        console.log("NFT approval confirmed");
-        return true;
-      }
-      return false;
-    } catch (error) {
-      console.error("NFT approval error:", error);
+      console.error("Error transferring DMC:", error);
       return false;
     }
   };
 
   return {
     checkBalance,
-    approveDMC,
-    approveNFT,
+    transferDMC
   };
 };

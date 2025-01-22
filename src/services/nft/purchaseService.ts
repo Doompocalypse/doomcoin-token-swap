@@ -1,20 +1,30 @@
-import { recordPurchase } from "./purchaseRecordService";
+import { supabase } from "@/integrations/supabase/client";
 import { createContractService } from "./contractService";
 import { ethers } from "ethers";
 
-export const purchaseNFT = async (nftId: string, price: number, connectedAccount: string) => {
-  console.log("Executing NFT purchase:", { nftId, price, connectedAccount });
+export const purchaseNFT = async (tokenId: string, buyerAddress: string, price: number) => {
+  console.log("Recording NFT purchase:", { tokenId, buyerAddress, price });
+  
+  try {
+    const { data: purchaseData, error: purchaseError } = await supabase
+      .from('nft_purchases')
+      .insert({
+        token_id: tokenId,
+        buyer_address: buyerAddress,
+        price_paid: price
+      })
+      .select()
+      .single();
 
-  const contractService = await createContractService();
-  const priceInWei = ethers.parseEther(price.toString());
+    if (purchaseError) {
+      console.error("Error recording purchase:", purchaseError);
+      throw purchaseError;
+    }
 
-  const purchaseTx = await contractService.purchaseNFT(connectedAccount, nftId, priceInWei);
-
-  console.log("Purchase transaction initiated:", purchaseTx.hash);
-  const receipt = await purchaseTx.wait();
-  console.log("Purchase confirmed:", receipt);
-
-  await recordPurchase(nftId, connectedAccount, receipt.hash, price);
-
-  return receipt;
+    console.log("Purchase recorded successfully:", purchaseData);
+    return purchaseData;
+  } catch (error) {
+    console.error("Purchase recording error:", error);
+    throw error;
+  }
 };
