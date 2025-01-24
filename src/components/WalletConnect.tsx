@@ -8,7 +8,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import { Wallet, CoinbaseIcon } from "lucide-react";
+import { Wallet } from "lucide-react";
 
 const WalletConnect = () => {
   const { connectWallet, forceDisconnectWallet, accounts, chainId } = useWallet();
@@ -34,9 +34,9 @@ const WalletConnect = () => {
     return " (Wrong Network)";
   };
 
-  const handleConnectWallet = async (walletType: "metamask" | "walletconnect" | "coinbase") => {
-    console.log(`Connecting ${walletType}...`);
-    await connectWallet(walletType);
+  const handleConnectMetaMask = async () => {
+    console.log("Connecting MetaMask...");
+    await connectWallet();
   };
 
   if (accounts && accounts.length > 0) {
@@ -75,22 +75,10 @@ const WalletConnect = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-white border-none">
         <DropdownMenuItem
-          onClick={() => handleConnectWallet("metamask")}
+          onClick={handleConnectMetaMask}
           className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleConnectWallet("coinbase")}
-          className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
-          <CoinbaseIcon className="mr-2 h-4 w-4" />
-          Coinbase Wallet
-        </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => handleConnectWallet("walletconnect")}
-          className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
-          <img src="/walletconnect-logo.svg" alt="WalletConnect" className="mr-2 h-4 w-4" />
-          WalletConnect
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
