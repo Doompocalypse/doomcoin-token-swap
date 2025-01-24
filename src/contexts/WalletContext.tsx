@@ -35,13 +35,15 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
       }
 
       try {
-        const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
+        // Only check chainId, don't request accounts automatically
         const currentChainId = await window.ethereum.request({ method: "eth_chainId" });
-        console.log("Current connected accounts:", currentAccounts);
         console.log("Current chain ID:", currentChainId);
-
         setChainId(currentChainId);
-
+        
+        // Check if there are already permitted accounts without requesting new permissions
+        const currentAccounts = await window.ethereum.request({ method: "eth_accounts" });
+        console.log("Current connected accounts:", currentAccounts);
+        
         if (currentAccounts.length > 0) {
           setAccounts(currentAccounts);
           setWalletAddress(currentAccounts[0]);
@@ -78,7 +80,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
         window.ethereum.removeListener("chainChanged", handleChainUpdate);
       };
     }
-  }, []);
+  }, [onConnect]);
 
   const disconnectWallet = async () => {
     try {
