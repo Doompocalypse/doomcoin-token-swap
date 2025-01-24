@@ -4,13 +4,12 @@ import { useToast } from "@/hooks/use-toast";
 import { ARBITRUM_CHAIN_ID } from "@/utils/chainConfig";
 
 interface WalletContextType {
-  connectWallet: () => void;
+  connectWallet: (walletType?: string) => void;
   disconnectWallet: () => void;
-
-  forceDisconnectWallet;
-  accounts;
-  chainId;
-  walletAddress;
+  forceDisconnectWallet: () => void;
+  accounts: string[];
+  chainId?: string;
+  walletAddress: string;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -182,7 +181,7 @@ export const WalletProvider = ({ children }, onConnect: (connected: boolean, acc
     }
   };
 
-  const connectWallet = async () => {
+  const connectWallet = async (walletType?: string) => {
     if (typeof window === "undefined") return;
 
     if (!window.ethereum) {
@@ -202,7 +201,8 @@ export const WalletProvider = ({ children }, onConnect: (connected: boolean, acc
 
     try {
       console.log("Requesting accounts...");
-
+      
+      // Request accounts and wait for user confirmation
       const newAccounts = await window.ethereum.request({
         method: "eth_requestAccounts",
       });
@@ -210,6 +210,7 @@ export const WalletProvider = ({ children }, onConnect: (connected: boolean, acc
       console.log("New accounts received:", newAccounts);
       if (newAccounts.length > 0) {
         setAccounts(newAccounts);
+        setWalletAddress(newAccounts[0]);
         onConnect(true, newAccounts[0]);
         toast({
           title: "Wallet Connected",

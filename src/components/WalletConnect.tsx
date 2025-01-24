@@ -34,11 +34,6 @@ const WalletConnect = () => {
     return " (Wrong Network)";
   };
 
-  const handleConnectMetaMask = async () => {
-    console.log("Connecting MetaMask...");
-    await connectWallet();
-  };
-
   if (accounts && accounts.length > 0) {
     return (
       <DropdownMenu>
@@ -53,7 +48,7 @@ const WalletConnect = () => {
             <>
               <div className="px-2 py-1.5 text-sm font-semibold">Switch Account</div>
               {accounts.map((account, index) => (
-                <DropdownMenuItem key={account} onClick={() => connectWallet()} className="cursor-pointer">
+                <DropdownMenuItem key={account} className="cursor-pointer">
                   Account {index + 1}: {formatAddress(account)}
                 </DropdownMenuItem>
               ))}
@@ -75,7 +70,7 @@ const WalletConnect = () => {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 bg-white border-none">
         <DropdownMenuItem
-          onClick={handleConnectMetaMask}
+          onClick={() => connectWallet("metamask")}
           className="cursor-pointer bg-white text-black hover:bg-white/90 border-none">
           <Wallet className="mr-2 h-4 w-4" />
           MetaMask
