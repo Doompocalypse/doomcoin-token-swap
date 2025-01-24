@@ -31,9 +31,13 @@ const ErrorFallback = ({ error }: { error: Error }) => {
 };
 
 function App() {
+  const handleWalletConnection = (connected: boolean, account?: string) => {
+    console.log("Wallet connection status:", connected, "Account:", account);
+  };
+
   return (
     <QueryClientProvider client={queryClient}>
-      <WalletProvider>
+      <WalletProvider onConnect={handleWalletConnection}>
         <ErrorBoundary FallbackComponent={ErrorFallback}>
           <BrowserRouter>
             <Routes>

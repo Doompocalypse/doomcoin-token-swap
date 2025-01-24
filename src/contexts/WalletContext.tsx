@@ -12,9 +12,14 @@ interface WalletContextType {
   walletAddress: string;
 }
 
+interface WalletProviderProps {
+  children: React.ReactNode;
+  onConnect: (connected: boolean, account?: string) => void;
+}
+
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export const WalletProvider = ({ children }, onConnect: (connected: boolean, account?: string) => void) => {
+export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConnect }) => {
   const [accounts, setAccounts] = useState<string[]>([]);
   const [walletAddress, setWalletAddress] = useState<string>("");
   const [chainId, setChainId] = useState<string>();
