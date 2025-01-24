@@ -133,7 +133,12 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
     try {
       console.log("Requesting accounts...");
       
-      const newAccounts = await sdk?.connect();
+      // Request accounts with explicit user interaction required
+      const newAccounts = await sdk?.connect({
+        silent: false, // Ensure explicit user confirmation
+        chainId: chainId // Keep current chain if exists
+      });
+      
       console.log("New accounts received:", newAccounts);
 
       if (newAccounts && newAccounts.length > 0) {
