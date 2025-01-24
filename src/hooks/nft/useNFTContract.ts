@@ -1,7 +1,7 @@
 import { ethers } from "ethers";
 import { useEffect, useState, useCallback } from "react";
 import { ARBITRUM_CHAIN_ID, SEPOLIA_CHAIN_ID } from "@/utils/chainConfig";
-import { NFT_CONTRACT } from "@/services/nft/contractService";
+import { NFT_CONTRACT } from "@/utils/contractAddresses";
 
 const NFT_ABI = [
   "function balanceOf(address owner) view returns (uint256)",
