@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useSDK } from "@metamask/sdk-react";
 
@@ -24,12 +24,32 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
   const { toast } = useToast();
   const { sdk, connected, chainId } = useSDK();
 
+  // Prevent auto-connection by checking localStorage
+  useEffect(() => {
+    const wasDisconnected = localStorage.getItem("wallet_disconnected") === "true";
+    if (wasDisconnected || !connected) {
+      console.log("Previous session was disconnected or not connected, preventing auto-connection");
+      setAccounts([]);
+      onConnect(false);
+    }
+  }, [connected, onConnect]);
+
+  // Clear connection if user manually disconnected from MetaMask
+  useEffect(() => {
+    if (!connected && accounts.length > 0) {
+      console.log("MetaMask disconnected externally, updating state");
+      setAccounts([]);
+      onConnect(false);
+    }
+  }, [connected, accounts, onConnect]);
+
   console.log("WalletContext state:", { accounts, chainId, connected });
 
   const disconnectWallet = async () => {
     try {
       console.log("Starting wallet disconnection process...");
       
+      localStorage.setItem("wallet_disconnected", "true");
       setAccounts([]);
       onConnect(false);
       
@@ -117,6 +137,7 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
       console.log("New accounts received:", newAccounts);
 
       if (newAccounts && newAccounts.length > 0) {
+        localStorage.removeItem("wallet_disconnected"); // Clear disconnected flag on successful connection
         setAccounts(newAccounts);
         setWalletAddress(newAccounts[0]);
         onConnect(true, newAccounts[0]);
