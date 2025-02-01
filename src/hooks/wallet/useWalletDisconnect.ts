@@ -1,27 +1,23 @@
 import { useCallback } from "react";
 import { useToast } from "@/hooks/use-toast";
 
-export const useWalletDisconnect = (
-  setAccounts: (accounts: string[]) => void,
-  onConnect: (connected: boolean) => void
-) => {
+export const useWalletDisconnect = (setAccounts: (accounts: string[]) => void) => {
   const { toast } = useToast();
 
   const forceDisconnectWallet = useCallback(async () => {
     try {
       console.log("Starting force wallet disconnection process...");
-      
+
       // Set disconnected flag FIRST to prevent auto-reconnection
-      localStorage.setItem('wallet_disconnected', 'true');
-      
+      localStorage.setItem("wallet_disconnected", "true");
+
       // Clear local state immediately
       setAccounts([]);
-      onConnect(false);
-      
+
       // Remove all event listeners
       if (window.ethereum) {
-        const events = ['accountsChanged', 'chainChanged', 'connect', 'disconnect'];
-        events.forEach(event => {
+        const events = ["accountsChanged", "chainChanged", "connect", "disconnect"];
+        events.forEach((event) => {
           window.ethereum?.removeListener(event, () => {});
         });
         console.log("Removed all network event listeners");
@@ -29,14 +25,15 @@ export const useWalletDisconnect = (
 
       // Clear any cached provider data
       if (window.localStorage) {
-        const walletKeys = Object.keys(window.localStorage).filter(key => 
-          key.toLowerCase().includes('wallet') || 
-          key.toLowerCase().includes('web3') || 
-          key.toLowerCase().includes('metamask') ||
-          key.toLowerCase().includes('wc@')
+        const walletKeys = Object.keys(window.localStorage).filter(
+          (key) =>
+            key.toLowerCase().includes("wallet") ||
+            key.toLowerCase().includes("web3") ||
+            key.toLowerCase().includes("metamask") ||
+            key.toLowerCase().includes("wc@")
         );
-        
-        walletKeys.forEach(key => {
+
+        walletKeys.forEach((key) => {
           window.localStorage.removeItem(key);
         });
         console.log("Cleared all wallet-related local storage data");
@@ -46,12 +43,11 @@ export const useWalletDisconnect = (
         title: "Wallet Force Disconnected",
         description: "Your wallet has been forcefully disconnected from the application.",
       });
-      
+
       console.log("Wallet force disconnected successfully");
-      
+
       // Force reload the page to ensure clean state
       window.location.reload();
-      
     } catch (error) {
       console.error("Error force disconnecting wallet:", error);
       toast({
@@ -60,16 +56,15 @@ export const useWalletDisconnect = (
         variant: "destructive",
       });
     }
-  }, [setAccounts, onConnect, toast]);
+  }, [setAccounts, toast]);
 
   const disconnectWallet = useCallback(async () => {
     try {
       console.log("Starting wallet disconnection process...");
-      
+
       // Clear local state first
       setAccounts([]);
-      onConnect(false);
-      
+
       // For WalletConnect
       if (window.ethereum?.isWalletConnect) {
         try {
@@ -79,7 +74,7 @@ export const useWalletDisconnect = (
           console.error("Error disconnecting WalletConnect:", error);
         }
       }
-      
+
       // For MetaMask, request new permissions to force disconnect
       if (window.ethereum?.isMetaMask) {
         try {
@@ -98,9 +93,9 @@ export const useWalletDisconnect = (
         title: "Wallet Disconnected",
         description: "Your wallet has been disconnected successfully.",
       });
-      
+
       console.log("Wallet disconnected successfully");
-      
+
       // Force reload the page to ensure clean state
       window.location.reload();
     } catch (error) {
@@ -111,10 +106,10 @@ export const useWalletDisconnect = (
         variant: "destructive",
       });
     }
-  }, [setAccounts, onConnect, toast]);
+  }, [setAccounts, toast]);
 
   return {
     disconnectWallet,
-    forceDisconnectWallet
+    forceDisconnectWallet,
   };
 };

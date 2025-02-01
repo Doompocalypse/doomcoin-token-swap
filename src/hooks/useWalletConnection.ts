@@ -10,7 +10,7 @@ interface WalletContextType {
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export const useWalletConnection = (onConnect: (connected: boolean, account?: string) => void) => {
+export const useWalletConnection = () => {
   const [accounts, setAccounts] = useState<string[]>([]);
   const [chainId, setChainId] = useState<string>();
   const { toast } = useToast();
@@ -32,7 +32,6 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
 
         if (currentAccounts.length > 0) {
           setAccounts(currentAccounts);
-          onConnect(true, currentAccounts[0]);
         }
       } catch (error) {
         console.error("Error checking connection:", error);
@@ -45,11 +44,6 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
     const handleAccountsUpdate = (newAccounts: string[]) => {
       console.log("Accounts update event:", newAccounts);
       setAccounts(newAccounts);
-      if (newAccounts.length > 0) {
-        onConnect(true, newAccounts[0]);
-      } else {
-        onConnect(false);
-      }
     };
 
     const handleChainUpdate = async (newChainId: string) => {
@@ -66,7 +60,7 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
         window.ethereum.removeListener("chainChanged", handleChainUpdate);
       };
     }
-  }, [onConnect]);
+  }, []);
 
   const disconnectWallet = async () => {
     try {
@@ -74,7 +68,6 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
 
       // Clear local state first
       setAccounts([]);
-      onConnect(false);
 
       // For WalletConnect
       if (window.ethereum?.isWalletConnect) {
@@ -128,7 +121,6 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
 
       // Clear local state immediately
       setAccounts([]);
-      onConnect(false);
 
       // Remove all event listeners
       if (window.ethereum) {
@@ -202,7 +194,6 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
       console.log("New accounts received:", newAccounts);
       if (newAccounts.length > 0) {
         setAccounts(newAccounts);
-        onConnect(true, newAccounts[0]);
         toast({
           title: "Wallet Connected",
           description: `Connected to account: ${newAccounts[0].slice(0, 6)}...${newAccounts[0].slice(-4)}`,

@@ -3,12 +3,12 @@ import { useWalletEvents } from "./useWalletEvents";
 import { useWalletDisconnect } from "./useWalletDisconnect";
 import { useCallback } from "react";
 
-export const useWalletConnection = (onConnect: (connected: boolean, account?: string) => void) => {
-  const { accounts, chainId, setAccounts, setChainId, connectMetaMask } = useWalletCore(onConnect);
+export const useWalletConnection = () => {
+  const { accounts, chainId, setAccounts, setChainId, connectMetaMask } = useWalletCore();
 
-  useWalletEvents(onConnect, setChainId, setAccounts);
+  useWalletEvents(setChainId, setAccounts);
 
-  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts, onConnect);
+  const { disconnectWallet, forceDisconnectWallet } = useWalletDisconnect(setAccounts);
 
   const connectWallet = useCallback(
     async (walletType?: "metamask" | "walletconnect", selectedAccount?: string) => {
@@ -18,7 +18,7 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
       if (selectedAccount && accounts.includes(selectedAccount)) {
         console.log("Switching to selected account:", selectedAccount);
         setAccounts([selectedAccount]);
-        onConnect(true, selectedAccount);
+        // onConnect(true, selectedAccount);
         return;
       }
 
@@ -33,7 +33,7 @@ export const useWalletConnection = (onConnect: (connected: boolean, account?: st
         document.body.appendChild(wcModal);
       }
     },
-    [accounts, connectMetaMask, onConnect, setAccounts]
+    [accounts, connectMetaMask, setAccounts]
   );
 
   return {

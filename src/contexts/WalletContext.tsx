@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useSDK } from "@metamask/sdk-react";
-import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
+// import { useWalletConnection } from "@/hooks/wallet/useWalletConnection";
+import { useWalletConnection } from "@/hooks/useWalletConnection";
 
 interface WalletContextType {
   connectWallet: (walletType?: string) => void;
@@ -13,31 +14,24 @@ interface WalletContextType {
 
 interface WalletProviderProps {
   children: React.ReactNode;
-  onConnect: (connected: boolean, account?: string) => void;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
-export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConnect }) => {
+export const WalletProvider: React.FC<WalletProviderProps> = ({ children }) => {
   const [walletAddress, setWalletAddress] = useState<string>("");
   const { connected } = useSDK();
-  
-  const {
-    accounts,
-    chainId,
-    connectWallet,
-    disconnectWallet,
-    forceDisconnectWallet
-  } = useWalletConnection(onConnect);
+
+  const { accounts, chainId, connectWallet, disconnectWallet, forceDisconnectWallet } = useWalletConnection();
 
   // Prevent auto-connection by checking localStorage
   useEffect(() => {
     const wasDisconnected = localStorage.getItem("wallet_disconnected") === "true";
     if (wasDisconnected || !connected) {
       console.log("Previous session was disconnected or not connected, preventing auto-connection");
-      onConnect(false);
+      // onConnect(false);
     }
-  }, [connected, onConnect]);
+  }, [connected]);
 
   // Update wallet address when accounts change
   useEffect(() => {
@@ -52,13 +46,13 @@ export const WalletProvider: React.FC<WalletProviderProps> = ({ children, onConn
 
   return (
     <WalletContext.Provider
-      value={{ 
-        walletAddress, 
-        accounts, 
-        chainId, 
-        connectWallet, 
-        disconnectWallet, 
-        forceDisconnectWallet 
+      value={{
+        walletAddress,
+        accounts,
+        chainId,
+        connectWallet,
+        disconnectWallet,
+        forceDisconnectWallet,
       }}>
       {children}
     </WalletContext.Provider>
